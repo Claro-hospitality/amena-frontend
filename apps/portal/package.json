@@ -13,8 +13,6 @@
     "@amena/supabase": "workspace:*",
     "@amena/ui": "workspace:*",
     "@amena/utils": "workspace:*",
-    "@fontsource-variable/geist": "^5.2.9",
-    "@fontsource-variable/geist-mono": "^5.2.8",
     "@tailwindcss/vite": "^4.3.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
