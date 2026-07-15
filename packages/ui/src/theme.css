@@ -7,6 +7,12 @@
 
 @import "tailwindcss";
 
+/* Capa base del estilo Rhea (radix): custom-variants (data-open/closed/...) y utilities
+   que consumen los componentes de shadcn, más las animaciones de tw-animate-css.
+   Aditivo: no altera ningún token de marca. */
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
 /* Fuentes de UI — @amena/ui es dueño del tema completo (fuentes incluidas).
    Se declaran como dependencia de este paquete; las apps solo importan este theme.css. */
 @import "@fontsource-variable/geist";
