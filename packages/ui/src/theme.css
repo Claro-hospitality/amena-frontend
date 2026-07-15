@@ -1,0 +1,206 @@
+/* ============================================================
+   AMENA — Design tokens del sistema
+   Fuente: Amena Brand Book ("Sabores reales, momentos reales.")
+   Paleta: Crema Base #F4EFE3 · Naranja Acento #F68D2E · Verde Salvia #92A271
+   Tipografía UI: Geist · Tipografía expresiva (solo marketing): Thursday Morning
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* Fuente de UI — instalar con: pnpm add @fontsource-variable/geist
+   e importar en main.tsx ANTES de este archivo:
+   import '@fontsource-variable/geist' */
+
+@theme {
+  /* ---------- Tipografía ---------- */
+  --font-sans: "Geist Variable", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+
+  /* ---------- Marca: Naranja Acento (color primario de acción) ---------- */
+  --color-naranja-50: #fef5ec;
+  --color-naranja-100: #fde8d3;
+  --color-naranja-200: #fbd1a7;
+  --color-naranja-300: #f9b97a;
+  --color-naranja-400: #f8a354;
+  --color-naranja-500: #f68d2e; /* ← color de marca */
+  --color-naranja-600: #e17615;
+  --color-naranja-700: #b95f11;
+  --color-naranja-800: #924a0e;
+  --color-naranja-900: #6e370b;
+
+  /* ---------- Marca: Verde Salvia (color secundario / éxito) ---------- */
+  --color-salvia-50: #f5f7f0;
+  --color-salvia-100: #e8eddd;
+  --color-salvia-200: #d2dbbc;
+  --color-salvia-300: #bbc89c;
+  --color-salvia-400: #a6b586;
+  --color-salvia-500: #92a271; /* ← color de marca */
+  --color-salvia-600: #78885a;
+  --color-salvia-700: #5e6b46;
+  --color-salvia-800: #454f33;
+  --color-salvia-900: #2e3522;
+
+  /* ---------- Marca: Crema Base (fondos y superficies) ---------- */
+  --color-crema-50: #fcfaf5;
+  --color-crema-100: #f4efe3; /* ← color de marca */
+  --color-crema-200: #e9e1cd;
+  --color-crema-300: #dbd0b4;
+  --color-crema-400: #c4b58f;
+  --color-crema-500: #a99873;
+
+  /* ---------- Tinta (texto) — neutro cálido acorde a la paleta ---------- */
+  --color-tinta-500: #6b675e;
+  --color-tinta-700: #4a473f;
+  --color-tinta-900: #2b2925;
+}
+
+/* ============================================================
+   Variables semánticas de shadcn/ui
+   Los componentes de shadcn consumen estos tokens; así todo el
+   sistema hereda el branding sin tocar componente por componente.
+   ============================================================ */
+
+:root {
+  --radius: 0.625rem; /* esquinas suaves = calidez de la marca */
+
+  --background: #fcfaf5; /* crema-50: fondo general cálido */
+  --foreground: #2b2925; /* tinta-900 */
+
+  --card: #ffffff;
+  --card-foreground: #2b2925;
+
+  --popover: #ffffff;
+  --popover-foreground: #2b2925;
+
+  --primary: #f68d2e; /* naranja: botones y acciones principales */
+  --primary-foreground: #ffffff;
+
+  --secondary: #e8eddd; /* salvia-100: acciones secundarias */
+  --secondary-foreground: #454f33; /* salvia-800 */
+
+  --muted: #f4efe3; /* crema-100 */
+  --muted-foreground: #6b675e; /* tinta-500 */
+
+  --accent: #fde8d3; /* naranja-100: hovers y resaltados suaves */
+  --accent-foreground: #924a0e; /* naranja-800 */
+
+  --destructive: #dc2626; /* rojo estándar: errores y acciones destructivas */
+  --destructive-foreground: #ffffff;
+
+  --border: #e9e1cd; /* crema-200 */
+  --input: #f1ebdc; /* relleno de campos: estilo "filled", sin borde */
+  --ring: #f68d2e; /* focus ring en naranja de marca */
+
+  /* Estados de negocio (escaneo QR, cierres, facturas) */
+  --success: #78885a; /* salvia-600: consumo validado, factura pagada */
+  --success-foreground: #ffffff;
+  --warning: #f8a354; /* naranja-400: cuota por agotarse, cierre abierto */
+  --warning-foreground: #6e370b;
+
+  /* Gráficas (dashboards de consumo, cierres y facturación) */
+  --chart-1: #f68d2e; /* naranja de marca */
+  --chart-2: #92a271; /* salvia de marca */
+  --chart-3: #b95f11; /* naranja-700 */
+  --chart-4: #5e6b46; /* salvia-700 */
+  --chart-5: #c4b58f; /* crema-400 */
+
+  /* Sidebar (navegación lateral del backoffice y portal) */
+  --sidebar: #f4efe3; /* crema-100: superficie cálida diferenciada del fondo */
+  --sidebar-foreground: #2b2925;
+  --sidebar-primary: #f68d2e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fde8d3; /* naranja-100: item activo/hover */
+  --sidebar-accent-foreground: #924a0e;
+  --sidebar-border: #e9e1cd;
+  --sidebar-ring: #f68d2e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ============================================================
+   Campos de formulario — estilo "filled" de Amena
+   Relleno suave sin bordes; el foco se marca con el ring naranja.
+   Aplica a los componentes de shadcn (Input, Textarea, Select).
+   ============================================================ */
+
+@layer components {
+  input[data-slot="input"],
+  textarea[data-slot="textarea"],
+  button[data-slot="select-trigger"] {
+    background-color: var(--input);
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  input[data-slot="input"]::placeholder,
+  textarea[data-slot="textarea"]::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  input[data-slot="input"]:focus-visible,
+  textarea[data-slot="textarea"]:focus-visible,
+  button[data-slot="select-trigger"]:focus-visible {
+    background-color: var(--card); /* al enfocar: fondo blanco + ring naranja */
+    border-color: transparent;
+  }
+}

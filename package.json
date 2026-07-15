@@ -1,0 +1,17 @@
+{
+  "name": "amena-front",
+  "private": true,
+  "packageManager": "pnpm@10.13.1",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:backoffice": "turbo dev --filter=backoffice",
+    "dev:portal": "turbo dev --filter=portal",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "gen:types": "supabase gen types typescript --local --workdir ../amena-backend > packages/supabase/src/database.types.ts"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  }
+}
