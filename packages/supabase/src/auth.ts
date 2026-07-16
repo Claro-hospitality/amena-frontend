@@ -1,6 +1,10 @@
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './index'
 
+// Re-export para que las apps consuman el tipo desde @amena/supabase (sin depender
+// directamente de @supabase/supabase-js).
+export type { Session } from '@supabase/supabase-js'
+
 /**
  * Helpers de autenticación sobre Supabase Auth (auth.users).
  * NO consultan tablas de negocio — solo supabase.auth. La validación de rol/acceso
