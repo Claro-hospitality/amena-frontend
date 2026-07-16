@@ -5,9 +5,16 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./auth": "./src/auth.ts",
     "./types": "./src/database.types.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
   }
 }
