@@ -47,7 +47,32 @@ pnpm gen:types               # regenerar tipos desde el esquema local de Supabas
 - Componentes por feature: `src/features/<feature>/` dentro de cada app (ej. `features/escaner/`, `features/colaboradores/`)
 - Los tests viven junto al código: `Componente.tsx` + `Componente.test.tsx`
 - Idioma: código y comentarios en español; nombres de variables descriptivos
-- Un PR = una unidad revisable. No mezclar features
+- Una rama de módulo = una unidad de trabajo coherente. No mezclar módulos (ver Flujo de ramas)
+
+## Flujo de ramas
+
+- **`main`**: solo producción. Refleja lo desplegado. Los workflows de deploy/push a producción están atados a `main`.
+- **`dev`**: rama de integración. Todo el trabajo se acumula aquí antes de un release.
+- **Ramas de trabajo**: nombradas por el **módulo** que tocan (`backoffice`, `portal`, `menu`, `modelo-datos`, etc.). Vida corta: se crean desde `dev` actualizado y se borran al integrarse.
+
+**Integrar un módulo a `dev`** — merge **directo, sin PR**:
+
+```bash
+git checkout dev && git pull            # dev actualizado
+git checkout -b <modulo>                # trabajar
+# ... commits ...
+pnpm build && pnpm test                 # OBLIGATORIO: ambos en verde localmente
+git checkout dev && git merge <modulo> && git push
+git branch -d <modulo>                  # borrar rama al integrar
+```
+
+**Llevar `dev` a producción** — única forma de tocar `main`: **PR de release `dev → main`** (pasa por el CI y el ruleset de `main`). Nunca se commitea ni se mergea a `main` fuera de ese PR.
+
+### Reglas duras
+
+1. **Nunca commitear directo a `dev`.** Todo cambio entra por una rama de módulo.
+2. **Nunca mergear a `dev` con tests o build rotos.** `pnpm build` y `pnpm test` en verde localmente es requisito previo al merge.
+3. **Jamás tocar `main` directamente.** `main` solo avanza vía PR de release desde `dev`; ninguna rama de módulo se mergea a `main`.
 
 ## Ambientes
 
