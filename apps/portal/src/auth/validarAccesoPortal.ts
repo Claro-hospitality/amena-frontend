@@ -1,4 +1,4 @@
-import type { Session } from '@amena/supabase/auth'
+import { supabase } from '@amena/supabase'
 
 export type TipoUsuarioPortal = 'admin_empresa' | 'colaborador'
 
@@ -7,20 +7,35 @@ export interface ResultadoAcceso {
   tipo: TipoUsuarioPortal | null
 }
 
+/** Contexto que RutaProtegida pasa a las rutas hijas vía <Outlet>. */
+export interface ContextoAcceso {
+  tipo: TipoUsuarioPortal
+}
+
 /**
- * Valida si el usuario autenticado puede entrar al PORTAL (app.amena.com) y como qué.
+ * Valida si el usuario autenticado puede entrar al PORTAL y como qué tipo.
  *
- * TODO(fase-3-sync): implementar contra `usuarios_empresa` y `colaboradores` cuando el
- * esquema esté mergeado. Debe (solo lectura, sin escribir):
- *   1. Buscar en usuarios_empresa por user_id = session.user.id y activo → 'admin_empresa'.
- *   2. Si no, buscar en colaboradores por user_id = session.user.id (user_id no nulo) y
- *      activo → 'colaborador'.
- *   3. Si no aparece en ninguna → { concedido: false, tipo: null }.
- *
- * Por ahora es un STUB: concede acceso con un tipo falso para poder montar todo el flujo
- * (login → validación → shell / pantalla "sin acceso") sin depender del esquema.
+ * Usa los helpers SECURITY DEFINER del backend (con auth.uid(), saltándose RLS):
+ *   - mis_empresas_admin(): empresas que administra → 'admin_empresa'
+ *   - mis_colaboradores(): colaboradores enlazados a su cuenta → 'colaborador'
+ * Si no aparece en ninguna, se le deniega el acceso.
  */
-export async function validarAccesoPortal(session: Session): Promise<ResultadoAcceso> {
-  // STUB — sustituir el interior cuando existan usuarios_empresa / colaboradores.
-  return session ? { concedido: true, tipo: 'admin_empresa' } : { concedido: false, tipo: null }
+export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
+  const [empresas, colaboradores] = await Promise.all([
+    supabase.rpc('mis_empresas_admin'),
+    supabase.rpc('mis_colaboradores'),
+  ])
+
+  if (empresas.data && empresas.data.length > 0) {
+    return { concedido: true, tipo: 'admin_empresa' }
+  }
+  if (colaboradores.data && colaboradores.data.length > 0) {
+    return { concedido: true, tipo: 'colaborador' }
+  }
+  return { concedido: false, tipo: null }
+}
+
+/** Ruta inicial (home) según el tipo: el colaborador entra directo a su QR. */
+export function rutaInicialPorTipo(tipo: TipoUsuarioPortal): string {
+  return tipo === 'colaborador' ? '/mi-qr' : '/inicio'
 }

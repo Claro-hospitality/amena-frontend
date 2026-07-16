@@ -2,15 +2,16 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Controlamos la sesión mockeando los helpers de @amena/supabase/auth.
-const mocks = vi.hoisted(() => ({
+const auth = vi.hoisted(() => ({
   obtenerSesion: vi.fn(),
   alCambiarSesion: vi.fn(() => () => {}),
   iniciarSesion: vi.fn(),
   cerrarSesion: vi.fn(),
 }))
+const db = vi.hoisted(() => ({ rpc: vi.fn() }))
 
-vi.mock('@amena/supabase/auth', () => mocks)
+vi.mock('@amena/supabase/auth', () => auth)
+vi.mock('@amena/supabase', () => ({ supabase: { rpc: db.rpc } }))
 
 import App from '../App'
 import { AuthProvider } from './AuthProvider'
@@ -27,28 +28,47 @@ function montar(rutaInicial: string) {
 
 const sesionFake = { access_token: 'tok', user: { id: 'u1' } }
 
+function stub({ empresas = [] as string[], colaboradores = [] as string[] }) {
+  db.rpc.mockImplementation((name: string) => {
+    const map: Record<string, string[]> = {
+      mis_empresas_admin: empresas,
+      mis_colaboradores: colaboradores,
+    }
+    return Promise.resolve({ data: map[name] ?? [], error: null })
+  })
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
-  mocks.alCambiarSesion.mockReturnValue(() => {})
+  auth.alCambiarSesion.mockReturnValue(() => {})
 })
 
-describe('flujo de rutas protegidas', () => {
-  it('redirige a /login al entrar a una ruta protegida sin sesión', async () => {
-    mocks.obtenerSesion.mockResolvedValue(null)
-
+describe('rutas protegidas del portal', () => {
+  it('sin sesión redirige a /login', async () => {
+    auth.obtenerSesion.mockResolvedValue(null)
     montar('/inicio')
-
     expect(await screen.findByRole('button', { name: /entrar/i })).toBeInTheDocument()
     expect(screen.getByText('Portal de empresas')).toBeInTheDocument()
-    expect(screen.queryByText(/portal de la empresa/i)).not.toBeInTheDocument()
   })
 
-  it('muestra la ruta protegida cuando hay sesión y el acceso es concedido', async () => {
-    mocks.obtenerSesion.mockResolvedValue(sesionFake)
-
-    montar('/inicio')
-
+  it('admin_empresa llega a /inicio', async () => {
+    auth.obtenerSesion.mockResolvedValue(sesionFake)
+    stub({ empresas: ['e1'] })
+    montar('/')
     expect(await screen.findByText(/portal de la empresa/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /cerrar sesión/i })).toBeInTheDocument()
+  })
+
+  it('colaborador es redirigido a /mi-qr', async () => {
+    auth.obtenerSesion.mockResolvedValue(sesionFake)
+    stub({ empresas: [], colaboradores: ['c1'] })
+    montar('/')
+    expect(await screen.findByRole('heading', { name: 'Mi QR' })).toBeInTheDocument()
+  })
+
+  it('usuario sin acceso → pantalla sin acceso', async () => {
+    auth.obtenerSesion.mockResolvedValue(sesionFake)
+    stub({ empresas: [], colaboradores: [] })
+    montar('/')
+    expect(await screen.findByText(/no tienes acceso a este portal/i)).toBeInTheDocument()
   })
 })

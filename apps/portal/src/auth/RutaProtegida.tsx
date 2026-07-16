@@ -3,7 +3,11 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { PantallaCargando } from '../components/PantallaCargando'
 import { PortalShell } from '../layout/PortalShell'
 import { useAuth } from './useAuth'
-import { validarAccesoPortal, type ResultadoAcceso } from './validarAccesoPortal'
+import {
+  validarAccesoPortal,
+  type ContextoAcceso,
+  type ResultadoAcceso,
+} from './validarAccesoPortal'
 
 type EstadoAcceso = 'validando' | ResultadoAcceso
 
@@ -12,12 +16,10 @@ type EstadoAcceso = 'validando' | ResultadoAcceso
  *   - sin sesión → /login
  *   - con sesión → valida acceso al portal (validarAccesoPortal)
  *       - denegado → /sin-acceso
- *       - concedido → monta el shell y renderiza la ruta hija
+ *       - concedido → monta el shell y pasa el tipo a las rutas hijas vía <Outlet>
  */
 export function RutaProtegida() {
   const { session, cargando } = useAuth()
-  // Guardamos el resultado junto al userId validado: si la sesión cambia (otro
-  // usuario), el resultado deja de corresponder y volvemos a "validando".
   const [validado, setValidado] = useState<{ userId: string; acceso: ResultadoAcceso } | null>(
     null
   )
@@ -26,7 +28,7 @@ export function RutaProtegida() {
     if (!session) return
     const userId = session.user.id
     let vigente = true
-    validarAccesoPortal(session).then((resultado) => {
+    validarAccesoPortal().then((resultado) => {
       if (vigente) setValidado({ userId, acceso: resultado })
     })
     return () => {
@@ -41,13 +43,12 @@ export function RutaProtegida() {
     validado && validado.userId === session.user.id ? validado.acceso : 'validando'
 
   if (acceso === 'validando') return <PantallaCargando />
-  if (!acceso.concedido) return <Navigate to="/sin-acceso" replace />
+  if (!acceso.concedido || !acceso.tipo) return <Navigate to="/sin-acceso" replace />
 
-  // TODO(fase-3-sync): redirección inicial por tipo (admin_empresa → panel de la empresa;
-  // colaborador → su QR/consumos) cuando validarAccesoPortal devuelva el tipo real.
+  const contexto: ContextoAcceso = { tipo: acceso.tipo }
   return (
-    <PortalShell>
-      <Outlet />
+    <PortalShell tipo={acceso.tipo}>
+      <Outlet context={contexto} />
     </PortalShell>
   )
 }
