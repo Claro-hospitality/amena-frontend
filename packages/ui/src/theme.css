@@ -18,6 +18,11 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 
+/* Escaneo de clases de los componentes de @amena/ui. Sin esto, Tailwind excluye el
+   paquete por resolverse vía node_modules (symlink) y NO genera sus utilidades
+   (bg-primary, tamaños, radios, variantes dark:). La ruta es relativa a este archivo. */
+@source "./components";
+
 /* Modo oscuro basado en la clase .dark (del export tweakcn). Sustituye a la
    variante `dark` por prefers-color-scheme de Tailwind por una basada en clase. */
 @custom-variant dark (&:is(.dark *));
