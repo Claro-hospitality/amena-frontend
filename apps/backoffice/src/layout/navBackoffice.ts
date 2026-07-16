@@ -22,6 +22,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
   ],
   finanzas: [
     { to: '/inicio', label: 'Inicio' },
+    { to: '/empresas', label: 'Empresas' },
     { to: '/cierres', label: 'Cierres' },
     { to: '/facturas', label: 'Facturas' },
   ],
