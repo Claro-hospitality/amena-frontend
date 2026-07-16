@@ -7,9 +7,16 @@
 
 @import "tailwindcss";
 
-/* Fuente de UI — instalar con: pnpm add @fontsource-variable/geist
-   e importar en main.tsx ANTES de este archivo:
-   import '@fontsource-variable/geist' */
+/* Capa base del estilo Rhea (radix): custom-variants (data-open/closed/...) y utilities
+   que consumen los componentes de shadcn, más las animaciones de tw-animate-css.
+   Aditivo: no altera ningún token de marca. */
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Fuentes de UI — @amena/ui es dueño del tema completo (fuentes incluidas).
+   Se declaran como dependencia de este paquete; las apps solo importan este theme.css. */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @theme {
   /* ---------- Tipografía ---------- */
