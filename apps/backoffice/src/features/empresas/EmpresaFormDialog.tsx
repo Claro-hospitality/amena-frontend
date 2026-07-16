@@ -127,7 +127,7 @@ export function EmpresaFormDialog({
               <FieldLabel htmlFor="ciclo_facturacion">Ciclo de facturación</FieldLabel>
               <Select name="ciclo_facturacion" defaultValue={empresa?.ciclo_facturacion ?? 'mensual'}>
                 <SelectTrigger id="ciclo_facturacion" className="w-full">
-                  <SelectValue />
+                  <SelectValue>{(valor) => (valor === 'semanal' ? 'Semanal' : 'Mensual')}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="mensual">Mensual</SelectItem>
