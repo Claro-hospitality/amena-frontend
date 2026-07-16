@@ -1,16 +1,22 @@
-import { Button } from '@amena/ui/components/ui/button'
-import { Input } from '@amena/ui/components/ui/input'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { RutaProtegida } from './auth/RutaProtegida'
+import { LoginPage } from './features/auth/LoginPage'
+import { SinAccesoPage } from './features/auth/SinAccesoPage'
+import { InicioPage } from './features/inicio/InicioPage'
 
-function App() {
+export default function App() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-6 bg-background text-foreground">
-      <h1 className="text-2xl font-semibold">Amena — Portal</h1>
-      <div className="flex w-full max-w-xs flex-col gap-3">
-        <Input placeholder="Escribe algo…" />
-        <Button>Botón primario</Button>
-      </div>
-    </main>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/sin-acceso" element={<SinAccesoPage />} />
+
+      {/* Todo lo demás es privado: RutaProtegida exige sesión + acceso al portal. */}
+      <Route element={<RutaProtegida />}>
+        <Route path="/inicio" element={<InicioPage />} />
+        <Route path="/" element={<Navigate to="/inicio" replace />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/inicio" replace />} />
+    </Routes>
   )
 }
-
-export default App
