@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "amena-20df0"
+  },
+  "targets": {
+    "amena-20df0": {
+      "hosting": {
+        "backoffice": ["amena-admin"],
+        "portal": ["amena-portal"]
+      }
+    }
+  }
+}
