@@ -34,13 +34,434 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cierres_semanales: {
+        Row: {
+          comprometidas: number
+          consumidas: number
+          created_at: string
+          empresa_id: string
+          estado: Database["public"]["Enums"]["estado_cierre"]
+          extras: number
+          factura_id: string | null
+          id: string
+          monto_total: number
+          precio_unitario: number
+          semana_inicio: string
+          updated_at: string
+        }
+        Insert: {
+          comprometidas: number
+          consumidas: number
+          created_at?: string
+          empresa_id: string
+          estado?: Database["public"]["Enums"]["estado_cierre"]
+          extras: number
+          factura_id?: string | null
+          id?: string
+          monto_total: number
+          precio_unitario: number
+          semana_inicio: string
+          updated_at?: string
+        }
+        Update: {
+          comprometidas?: number
+          consumidas?: number
+          created_at?: string
+          empresa_id?: string
+          estado?: Database["public"]["Enums"]["estado_cierre"]
+          extras?: number
+          factura_id?: string | null
+          id?: string
+          monto_total?: number
+          precio_unitario?: number
+          semana_inicio?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cierres_semanales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cierres_semanales_factura_id_fkey"
+            columns: ["factura_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      colaboradores: {
+        Row: {
+          activo: boolean
+          created_at: string
+          email: string | null
+          empresa_id: string
+          id: string
+          nombre: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          email?: string | null
+          empresa_id: string
+          id?: string
+          nombre: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          email?: string | null
+          empresa_id?: string
+          id?: string
+          nombre?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "colaboradores_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consumos: {
+        Row: {
+          colaborador_id: string
+          created_at: string
+          empresa_id: string
+          fecha: string
+          id: string
+          registrado_por: string | null
+        }
+        Insert: {
+          colaborador_id: string
+          created_at?: string
+          empresa_id: string
+          fecha?: string
+          id?: string
+          registrado_por?: string | null
+        }
+        Update: {
+          colaborador_id?: string
+          created_at?: string
+          empresa_id?: string
+          fecha?: string
+          id?: string
+          registrado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumos_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consumos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consumos_registrado_por_fkey"
+            columns: ["registrado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios_internos"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cuotas: {
+        Row: {
+          activo: boolean
+          colaborador_id: string
+          created_at: string
+          fecha: string
+          id: string
+          origen: Database["public"]["Enums"]["origen_cuota"]
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          colaborador_id: string
+          created_at?: string
+          fecha: string
+          id?: string
+          origen?: Database["public"]["Enums"]["origen_cuota"]
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          colaborador_id?: string
+          created_at?: string
+          fecha?: string
+          id?: string
+          origen?: Database["public"]["Enums"]["origen_cuota"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cuotas_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "colaboradores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresas: {
+        Row: {
+          activo: boolean
+          ciclo_facturacion: Database["public"]["Enums"]["ciclo_facturacion"]
+          created_at: string
+          id: string
+          nombre: string
+          precio_comida: number
+          rfc: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
+          created_at?: string
+          id?: string
+          nombre: string
+          precio_comida: number
+          rfc?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
+          created_at?: string
+          id?: string
+          nombre?: string
+          precio_comida?: number
+          rfc?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      facturas: {
+        Row: {
+          activo: boolean
+          created_at: string
+          empresa_id: string
+          estado: Database["public"]["Enums"]["estado_factura"]
+          id: string
+          monto: number
+          pdf_url: string | null
+          periodo_fin: string
+          periodo_inicio: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          empresa_id: string
+          estado?: Database["public"]["Enums"]["estado_factura"]
+          id?: string
+          monto: number
+          pdf_url?: string | null
+          periodo_fin: string
+          periodo_inicio: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          empresa_id?: string
+          estado?: Database["public"]["Enums"]["estado_factura"]
+          id?: string
+          monto?: number
+          pdf_url?: string | null
+          periodo_fin?: string
+          periodo_inicio?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facturas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_dias: {
+        Row: {
+          activo: boolean
+          created_at: string
+          fecha: string
+          id: string
+          platillo_id: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          fecha: string
+          id?: string
+          platillo_id: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          fecha?: string
+          id?: string
+          platillo_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_dias_platillo_id_fkey"
+            columns: ["platillo_id"]
+            isOneToOne: false
+            referencedRelation: "platillos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platillos: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string | null
+          foto_url: string | null
+          id: string
+          nombre: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          foto_url?: string | null
+          id?: string
+          nombre: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          foto_url?: string | null
+          id?: string
+          nombre?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usuarios_empresa: {
+        Row: {
+          activo: boolean
+          created_at: string
+          empresa_id: string
+          nombre: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          empresa_id: string
+          nombre: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          empresa_id?: string
+          nombre?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_empresa_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios_internos: {
+        Row: {
+          activo: boolean
+          created_at: string
+          nombre: string
+          rol: Database["public"]["Enums"]["rol_backoffice"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          nombre: string
+          rol: Database["public"]["Enums"]["rol_backoffice"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          nombre?: string
+          rol?: Database["public"]["Enums"]["rol_backoffice"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      colaboradores_de_mis_empresas: { Args: never; Returns: string[] }
+      cuota_disponible: {
+        Args: { p_colaborador_id: string; p_fecha: string }
+        Returns: boolean
+      }
+      es_finanzas: { Args: never; Returns: boolean }
+      es_mesero: { Args: never; Returns: boolean }
+      es_super_admin: { Args: never; Returns: boolean }
+      mis_colaboradores: { Args: never; Returns: string[] }
+      mis_empresas_admin: { Args: never; Returns: string[] }
+      registrar_consumo: {
+        Args: { p_colaborador_id: string; p_registrado_por: string }
+        Returns: {
+          colaborador_id: string
+          created_at: string
+          empresa_id: string
+          fecha: string
+          id: string
+          registrado_por: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "consumos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      tiene_algun_rol: { Args: never; Returns: boolean }
     }
     Enums: {
       ciclo_facturacion: "semanal" | "mensual"
