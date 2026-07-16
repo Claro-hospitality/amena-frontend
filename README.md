@@ -47,11 +47,25 @@ Firebase `amena-20df0`:
 La configuración vive en [`firebase.json`](./firebase.json) (targets + rewrites SPA)
 y [`.firebaserc`](./.firebaserc) (proyecto default y mapeo target → site).
 
-### Deploy continuo
+### Requisito único: crear los sites de Hosting
+
+Antes del primer deploy (por CD **o** manual) los sites deben existir; el workflow
+**no** los crea. Una sola vez, con `firebase-tools` autenticado (ver más abajo):
+
+```bash
+npx firebase-tools use amena-20df0
+npx firebase-tools hosting:sites:create amena-admin
+npx firebase-tools hosting:sites:create amena-portal
+```
+
+### Deploy continuo (flujo principal)
 
 `.github/workflows/deploy.yml` se dispara en **push a `main`**: hace build de
 producción de ambas apps y las despliega al canal `live` de cada site con el
-action oficial `FirebaseExtended/action-hosting-deploy`.
+action oficial `FirebaseExtended/action-hosting-deploy`. Este es el flujo real de
+despliegue, **incluido el primer deploy**: una vez creados los sites y configurados
+los secrets + IAM, basta con integrar a `main` para que ambos sites se publiquen
+(no hace falta correr `firebase deploy` a mano).
 
 ### Secrets a crear en GitHub
 
@@ -59,26 +73,24 @@ En **Settings → Secrets and variables → Actions** del repositorio:
 
 | Secret                     | Para qué sirve                                                        |
 |----------------------------|----------------------------------------------------------------------|
-| `FIREBASE_SERVICE_ACCOUNT` | JSON de una service account con permiso *Firebase Hosting Admin*. Se genera en Firebase Console → Configuración del proyecto → Cuentas de servicio → Generar clave privada. Pega el JSON completo. |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON de una service account **dedicada** con rol mínimo. Créala en Google Cloud Console → IAM y administración → Cuentas de servicio → *Crear cuenta de servicio* (proyecto `amena-20df0`), otórgale el rol **Firebase Hosting Admin** (`roles/firebasehosting.admin`) y genera una llave **JSON** (Claves → Agregar clave → Crear clave nueva → JSON). Pega el JSON completo. **No** uses la llave del Admin SDK por defecto de Firebase Console (acceso demasiado amplio). |
 | `VITE_SUPABASE_URL`        | URL del Supabase de producción (proyecto "Amena" en Supabase Cloud). |
 | `VITE_SUPABASE_ANON_KEY`   | Llave publishable (`sb_publishable_...`) de producción.              |
 | `VITE_SENTRY_DSN`          | DSN de Sentry para producción (deja el secret sin crear si aún no usas Sentry en prod; el build funciona igual y Sentry queda deshabilitado). |
 
-### Primer deploy manual (una sola vez)
+### Deploy manual (alternativa / local)
 
-Requiere `firebase-tools` (aquí vía `npx`; o instálalo global con `npm i -g firebase-tools`).
-Los sites deben existir antes del primer deploy.
+Normalmente **no hace falta**: el deploy de producción lo hace el CD al integrar a
+`main`. Usa esto solo para desplegar a mano (debugging o un deploy puntual desde tu
+máquina). Requiere `firebase-tools` (vía `npx` o global con `npm i -g firebase-tools`)
+y que los sites ya existan (ver "Requisito único" arriba).
 
 ```bash
 # 1. Autenticación y selección de proyecto
 npx firebase-tools login
 npx firebase-tools use amena-20df0
 
-# 2. Crear los sites de Hosting (solo si no existen aún)
-npx firebase-tools hosting:sites:create amena-admin
-npx firebase-tools hosting:sites:create amena-portal
-
-# (Los targets ya están en .firebaserc. Si necesitas reaplicarlos:)
+# 2. (Opcional) Reaplicar los targets si hiciera falta — ya están en .firebaserc
 npx firebase-tools target:apply hosting backoffice amena-admin
 npx firebase-tools target:apply hosting portal amena-portal
 
@@ -88,4 +100,23 @@ pnpm build
 npx firebase-tools deploy --only hosting
 ```
 
-A partir de ahí, cada push a `main` despliega automáticamente vía `deploy.yml`.
+### Troubleshooting — permisos de la service account
+
+**Síntoma:** `deploy.yml` falla en el paso de deploy con un error de permisos /
+autenticación de Firebase Hosting, aun con `FIREBASE_SERVICE_ACCOUNT` configurado.
+
+**Causa (vista en el primer deploy):** en el IAM del proyecto `amena-20df0` había un
+**binding de rol apuntando a una identidad eliminada** — aparece como
+`deleted:serviceAccount:...?uid=...`. El rol de Hosting estaba asignado a esa
+identidad muerta y no a la service account viva que usa el workflow.
+
+**Solución:**
+
+1. Google Cloud Console → **IAM y administración → IAM** del proyecto `amena-20df0`.
+2. Busca bindings con el prefijo **`deleted:`** (uid huérfano) y **elimínalos**.
+3. Otorga **Firebase Hosting Admin** (`roles/firebasehosting.admin`) a la service
+   account **viva** (la del JSON en `FIREBASE_SERVICE_ACCOUNT`).
+4. Re-ejecuta el job fallido: **Actions → run fallido → Re-run jobs**.
+
+Puede recurrir si se elimina y recrea una service account: los bindings antiguos que
+la referenciaban quedan como `deleted:...?uid=...` y hay que limpiarlos.
