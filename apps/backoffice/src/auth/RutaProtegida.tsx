@@ -3,7 +3,11 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { PantallaCargando } from '../components/PantallaCargando'
 import { BackofficeShell } from '../layout/BackofficeShell'
 import { useAuth } from './useAuth'
-import { validarAccesoPortal, type ResultadoAcceso } from './validarAccesoPortal'
+import {
+  validarAccesoPortal,
+  type ContextoAcceso,
+  type ResultadoAcceso,
+} from './validarAccesoPortal'
 
 type EstadoAcceso = 'validando' | ResultadoAcceso
 
@@ -12,7 +16,7 @@ type EstadoAcceso = 'validando' | ResultadoAcceso
  *   - sin sesión → /login
  *   - con sesión → valida acceso al portal (validarAccesoPortal)
  *       - denegado → /sin-acceso
- *       - concedido → monta el shell y renderiza la ruta hija
+ *       - concedido → monta el shell y pasa el rol a las rutas hijas vía <Outlet>
  */
 export function RutaProtegida() {
   const { session, cargando } = useAuth()
@@ -26,7 +30,7 @@ export function RutaProtegida() {
     if (!session) return
     const userId = session.user.id
     let vigente = true
-    validarAccesoPortal(session).then((resultado) => {
+    validarAccesoPortal().then((resultado) => {
       if (vigente) setValidado({ userId, acceso: resultado })
     })
     return () => {
@@ -41,13 +45,12 @@ export function RutaProtegida() {
     validado && validado.userId === session.user.id ? validado.acceso : 'validando'
 
   if (acceso === 'validando') return <PantallaCargando />
-  if (!acceso.concedido) return <Navigate to="/sin-acceso" replace />
+  if (!acceso.concedido || !acceso.rol) return <Navigate to="/sin-acceso" replace />
 
-  // TODO(fase-3-sync): redirección inicial por rol (p. ej. mesero → /escaner) cuando
-  // validarAccesoPortal devuelva el rol_backoffice real. Por ahora todos entran al shell.
+  const contexto: ContextoAcceso = { rol: acceso.rol }
   return (
-    <BackofficeShell>
-      <Outlet />
+    <BackofficeShell rol={acceso.rol}>
+      <Outlet context={contexto} />
     </BackofficeShell>
   )
 }

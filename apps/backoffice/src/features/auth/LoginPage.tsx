@@ -19,7 +19,8 @@ export function LoginPage() {
     setEnviando(true)
     try {
       await iniciarSesion(email, password)
-      navigate('/inicio', { replace: true })
+      // "/" redirige a la home según el rol (ver InicioPorRol).
+      navigate('/', { replace: true })
     } catch {
       setError('Credenciales inválidas. Verifica tu correo y contraseña.')
     } finally {

@@ -1,4 +1,4 @@
-import type { Session } from '@amena/supabase/auth'
+import { supabase } from '@amena/supabase'
 
 export type RolBackoffice = 'super_admin' | 'mesero' | 'finanzas'
 
@@ -7,21 +7,32 @@ export interface ResultadoAcceso {
   rol: RolBackoffice | null
 }
 
+/** Contexto que RutaProtegida pasa a las rutas hijas vía <Outlet>. */
+export interface ContextoAcceso {
+  rol: RolBackoffice
+}
+
 /**
  * Valida si el usuario autenticado puede entrar al BACKOFFICE y con qué rol.
  *
- * TODO(fase-3-sync): implementar contra `usuarios_internos` cuando el esquema esté
- * mergeado. Debe (solo lectura, sin escribir):
- *   1. Consultar usuarios_internos por user_id = session.user.id.
- *   2. Verificar activo = true (si es false, acceso denegado).
- *   3. Devolver { concedido: true, rol } con el rol_backoffice real,
- *      o { concedido: false, rol: null } si no existe / está inactivo.
- *
- * Por ahora es un STUB: concede acceso con un rol falso para poder montar todo el
- * flujo (login → validación → shell / pantalla "sin acceso") sin depender del esquema.
+ * Usa los helpers SECURITY DEFINER del backend (es_super_admin / es_finanzas /
+ * es_mesero), que resuelven el rol con auth.uid() saltándose RLS. No se consulta
+ * usuarios_internos directamente porque su RLS solo deja leer a super_admin.
  */
-export async function validarAccesoPortal(session: Session): Promise<ResultadoAcceso> {
-  // STUB — concede acceso a cualquier usuario autenticado con un rol falso.
-  // (session.user.id será la clave de la consulta a usuarios_internos al implementar.)
-  return session ? { concedido: true, rol: 'super_admin' } : { concedido: false, rol: null }
+export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
+  const [superAdmin, finanzas, mesero] = await Promise.all([
+    supabase.rpc('es_super_admin'),
+    supabase.rpc('es_finanzas'),
+    supabase.rpc('es_mesero'),
+  ])
+
+  if (superAdmin.data) return { concedido: true, rol: 'super_admin' }
+  if (finanzas.data) return { concedido: true, rol: 'finanzas' }
+  if (mesero.data) return { concedido: true, rol: 'mesero' }
+  return { concedido: false, rol: null }
+}
+
+/** Ruta inicial (home) según el rol: el mesero solo escanea. */
+export function rutaInicialPorRol(rol: RolBackoffice): string {
+  return rol === 'mesero' ? '/escaner' : '/inicio'
 }
