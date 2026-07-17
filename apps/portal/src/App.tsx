@@ -14,6 +14,12 @@ const ColaboradoresPage = lazy(() =>
     default: m.ColaboradoresPage,
   }))
 )
+const CuotasSemanaPage = lazy(() =>
+  import('./features/cuotas/CuotasSemanaPage').then((m) => ({ default: m.CuotasSemanaPage }))
+)
+const DeclararCuotasPage = lazy(() =>
+  import('./features/cuotas/DeclararCuotasPage').then((m) => ({ default: m.DeclararCuotasPage }))
+)
 
 function CargandoRuta() {
   return (
@@ -39,6 +45,26 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <ColaboradoresPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="cuotas"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <CuotasSemanaPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="cuotas/declarar"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <DeclararCuotasPage />
               </Suspense>
             </RutaErrorBoundary>
           }
