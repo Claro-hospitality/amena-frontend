@@ -439,6 +439,14 @@ export type Database = {
         Args: { p_colaborador_id: string; p_fecha: string }
         Returns: boolean
       }
+      declarar_cuotas: {
+        Args: {
+          p_declaracion: Json
+          p_empresa_id: string
+          p_origen?: Database["public"]["Enums"]["origen_cuota"]
+        }
+        Returns: Json
+      }
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }

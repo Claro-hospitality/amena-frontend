@@ -22,6 +22,11 @@ export function etiquetaDia(fecha: Date): string {
   return format(fecha, "EEEE d", { locale: es })
 }
 
+/** Etiqueta corta de un día para toggles/chips, p. ej. "lun. 13". */
+export function etiquetaDiaCorta(fecha: Date): string {
+  return format(fecha, 'EEE d', { locale: es })
+}
+
 /** ¿La fecha es anterior a hoy? (los días pasados del menú son de solo lectura) */
 export function esFechaPasada(fecha: Date, hoy: Date = new Date()): boolean {
   return isBefore(startOfDay(fecha), startOfDay(hoy))

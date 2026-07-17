@@ -5,6 +5,7 @@ import {
   diasHabiles,
   esFechaPasada,
   etiquetaDia,
+  etiquetaDiaCorta,
   lunesDeSemana,
   rangoSemanaLegible,
 } from './semana'
@@ -39,6 +40,12 @@ describe('rangoSemanaLegible', () => {
 describe('etiquetaDia', () => {
   it('es el nombre del día y el número', () => {
     expect(etiquetaDia(new Date(2026, 6, 13))).toMatch(/lunes 13/i)
+  })
+})
+
+describe('etiquetaDiaCorta', () => {
+  it('es el nombre corto del día y el número', () => {
+    expect(etiquetaDiaCorta(new Date(2026, 6, 13))).toMatch(/lun.*13/i)
   })
 })
 
