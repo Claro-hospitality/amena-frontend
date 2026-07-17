@@ -12,6 +12,17 @@ const cuotasApi = vi.hoisted(() => ({
 }))
 vi.mock('./api', () => cuotasApi)
 
+// AgregarExtraDialog (montado por esta página) importa la capa de colaboradores,
+// que carga el cliente real de Supabase; se mockea para no depender de env en CI.
+const colabApi = vi.hoisted(() => ({
+  listarColaboradores: vi.fn().mockResolvedValue([]),
+  obtenerMiEmpresaId: vi.fn().mockResolvedValue('emp1'),
+  crearColaborador: vi.fn(),
+  actualizarColaborador: vi.fn(),
+  cambiarEstadoColaborador: vi.fn(),
+}))
+vi.mock('../colaboradores/api', () => colabApi)
+
 import type { TipoUsuarioPortal } from '../../auth/validarAccesoPortal'
 import { CuotasSemanaPage } from './CuotasSemanaPage'
 
