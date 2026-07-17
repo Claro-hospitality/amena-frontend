@@ -1,8 +1,20 @@
+import {
+  Building2,
+  CalendarDays,
+  ClipboardCheck,
+  FileText,
+  Home,
+  ScanLine,
+  Users,
+  UtensilsCrossed,
+  type LucideIcon,
+} from 'lucide-react'
 import type { RolBackoffice } from '../auth/validarAccesoPortal'
 
 export interface ItemNav {
   to: string
   label: string
+  icon: LucideIcon
 }
 
 /**
@@ -13,19 +25,19 @@ export interface ItemNav {
  */
 export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
   super_admin: [
-    { to: '/inicio', label: 'Inicio' },
-    { to: '/empresas', label: 'Empresas' },
-    { to: '/platillos', label: 'Platillos' },
-    { to: '/menu', label: 'Menú' },
-    { to: '/colaboradores', label: 'Colaboradores' },
-    { to: '/cierres', label: 'Cierres' },
-    { to: '/facturas', label: 'Facturas' },
+    { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/empresas', label: 'Empresas', icon: Building2 },
+    { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
+    { to: '/menu', label: 'Menú', icon: CalendarDays },
+    { to: '/colaboradores', label: 'Colaboradores', icon: Users },
+    { to: '/cierres', label: 'Cierres', icon: ClipboardCheck },
+    { to: '/facturas', label: 'Facturas', icon: FileText },
   ],
   finanzas: [
-    { to: '/inicio', label: 'Inicio' },
-    { to: '/empresas', label: 'Empresas' },
-    { to: '/cierres', label: 'Cierres' },
-    { to: '/facturas', label: 'Facturas' },
+    { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/empresas', label: 'Empresas', icon: Building2 },
+    { to: '/cierres', label: 'Cierres', icon: ClipboardCheck },
+    { to: '/facturas', label: 'Facturas', icon: FileText },
   ],
-  mesero: [{ to: '/escaner', label: 'Escáner' }],
+  mesero: [{ to: '/escaner', label: 'Escáner', icon: ScanLine }],
 }

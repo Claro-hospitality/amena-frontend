@@ -1,44 +1,100 @@
 import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
-import { Button } from '@amena/ui/components/ui/button'
-import { cn } from '@amena/ui/lib/utils'
+import { Link, useLocation } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
+} from '@amena/ui/components/ui/sidebar'
 import { useAuth } from '../auth/useAuth'
 import type { RolBackoffice } from '../auth/validarAccesoPortal'
 import { navPorRol } from './navBackoffice'
 
-/** Shell del backoffice: sidebar (tokens sidebar del tema) con items según rol. */
+/**
+ * Shell del backoffice sobre el sidebar del kit (@amena/ui):
+ * - Desktop: sidebar persistente, colapsable a íconos.
+ * - < md: drawer con trigger hamburguesa en el header móvil.
+ * Usa los tokens `--sidebar-*` del tema (los consume el componente).
+ */
 export function BackofficeShell({ rol, children }: { rol: RolBackoffice; children: ReactNode }) {
+  return (
+    <SidebarProvider>
+      <NavegacionBackoffice rol={rol} />
+      <SidebarInset className="min-w-0">
+        <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background px-4">
+          <SidebarTrigger aria-label="Alternar menú" />
+          <span className="text-lg font-semibold text-primary md:hidden">Amena</span>
+        </header>
+        <div className="min-w-0 flex-1">{children}</div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
+}
+
+function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
   const { cerrarSesion } = useAuth()
+  const { isMobile, setOpenMobile } = useSidebar()
+  const { pathname } = useLocation()
+
+  const cerrarDrawer = () => {
+    if (isMobile) setOpenMobile(false)
+  }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
-      <aside className="flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-        <div className="p-4 text-lg font-semibold text-sidebar-primary">Amena</div>
-        <nav className="flex flex-1 flex-col gap-1 px-2">
-          {navPorRol[rol].map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <span className="px-2 py-1 text-lg font-semibold text-sidebar-primary group-data-[collapsible=icon]:hidden">
+          Amena
+        </span>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navPorRol[rol].map((item) => {
+                const Icono = item.icon
+                const activo = pathname === item.to || pathname.startsWith(`${item.to}/`)
+                return (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton
+                      isActive={activo}
+                      tooltip={item.label}
+                      render={
+                        <Link to={item.to} onClick={cerrarDrawer}>
+                          <Icono />
+                          <span>{item.label}</span>
+                        </Link>
+                      }
+                    />
+                  </SidebarMenuItem>
                 )
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="p-4">
-          <Button variant="outline" className="w-full" onClick={() => cerrarSesion()}>
-            Cerrar sesión
-          </Button>
-        </div>
-      </aside>
-      <main className="min-w-0 flex-1">{children}</main>
-    </div>
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Cerrar sesión" onClick={() => cerrarSesion()}>
+              <LogOut />
+              <span>Cerrar sesión</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
   )
 }
