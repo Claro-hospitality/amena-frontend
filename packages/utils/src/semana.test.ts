@@ -6,6 +6,7 @@ import {
   esFechaPasada,
   etiquetaDia,
   etiquetaDiaCorta,
+  horaCorta,
   lunesDeSemana,
   rangoSemanaLegible,
 } from './semana'
@@ -63,5 +64,12 @@ describe('esFechaPasada', () => {
 describe('aISO / deISO', () => {
   it('van y vuelven', () => {
     expect(aISO(deISO('2026-07-13'))).toBe('2026-07-13')
+  })
+})
+
+describe('horaCorta', () => {
+  it('formatea HH:mm', () => {
+    expect(horaCorta(new Date(2026, 6, 13, 9, 5))).toBe('09:05')
+    expect(horaCorta(new Date(2026, 6, 13, 14, 30))).toBe('14:30')
   })
 })

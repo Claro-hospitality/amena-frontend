@@ -26,6 +26,7 @@ export interface ItemNav {
 export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
   super_admin: [
     { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/escaner', label: 'Escáner', icon: ScanLine },
     { to: '/empresas', label: 'Empresas', icon: Building2 },
     { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
     { to: '/menu', label: 'Menú', icon: CalendarDays },

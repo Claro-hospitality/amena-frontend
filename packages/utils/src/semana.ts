@@ -41,3 +41,8 @@ export function aISO(fecha: Date): string {
 export function deISO(iso: string): Date {
   return parseISO(iso)
 }
+
+/** Hora local corta "HH:mm" (para el ticket del escáner y la lista del día). */
+export function horaCorta(fecha: Date): string {
+  return format(fecha, 'HH:mm')
+}

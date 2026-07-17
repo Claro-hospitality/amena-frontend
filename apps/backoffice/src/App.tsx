@@ -18,6 +18,12 @@ const PlatillosPage = lazy(() =>
 const MenuSemanalPage = lazy(() =>
   import('./features/menu/MenuSemanalPage').then((m) => ({ default: m.MenuSemanalPage }))
 )
+const EscanerPage = lazy(() =>
+  import('./features/escaner/EscanerPage').then((m) => ({ default: m.EscanerPage }))
+)
+const ListaConsumosHoy = lazy(() =>
+  import('./features/escaner/ListaConsumosHoy').then((m) => ({ default: m.ListaConsumosHoy }))
+)
 
 function CargandoRuta() {
   return (
@@ -37,7 +43,26 @@ export default function App() {
       <Route element={<RutaProtegida />}>
         <Route index element={<InicioPorRol />} />
         <Route path="inicio" element={<InicioPage />} />
-        <Route path="escaner" element={<Placeholder titulo="Escáner" />} />
+        <Route
+          path="escaner"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <EscanerPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="escaner/hoy"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ListaConsumosHoy />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
         <Route
           path="empresas"
           element={

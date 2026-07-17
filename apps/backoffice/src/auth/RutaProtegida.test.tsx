@@ -14,6 +14,11 @@ const db = vi.hoisted(() => ({ rpc: vi.fn() }))
 vi.mock('@amena/supabase/auth', () => auth)
 vi.mock('@amena/supabase', () => ({ supabase: { rpc: db.rpc } }))
 
+// El escáner es una pantalla pesada (cámara/Realtime); para el test de ruteo basta un stub.
+vi.mock('../features/escaner/EscanerPage', () => ({
+  EscanerPage: () => <h1>Escáner</h1>,
+}))
+
 import App from '../App'
 import { AuthProvider } from './AuthProvider'
 
