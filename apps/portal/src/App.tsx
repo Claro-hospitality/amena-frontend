@@ -1,11 +1,11 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useOutletContext } from 'react-router-dom'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { InicioPorTipo } from './auth/InicioPorTipo'
 import { RutaProtegida } from './auth/RutaProtegida'
+import type { ContextoAcceso } from './auth/validarAccesoPortal'
 import { RutaErrorBoundary } from './components/RutaErrorBoundary'
 import { LoginPage } from './features/auth/LoginPage'
-import { Placeholder } from './features/Placeholder'
 import { SinAccesoPage } from './features/auth/SinAccesoPage'
 import { InicioPage } from './features/inicio/InicioPage'
 
@@ -20,6 +20,34 @@ const CuotasSemanaPage = lazy(() =>
 const DeclararCuotasPage = lazy(() =>
   import('./features/cuotas/DeclararCuotasPage').then((m) => ({ default: m.DeclararCuotasPage }))
 )
+const InicioColaboradorPage = lazy(() =>
+  import('./features/colaborador/InicioColaboradorPage').then((m) => ({
+    default: m.InicioColaboradorPage,
+  }))
+)
+const MenuColaboradorPage = lazy(() =>
+  import('./features/colaborador/MenuColaboradorPage').then((m) => ({
+    default: m.MenuColaboradorPage,
+  }))
+)
+const HistorialPage = lazy(() =>
+  import('./features/colaborador/HistorialPage').then((m) => ({ default: m.HistorialPage }))
+)
+
+/** /inicio despacha por tipo: el colaborador ve su espacio; el admin, su panel. */
+function InicioRouter() {
+  const { tipo } = useOutletContext<ContextoAcceso>()
+  if (tipo === 'colaborador') {
+    return (
+      <RutaErrorBoundary>
+        <Suspense fallback={<CargandoRuta />}>
+          <InicioColaboradorPage />
+        </Suspense>
+      </RutaErrorBoundary>
+    )
+  }
+  return <InicioPage />
+}
 
 function CargandoRuta() {
   return (
@@ -38,7 +66,7 @@ export default function App() {
       {/* Todo lo demás es privado: RutaProtegida exige sesión + acceso, y "/" redirige por tipo. */}
       <Route element={<RutaProtegida />}>
         <Route index element={<InicioPorTipo />} />
-        <Route path="inicio" element={<InicioPage />} />
+        <Route path="inicio" element={<InicioRouter />} />
         <Route
           path="colaboradores"
           element={
@@ -69,8 +97,26 @@ export default function App() {
             </RutaErrorBoundary>
           }
         />
-        <Route path="mi-qr" element={<Placeholder titulo="Mi QR" />} />
-        <Route path="mis-consumos" element={<Placeholder titulo="Mis consumos" />} />
+        <Route
+          path="menu"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <MenuColaboradorPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="historial"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <HistorialPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

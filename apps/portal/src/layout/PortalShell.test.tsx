@@ -22,14 +22,17 @@ describe('PortalShell', () => {
     renderShell('admin_empresa')
     expect(screen.getByRole('link', { name: 'Inicio' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Colaboradores' })).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Mi QR' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Cuotas' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Historial' })).not.toBeInTheDocument()
   })
 
   it('colaborador ve su navegación', () => {
     renderShell('colaborador')
-    expect(screen.getByRole('link', { name: 'Mi QR' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Mis consumos' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Inicio' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Menú' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Historial' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Colaboradores' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Cuotas' })).not.toBeInTheDocument()
   })
 
   it('ofrece cerrar sesión y el trigger del menú móvil', () => {

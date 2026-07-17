@@ -35,7 +35,7 @@ export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
   return { concedido: false, tipo: null }
 }
 
-/** Ruta inicial (home) según el tipo: el colaborador entra directo a su QR. */
-export function rutaInicialPorTipo(tipo: TipoUsuarioPortal): string {
-  return tipo === 'colaborador' ? '/mi-qr' : '/inicio'
+/** Ruta inicial (home): ambos tipos entran a /inicio (el contenido se despacha por tipo). */
+export function rutaInicial(): string {
+  return '/inicio'
 }

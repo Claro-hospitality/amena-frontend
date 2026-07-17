@@ -1,8 +1,7 @@
-import { Navigate, useOutletContext } from 'react-router-dom'
-import { rutaInicialPorTipo, type ContextoAcceso } from './validarAccesoPortal'
+import { Navigate } from 'react-router-dom'
+import { rutaInicial } from './validarAccesoPortal'
 
-/** Ruta índice ("/"): redirige a la home que corresponde al tipo de usuario. */
+/** Ruta índice ("/"): redirige al inicio (el contenido se despacha por tipo dentro de /inicio). */
 export function InicioPorTipo() {
-  const { tipo } = useOutletContext<ContextoAcceso>()
-  return <Navigate to={rutaInicialPorTipo(tipo)} replace />
+  return <Navigate to={rutaInicial()} replace />
 }

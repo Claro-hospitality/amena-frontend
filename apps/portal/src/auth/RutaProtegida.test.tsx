@@ -13,6 +13,11 @@ const db = vi.hoisted(() => ({ rpc: vi.fn() }))
 vi.mock('@amena/supabase/auth', () => auth)
 vi.mock('@amena/supabase', () => ({ supabase: { rpc: db.rpc } }))
 
+// El inicio del colaborador es pesado (QR/queries); para el test de ruteo basta un stub.
+vi.mock('../features/colaborador/InicioColaboradorPage', () => ({
+  InicioColaboradorPage: () => <h1>Mi espacio</h1>,
+}))
+
 import App from '../App'
 import { AuthProvider } from './AuthProvider'
 
@@ -58,11 +63,11 @@ describe('rutas protegidas del portal', () => {
     expect(await screen.findByText(/portal de la empresa/i)).toBeInTheDocument()
   })
 
-  it('colaborador es redirigido a /mi-qr', async () => {
+  it('colaborador es redirigido a su inicio', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
     stub({ empresas: [], colaboradores: ['c1'] })
     montar('/')
-    expect(await screen.findByRole('heading', { name: 'Mi QR' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Mi espacio' })).toBeInTheDocument()
   })
 
   it('usuario sin acceso → pantalla sin acceso', async () => {
