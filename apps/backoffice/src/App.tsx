@@ -15,6 +15,9 @@ const EmpresasPage = lazy(() =>
 const PlatillosPage = lazy(() =>
   import('./features/platillos/PlatillosPage').then((m) => ({ default: m.PlatillosPage }))
 )
+const MenuSemanalPage = lazy(() =>
+  import('./features/menu/MenuSemanalPage').then((m) => ({ default: m.MenuSemanalPage }))
+)
 
 function CargandoRuta() {
   return (
@@ -55,7 +58,16 @@ export default function App() {
             </RutaErrorBoundary>
           }
         />
-        <Route path="menu" element={<Placeholder titulo="Menú" />} />
+        <Route
+          path="menu"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <MenuSemanalPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
         <Route path="colaboradores" element={<Placeholder titulo="Colaboradores" />} />
         <Route path="cierres" element={<Placeholder titulo="Cierres" />} />
         <Route path="facturas" element={<Placeholder titulo="Facturas" />} />
