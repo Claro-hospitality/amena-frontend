@@ -15,6 +15,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
   super_admin: [
     { to: '/inicio', label: 'Inicio' },
     { to: '/empresas', label: 'Empresas' },
+    { to: '/platillos', label: 'Platillos' },
     { to: '/menu', label: 'Menú' },
     { to: '/colaboradores', label: 'Colaboradores' },
     { to: '/cierres', label: 'Cierres' },
