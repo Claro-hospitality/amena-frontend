@@ -49,6 +49,19 @@ pnpm gen:types               # regenerar tipos desde el esquema local de Supabas
 - Idioma: código y comentarios en español; nombres de variables descriptivos
 - Una rama de módulo = una unidad de trabajo coherente. No mezclar módulos (ver Flujo de ramas)
 
+## Verificación
+
+> **Cambio en prueba (2026-07-17) — evaluar tras módulos 4.7 y 4.8.**
+
+- **Automática (obligatoria, sin cambios):** `pnpm test` (Vitest), `pnpm build` y `pnpm lint` en verde por cada unidad de trabajo **antes del merge**. Son rápidos y no negociables. El **CI en `dev`** es la red de seguridad.
+- **Visual con Puppeteer: FUERA de la rutina de módulos.** La revisión visual la hace **Cristian** al cierre de cada módulo — no se generan capturas por defecto.
+  - **Excepción:** usar Puppeteer solo cuando la verificación requiera una simulación que el humano no pueda hacer fácilmente (p. ej. cámara falsa para el escáner, estados difíciles de reproducir). **Avisar antes de usarlo y explicar por qué.**
+- **Guía de revisión (obligatoria en el resumen final de cada módulo):** para que Cristian revise, incluir por cada pantalla nueva o modificada:
+  1. **Ruta/URL** de la pantalla.
+  2. **Con qué usuario del seed** probarla (email/contraseña).
+  3. **Qué verificar** — 2-3 puntos concretos.
+  4. **En qué anchos** según la app: **portal → 375 primero**; **backoffice → 1280 primero** (y tablet 768–1024 si aplica, p. ej. el escáner).
+
 ## Flujo de ramas
 
 - **`main`**: solo producción. Refleja lo desplegado. Los workflows de deploy/push a producción están atados a `main`.
