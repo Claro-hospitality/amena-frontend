@@ -21,6 +21,31 @@ Cada app usa variables `VITE_*`. Copia el `.env.example` de cada app a
 `.env.local` y complétalo (ver [`apps/backoffice/.env.example`](./apps/backoffice/.env.example)
 y [`apps/portal/.env.example`](./apps/portal/.env.example)).
 
+### Probar desde teléfono/tablet (LAN)
+
+Para abrir las apps desde otro dispositivo en la misma red Wi-Fi (útil porque el
+portal es mobile-first y el escáner del backoffice se usa en tablet):
+
+```bash
+pnpm dev:lan              # ambas apps expuestas en la LAN
+pnpm dev:lan:portal       # solo portal      → http://<IP-de-tu-Mac>:5173
+pnpm dev:lan:backoffice   # solo backoffice  → http://<IP-de-tu-Mac>:5174
+```
+
+El script [`scripts/dev-lan.sh`](./scripts/dev-lan.sh) detecta la IP LAN de la Mac
+y **apunta el cliente de Supabase a esa IP** (no a `localhost`, que desde el
+teléfono sería el propio teléfono). Solo sobrescribe `VITE_SUPABASE_URL` para esa
+corrida — no toca `.env.local`. Requiere el stack local de `amena-backend`
+corriendo. Override del puerto de Supabase: `SUPABASE_PORT=xxxx pnpm dev:lan`.
+
+> **Limitación conocida — cámara del escáner por LAN:** se sirve por `http://`
+> (no HTTPS), y los navegadores bloquean el acceso a la cámara fuera de un
+> *secure context* salvo en `localhost`. Por eso **el escáner QR del mesero no
+> funciona por LAN**; el resto de las pantallas sí. Para probar la cámara en un
+> dispositivo real hace falta HTTPS (p. ej. un túnel tipo ngrok o un certificado
+> local); la app ya muestra un mensaje claro cuando la cámara no está en contexto
+> seguro.
+
 ## Observabilidad (Sentry)
 
 Ambas apps inicializan `@sentry/react` en su `main.tsx`, pero **solo si
