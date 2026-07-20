@@ -1,21 +1,5 @@
-import { useState, type ReactNode } from 'react'
-import {
-  Bell,
-  Building2,
-  Check,
-  ClipboardCheck,
-  Info,
-  Pencil,
-  Plus,
-  ScanLine,
-  Search,
-  Settings,
-  TriangleAlert,
-  Trash2,
-  Users,
-  UtensilsCrossed,
-  X,
-} from 'lucide-react'
+import { useState } from 'react'
+import { Building2, Check, Info, Plus, TriangleAlert, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@amena/ui/components/ui/alert'
 import { Badge } from '@amena/ui/components/ui/badge'
@@ -72,24 +56,21 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@amena/ui/components/ui/tabs'
 import { Textarea } from '@amena/ui/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
+import { Fila, Seccion } from './primitivos'
 
 /**
- * Catálogo de componentes de @amena/ui — referencia interna del design system.
- * Muestra tokens del tema, tipografía, íconos y los componentes más usados con
- * sus variantes. Todo con tokens del tema (sin colores hardcodeados).
+ * Catálogo de componentes de @amena/ui (sección Desarrollo → Componentes).
+ * Muestra los componentes más usados con sus variantes. Todo con tokens del tema.
  */
 export function ComponentesPage() {
   return (
     <TooltipProvider>
       <div className="flex flex-col gap-8">
         <p className="text-sm text-muted-foreground">
-          Referencia de los componentes globales de <code className="font-mono">@amena/ui</code>,
-          sus variantes y los tokens del tema. Todo se construye sobre estos bloques.
+          Componentes globales de <code className="font-mono">@amena/ui</code> y sus variantes.
+          Los colores, la tipografía y los tamaños viven en <strong>Branding</strong>.
         </p>
 
-        <TokensColor />
-        <Tipografia />
-        <Iconos />
         <Botones />
         <Badges />
         <Tarjetas />
@@ -99,117 +80,6 @@ export function ComponentesPage() {
         <Datos />
       </div>
     </TooltipProvider>
-  )
-}
-
-/** Contenedor de una sección: título + tarjeta (superficie bg-card, borde, sin sombra). */
-function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-        {titulo}
-      </h2>
-      <div className="rounded-lg border border-border bg-card p-5">{children}</div>
-    </section>
-  )
-}
-
-/** Fila de ejemplos con envoltura y etiqueta opcional. */
-function Fila({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-center gap-3">{children}</div>
-}
-
-const TOKENS_COLOR = [
-  { nombre: 'primary', clase: 'bg-primary' },
-  { nombre: 'secondary', clase: 'bg-secondary' },
-  { nombre: 'accent', clase: 'bg-accent' },
-  { nombre: 'muted', clase: 'bg-muted' },
-  { nombre: 'success', clase: 'bg-success' },
-  { nombre: 'warning', clase: 'bg-warning' },
-  { nombre: 'destructive', clase: 'bg-destructive' },
-  { nombre: 'info', clase: 'bg-info' },
-  { nombre: 'card', clase: 'bg-card' },
-  { nombre: 'background', clase: 'bg-background' },
-  { nombre: 'border', clase: 'bg-border' },
-  { nombre: 'foreground', clase: 'bg-foreground' },
-]
-
-function TokensColor() {
-  return (
-    <Seccion titulo="Tokens de color">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {TOKENS_COLOR.map((t) => (
-          <div key={t.nombre} className="flex items-center gap-3">
-            <div className={`size-10 shrink-0 rounded-lg border border-border ${t.clase}`} />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{t.nombre}</p>
-              <code className="font-mono text-xs text-muted-foreground">bg-{t.nombre}</code>
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="mt-4 text-xs text-muted-foreground">
-        Estados: <span className="font-medium text-foreground">success</span> (validado/pagado),{' '}
-        <span className="font-medium text-foreground">warning</span> (advertencias),{' '}
-        <span className="font-medium text-foreground">destructive</span> (errores),{' '}
-        <span className="font-medium text-foreground">info</span> (información). Usar siempre el
-        token, nunca el hex.
-      </p>
-    </Seccion>
-  )
-}
-
-function Tipografia() {
-  return (
-    <Seccion titulo="Tipografía">
-      <div className="flex flex-col gap-2">
-        <p className="text-2xl font-semibold tracking-tight">Título grande · text-2xl</p>
-        <p className="text-xl font-semibold tracking-tight">Título de página · text-xl</p>
-        <p className="text-base font-medium">Subtítulo · text-base</p>
-        <p className="text-sm">Texto de cuerpo · text-sm</p>
-        <p className="text-sm text-muted-foreground">Texto secundario · text-muted-foreground</p>
-        <p className="text-xs text-muted-foreground">Texto pequeño · text-xs</p>
-        <p className="font-mono text-sm tabular-nums">$1,234.50 · ID-00421 · font-mono (montos e IDs)</p>
-      </div>
-    </Seccion>
-  )
-}
-
-const ICONOS = [
-  { Icono: ScanLine, nombre: 'ScanLine' },
-  { Icono: Building2, nombre: 'Building2' },
-  { Icono: UtensilsCrossed, nombre: 'UtensilsCrossed' },
-  { Icono: Users, nombre: 'Users' },
-  { Icono: ClipboardCheck, nombre: 'ClipboardCheck' },
-  { Icono: Settings, nombre: 'Settings' },
-  { Icono: Plus, nombre: 'Plus' },
-  { Icono: Pencil, nombre: 'Pencil' },
-  { Icono: Trash2, nombre: 'Trash2' },
-  { Icono: Search, nombre: 'Search' },
-  { Icono: Bell, nombre: 'Bell' },
-  { Icono: Check, nombre: 'Check' },
-]
-
-function Iconos() {
-  return (
-    <Seccion titulo="Íconos (lucide-react)">
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-        {ICONOS.map(({ Icono, nombre }) => (
-          <div
-            key={nombre}
-            className="flex flex-col items-center gap-1.5 rounded-lg border border-border p-3 text-center"
-          >
-            <Icono className="size-5 text-foreground" />
-            <code className="font-mono text-[11px] text-muted-foreground">{nombre}</code>
-          </div>
-        ))}
-      </div>
-      <p className="mt-4 text-xs text-muted-foreground">
-        Tamaño por clase (<code className="font-mono">size-4</code>,{' '}
-        <code className="font-mono">size-5</code>), nunca px. Decorativos con{' '}
-        <code className="font-mono">aria-hidden</code>.
-      </p>
-    </Seccion>
   )
 }
 

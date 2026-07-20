@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { LogOut } from 'lucide-react'
+import { ChevronRight, LogOut } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@amena/ui/components/ui/collapsible'
 import { Breadcrumbs } from './Breadcrumbs'
 import {
   Sidebar,
@@ -9,12 +14,14 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
@@ -77,6 +84,8 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
       )
     })
 
+  const IconoDesarrollo = navDesarrollo.icon
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -89,12 +98,47 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Solo en desarrollo (import.meta.env.DEV): herramientas internas. */}
+        {/* Solo en desarrollo (import.meta.env.DEV): submenú de herramientas internas. */}
         {import.meta.env.DEV && (
           <SidebarGroup>
-            <SidebarGroupLabel>Desarrollo</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>{renderItems(navDesarrollo)}</SidebarMenu>
+              <SidebarMenu>
+                <Collapsible defaultOpen>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger
+                      render={
+                        <SidebarMenuButton tooltip={navDesarrollo.label} className="group/desarrollo">
+                          <IconoDesarrollo />
+                          <span>{navDesarrollo.label}</span>
+                          <ChevronRight className="ml-auto transition-transform group-aria-expanded/desarrollo:rotate-90" />
+                        </SidebarMenuButton>
+                      }
+                    />
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {navDesarrollo.items.map((item) => {
+                          const Icono = item.icon
+                          const activo =
+                            pathname === item.to || pathname.startsWith(`${item.to}/`)
+                          return (
+                            <SidebarMenuSubItem key={item.to}>
+                              <SidebarMenuSubButton
+                                isActive={activo}
+                                render={
+                                  <Link to={item.to} onClick={cerrarDrawer}>
+                                    <Icono />
+                                    <span>{item.label}</span>
+                                  </Link>
+                                }
+                              />
+                            </SidebarMenuSubItem>
+                          )
+                        })}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         )}

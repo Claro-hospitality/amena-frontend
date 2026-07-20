@@ -5,10 +5,12 @@ import {
   ClipboardCheck,
   FileText,
   Home,
+  Palette,
   ScanLine,
   Settings,
   Users,
   UtensilsCrossed,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react'
 import type { RolBackoffice } from '../auth/validarAccesoPortal'
@@ -46,10 +48,23 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
   mesero: [{ to: '/escaner', label: 'Escáner', icon: ScanLine }],
 }
 
+/** Grupo de navegación colapsable (un item padre con sub-items). */
+export interface GrupoNav {
+  label: string
+  icon: LucideIcon
+  items: ItemNav[]
+}
+
 /**
- * Sección "Desarrollo" — herramientas internas. SOLO se muestra en el entorno de
- * desarrollo (import.meta.env.DEV); nunca en producción. No depende del rol.
+ * Sección "Desarrollo" — herramientas internas, submenú desplegable. SOLO se
+ * muestra en el entorno de desarrollo (import.meta.env.DEV); nunca en producción.
+ * No depende del rol.
  */
-export const navDesarrollo: ItemNav[] = [
-  { to: '/componentes', label: 'Componentes', icon: Blocks },
-]
+export const navDesarrollo: GrupoNav = {
+  label: 'Desarrollo',
+  icon: Wrench,
+  items: [
+    { to: '/componentes', label: 'Componentes', icon: Blocks },
+    { to: '/branding', label: 'Branding', icon: Palette },
+  ],
+}
