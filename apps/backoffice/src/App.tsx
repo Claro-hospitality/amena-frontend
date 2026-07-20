@@ -12,6 +12,11 @@ import { InicioPage } from './features/inicio/InicioPage'
 const EmpresasPage = lazy(() =>
   import('./features/empresas/EmpresasPage').then((m) => ({ default: m.EmpresasPage }))
 )
+const ColaboradoresPage = lazy(() =>
+  import('./features/colaboradores/ColaboradoresPage').then((m) => ({
+    default: m.ColaboradoresPage,
+  }))
+)
 const PlatillosPage = lazy(() =>
   import('./features/platillos/PlatillosPage').then((m) => ({ default: m.PlatillosPage }))
 )
@@ -107,7 +112,16 @@ export default function App() {
             </RutaErrorBoundary>
           }
         />
-        <Route path="colaboradores" element={<Placeholder titulo="Colaboradores" />} />
+        <Route
+          path="colaboradores"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ColaboradoresPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
         <Route
           path="cierres"
           element={
