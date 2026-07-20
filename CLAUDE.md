@@ -26,7 +26,7 @@ packages/
 4. **Toda lógica no trivial lleva test** (Vitest + Testing Library). Correr `pnpm test` antes de dar por terminada cualquier tarea.
 5. **Componentes de UI:** usar los de `packages/ui` (shadcn). No instalar librerías de componentes nuevas sin consultar.
 6. **Estilos solo con Tailwind** usando los tokens del tema — no colores hardcodeados, no CSS suelto.
-7. **Roles y acceso:** cada app valida el rol del usuario contra su tabla (`usuarios_internos` para backoffice, `usuarios_empresa`/`colaboradores` para portal). La seguridad real vive en RLS del backend — la UI solo oculta, nunca es la única barrera.
+7. **Roles y acceso:** cada app valida el rol del usuario contra su tabla (`usuarios_backoffice` para backoffice, `usuarios_portal_empresarial`/`colaboradores` para portal). La seguridad real vive en RLS del backend — la UI solo oculta, nunca es la única barrera.
 8. **No usar `localStorage` para estado sensible.** La sesión la maneja el cliente de Supabase.
 
 ## Comandos

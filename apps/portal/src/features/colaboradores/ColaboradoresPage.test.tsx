@@ -25,6 +25,7 @@ const colaboradorFake = {
   user_id: null,
   nombre: 'María López',
   email: 'maria@empresa.com',
+  telefono: null,
   activo: true,
   created_at: '',
   updated_at: '',

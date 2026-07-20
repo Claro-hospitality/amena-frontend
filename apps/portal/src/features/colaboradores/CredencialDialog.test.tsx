@@ -16,6 +16,7 @@ const colaborador = {
   user_id: null,
   nombre: 'María López',
   email: null,
+  telefono: null,
   activo: true,
   created_at: '',
   updated_at: '',

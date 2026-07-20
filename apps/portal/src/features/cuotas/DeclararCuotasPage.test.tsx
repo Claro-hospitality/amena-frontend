@@ -31,6 +31,7 @@ const colaborador = {
   user_id: null,
   nombre: 'Ana López',
   email: null,
+  telefono: null,
   activo: true,
   created_at: '',
   updated_at: '',

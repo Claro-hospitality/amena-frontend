@@ -17,7 +17,7 @@ export interface ContextoAcceso {
  *
  * Usa los helpers SECURITY DEFINER del backend (es_super_admin / es_finanzas /
  * es_mesero), que resuelven el rol con auth.uid() saltándose RLS. No se consulta
- * usuarios_internos directamente porque su RLS solo deja leer a super_admin.
+ * usuarios_backoffice directamente porque su RLS solo deja leer a super_admin.
  */
 export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
   const [superAdmin, finanzas, mesero] = await Promise.all([

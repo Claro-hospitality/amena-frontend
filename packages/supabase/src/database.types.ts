@@ -102,6 +102,7 @@ export type Database = {
           empresa_id: string
           id: string
           nombre: string
+          telefono: string | null
           updated_at: string
           user_id: string | null
         }
@@ -112,6 +113,7 @@ export type Database = {
           empresa_id: string
           id?: string
           nombre: string
+          telefono?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -122,6 +124,7 @@ export type Database = {
           empresa_id?: string
           id?: string
           nombre?: string
+          telefono?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -200,7 +203,7 @@ export type Database = {
             foreignKeyName: "consumos_registrado_por_fkey"
             columns: ["registrado_por"]
             isOneToOne: false
-            referencedRelation: "usuarios_internos"
+            referencedRelation: "usuarios_backoffice"
             referencedColumns: ["user_id"]
           },
         ]
@@ -391,42 +394,7 @@ export type Database = {
         }
         Relationships: []
       }
-      usuarios_empresa: {
-        Row: {
-          activo: boolean
-          created_at: string
-          empresa_id: string
-          nombre: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          activo?: boolean
-          created_at?: string
-          empresa_id: string
-          nombre: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          activo?: boolean
-          created_at?: string
-          empresa_id?: string
-          nombre?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "usuarios_empresa_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      usuarios_internos: {
+      usuarios_backoffice: {
         Row: {
           activo: boolean
           created_at: string
@@ -453,11 +421,50 @@ export type Database = {
         }
         Relationships: []
       }
+      usuarios_portal_empresarial: {
+        Row: {
+          activo: boolean
+          created_at: string
+          empresa_id: string
+          nombre: string
+          telefono: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          empresa_id: string
+          nombre: string
+          telefono?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          empresa_id?: string
+          nombre?: string
+          telefono?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_empresa_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      auth_user_id_por_email: { Args: { p_email: string }; Returns: string }
       colaboradores_de_mis_empresas: { Args: never; Returns: string[] }
       cuota_disponible: {
         Args: { p_colaborador_id: string; p_fecha: string }

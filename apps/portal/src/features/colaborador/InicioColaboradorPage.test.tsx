@@ -22,6 +22,7 @@ const colaborador = {
   user_id: 'u1',
   nombre: 'Juan Pérez',
   email: null,
+  telefono: null,
   activo: true,
   created_at: '',
   updated_at: '',
