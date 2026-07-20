@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom'
 import { Menu } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
+import { Breadcrumbs } from './Breadcrumbs'
 import {
   Sheet,
   SheetContent,
@@ -95,6 +96,7 @@ export function PortalShell({
           </Sheet>
         </div>
       </header>
+      <Breadcrumbs />
       <main className="min-w-0 flex-1">{children}</main>
     </div>
   )

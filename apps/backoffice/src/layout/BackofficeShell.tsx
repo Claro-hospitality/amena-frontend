@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
+import { Breadcrumbs } from './Breadcrumbs'
 import {
   Sidebar,
   SidebarContent,
@@ -37,6 +38,7 @@ export function BackofficeShell({ rol, children }: { rol: RolBackoffice; childre
           <SidebarTrigger aria-label="Alternar menú" />
           <LogotipoAmena className="h-5 w-auto text-primary md:hidden" />
         </header>
+        <Breadcrumbs />
         <div className="min-w-0 flex-1">{children}</div>
       </SidebarInset>
     </SidebarProvider>
