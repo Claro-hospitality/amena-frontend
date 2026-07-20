@@ -9,6 +9,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -21,7 +22,7 @@ import {
 } from '@amena/ui/components/ui/sidebar'
 import { useAuth } from '../auth/useAuth'
 import type { RolBackoffice } from '../auth/validarAccesoPortal'
-import { navPorRol } from './navBackoffice'
+import { navDesarrollo, navPorRol, type ItemNav } from './navBackoffice'
 
 /**
  * Shell del backoffice sobre el sidebar del kit (@amena/ui):
@@ -56,6 +57,26 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
     if (isMobile) setOpenMobile(false)
   }
 
+  const renderItems = (items: ItemNav[]) =>
+    items.map((item) => {
+      const Icono = item.icon
+      const activo = pathname === item.to || pathname.startsWith(`${item.to}/`)
+      return (
+        <SidebarMenuItem key={item.to}>
+          <SidebarMenuButton
+            isActive={activo}
+            tooltip={item.label}
+            render={
+              <Link to={item.to} onClick={cerrarDrawer}>
+                <Icono />
+                <span>{item.label}</span>
+              </Link>
+            }
+          />
+        </SidebarMenuItem>
+      )
+    })
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -64,28 +85,19 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navPorRol[rol].map((item) => {
-                const Icono = item.icon
-                const activo = pathname === item.to || pathname.startsWith(`${item.to}/`)
-                return (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton
-                      isActive={activo}
-                      tooltip={item.label}
-                      render={
-                        <Link to={item.to} onClick={cerrarDrawer}>
-                          <Icono />
-                          <span>{item.label}</span>
-                        </Link>
-                      }
-                    />
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
+            <SidebarMenu>{renderItems(navPorRol[rol])}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Solo en desarrollo (import.meta.env.DEV): herramientas internas. */}
+        {import.meta.env.DEV && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Desarrollo</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{renderItems(navDesarrollo)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

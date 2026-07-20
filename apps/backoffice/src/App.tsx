@@ -32,6 +32,9 @@ const ConfiguracionPage = lazy(() =>
     default: m.ConfiguracionPage,
   }))
 )
+const ComponentesPage = lazy(() =>
+  import('./features/componentes/ComponentesPage').then((m) => ({ default: m.ComponentesPage }))
+)
 
 function CargandoRuta() {
   return (
@@ -123,6 +126,20 @@ export default function App() {
           }
         />
         <Route path="facturas" element={<Placeholder titulo="Facturas" />} />
+
+        {/* Sección de desarrollo: solo en dev (import.meta.env.DEV), nunca en prod. */}
+        {import.meta.env.DEV && (
+          <Route
+            path="componentes"
+            element={
+              <RutaErrorBoundary>
+                <Suspense fallback={<CargandoRuta />}>
+                  <ComponentesPage />
+                </Suspense>
+              </RutaErrorBoundary>
+            }
+          />
+        )}
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

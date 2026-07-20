@@ -1,4 +1,5 @@
 import {
+  Blocks,
   Building2,
   CalendarDays,
   ClipboardCheck,
@@ -44,3 +45,11 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
   ],
   mesero: [{ to: '/escaner', label: 'Escáner', icon: ScanLine }],
 }
+
+/**
+ * Sección "Desarrollo" — herramientas internas. SOLO se muestra en el entorno de
+ * desarrollo (import.meta.env.DEV); nunca en producción. No depende del rol.
+ */
+export const navDesarrollo: ItemNav[] = [
+  { to: '/componentes', label: 'Componentes', icon: Blocks },
+]
