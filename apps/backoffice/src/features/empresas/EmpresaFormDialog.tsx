@@ -87,11 +87,11 @@ export function EmpresaFormDialog({
         <form action={accion}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="nombre_comercial">Nombre comercial</FieldLabel>
+              <FieldLabel htmlFor="nombre_comercial">Nombre comercial (opcional)</FieldLabel>
               <Input
                 id="nombre_comercial"
                 name="nombre_comercial"
-                defaultValue={empresa?.nombre_comercial}
+                defaultValue={empresa?.nombre_comercial ?? ''}
                 aria-invalid={Boolean(estado.errors.nombre_comercial)}
                 autoFocus
               />

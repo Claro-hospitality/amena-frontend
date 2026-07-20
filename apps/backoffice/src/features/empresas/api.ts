@@ -6,8 +6,8 @@ export type CicloFacturacion = Database['public']['Enums']['ciclo_facturacion']
 
 /** Datos editables de una empresa (lo que envía el formulario). */
 export interface DatosEmpresa {
-  nombre_comercial: string
-  razon_social: string | null
+  nombre_comercial: string | null
+  razon_social: string
   rfc: string | null
   precio_comida: number
   ciclo_facturacion: CicloFacturacion

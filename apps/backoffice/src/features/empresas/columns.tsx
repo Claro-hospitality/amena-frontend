@@ -22,7 +22,12 @@ export function crearColumnasEmpresas({
     {
       accessorKey: 'nombre_comercial',
       header: 'Nombre comercial',
-      cell: ({ row }) => <span className="font-medium">{row.original.nombre_comercial}</span>,
+      cell: ({ row }) =>
+        row.original.nombre_comercial ? (
+          <span className="font-medium">{row.original.nombre_comercial}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     {
       accessorKey: 'razon_social',
@@ -77,7 +82,7 @@ export function crearColumnasEmpresas({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => onEditar(empresa)}
-                    aria-label={`Editar ${empresa.nombre_comercial}`}
+                    aria-label={`Editar ${empresa.nombre_comercial ?? empresa.razon_social}`}
                   >
                     <Pencil className="size-4" />
                   </Button>
@@ -92,7 +97,7 @@ export function crearColumnasEmpresas({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => onCambiarEstado(empresa)}
-                    aria-label={`${empresa.activo ? 'Desactivar' : 'Reactivar'} ${empresa.nombre_comercial}`}
+                    aria-label={`${empresa.activo ? 'Desactivar' : 'Reactivar'} ${empresa.nombre_comercial ?? empresa.razon_social}`}
                   >
                     {empresa.activo ? (
                       <PowerOff className="size-4" />

@@ -21,10 +21,10 @@ describe('empresaSchema', () => {
     }
   })
 
-  it('exige nombre comercial', () => {
+  it('acepta nombre comercial vacío (opcional → null)', () => {
     const r = empresaSchema.safeParse({ ...base, nombre_comercial: '  ' })
-    expect(r.success).toBe(false)
-    if (!r.success) expect(r.error.flatten().fieldErrors.nombre_comercial?.[0]).toMatch(/requerido/i)
+    expect(r.success).toBe(true)
+    if (r.success) expect(r.data.nombre_comercial).toBeNull()
   })
 
   it('exige razón social', () => {
