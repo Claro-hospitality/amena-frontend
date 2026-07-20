@@ -38,8 +38,10 @@ export function BackofficeShell({ rol, children }: { rol: RolBackoffice; childre
           <SidebarTrigger aria-label="Alternar menú" />
           <LogotipoAmena className="h-5 w-auto text-primary md:hidden" />
         </header>
-        <Breadcrumbs />
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col gap-5 p-4 md:p-6">
+          <Breadcrumbs />
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

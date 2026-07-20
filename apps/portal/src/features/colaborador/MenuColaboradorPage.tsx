@@ -28,7 +28,7 @@ export function MenuColaboradorPage() {
   const { data: menu, isLoading, isError, refetch } = useMenuSemana(lunesISO)
 
   if (tipo !== 'colaborador') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const dias = diasHabiles(deISO(lunesISO))
@@ -36,9 +36,8 @@ export function MenuColaboradorPage() {
   const vacia = (menu ?? []).length === 0
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-4">
       <header className="flex flex-col gap-3">
-        <h1 className="text-xl font-semibold">Menú de la semana</h1>
         <NavegadorSemana
           lunesISO={lunesISO}
           onAnterior={() => setLunesISO((p) => moverLunes(p, -1))}

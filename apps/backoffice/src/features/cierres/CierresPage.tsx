@@ -74,7 +74,7 @@ export function CierresPage() {
   const columnas = crearColumnasCierres({ onVerDetalle: (c) => setDetalle(c) })
 
   if (rol !== 'super_admin' && rol !== 'finanzas') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   async function confirmarCorteAhora() {
@@ -94,16 +94,15 @@ export function CierresPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4 p-6">
-        <header className="flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold">Cierres semanales</h1>
-          {esSuperAdmin && (
+      <div className="flex flex-col gap-4">
+        {esSuperAdmin && (
+          <header className="flex items-center justify-end gap-4">
             <Button onClick={() => setConfirmarCorte(true)} disabled={ejecutar.isPending}>
               {ejecutar.isPending ? <Spinner className="size-4" /> : <Play className="size-4" />}
               Ejecutar corte ahora
             </Button>
-          )}
-        </header>
+          </header>
+        )}
 
         <div className="flex flex-wrap items-end gap-3">
           <Field className="w-full max-w-52 sm:w-auto">

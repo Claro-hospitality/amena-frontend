@@ -27,7 +27,7 @@ export function PlatillosPage() {
   const [dialogo, setDialogo] = useState<Dialogo | null>(null)
 
   if (rol !== 'super_admin') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const platillos = data ?? []
@@ -36,9 +36,8 @@ export function PlatillosPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4 p-6">
-        <header className="flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold">Platillos</h1>
+      <div className="flex flex-col gap-4">
+        <header className="flex items-center justify-end gap-4">
           <Button onClick={nuevo}>
             <Plus className="size-4" />
             Nuevo platillo

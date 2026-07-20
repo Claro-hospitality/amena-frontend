@@ -35,16 +35,12 @@ export function ConfiguracionPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
 
   if (rol !== 'super_admin') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <header>
-        <h1 className="text-xl font-semibold">Configuración</h1>
-        <p className="text-sm text-muted-foreground">Parámetros globales del sistema.</p>
-      </header>
-
+    <div className="flex flex-col gap-6">
+      <p className="text-sm text-muted-foreground">Parámetros globales del sistema.</p>
       <SeccionCortesSemanales />
     </div>
   )

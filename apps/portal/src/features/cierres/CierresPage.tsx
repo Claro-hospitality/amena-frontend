@@ -18,17 +18,14 @@ export function CierresPage() {
   const { data: cierres, isLoading, isError, refetch } = useMisCierres()
 
   if (tipo !== 'admin_empresa') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
-      <header>
-        <h1 className="text-xl font-semibold">Cierres</h1>
-        <p className="text-sm text-muted-foreground">
-          Resumen semanal de consumo y monto de tu empresa.
-        </p>
-      </header>
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        Resumen semanal de consumo y monto de tu empresa.
+      </p>
 
       {isLoading ? (
         <ListaSkeleton />

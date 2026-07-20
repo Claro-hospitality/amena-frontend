@@ -26,7 +26,7 @@ export function HistorialPage() {
   } = useMisConsumos()
 
   if (tipo !== 'colaborador') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const cargando = cargandoCuotas || cargandoConsumos
@@ -34,9 +34,7 @@ export function HistorialPage() {
   const resumen = resumenSemana(dias, cuotas ?? [], consumos ?? [])
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-5 p-4">
-      <h1 className="text-xl font-semibold">Mi historial</h1>
-
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       {cargando ? (
         <>
           <Skeleton className="h-28 w-full" />

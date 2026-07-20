@@ -46,21 +46,20 @@ export function EmpresasPage() {
   })
 
   if (rol !== 'super_admin' && rol !== 'finanzas') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4 p-6">
-        <header className="flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold">Empresas</h1>
-          {puedeGestionar && (
+      <div className="flex flex-col gap-4">
+        {puedeGestionar && (
+          <header className="flex items-center justify-end gap-4">
             <Button onClick={() => setDialogo({ tipo: 'form', empresa: null })}>
               <Plus className="size-4" />
               Nueva empresa
             </Button>
-          )}
-        </header>
+          </header>
+        )}
 
         {isLoading ? (
           <TablaSkeleton />

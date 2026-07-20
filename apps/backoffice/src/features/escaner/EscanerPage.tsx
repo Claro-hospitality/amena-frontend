@@ -24,7 +24,7 @@ export function EscanerPage() {
   useConsumosRealtime()
 
   if (rol !== 'mesero' && rol !== 'super_admin') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const registradoPor = session?.user?.id ?? ''
@@ -71,8 +71,8 @@ export function EscanerPage() {
   }
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <header className="flex items-center justify-between gap-3">
         <ContadorHoy />
         <Button variant="outline" size="sm" nativeButton={false} render={<Link to="/escaner/hoy" />}>
           <List className="size-4" />

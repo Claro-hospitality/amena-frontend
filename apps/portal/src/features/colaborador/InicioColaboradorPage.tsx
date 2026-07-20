@@ -17,7 +17,7 @@ export function InicioColaboradorPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-4">
         <Skeleton className="h-72 w-full" />
         <Skeleton className="h-14 w-full" />
       </div>
@@ -25,7 +25,7 @@ export function InicioColaboradorPage() {
   }
   if (isError || !colaborador) {
     return (
-      <div className="mx-auto flex max-w-md flex-col items-center gap-3 p-6 text-center">
+      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-3 text-center">
         <TriangleAlert className="size-8 text-muted-foreground" />
         <p className="text-muted-foreground">No se pudo cargar tu información.</p>
         <Button variant="outline" onClick={() => refetch()}>
@@ -36,7 +36,7 @@ export function InicioColaboradorPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-5 p-4">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col items-center gap-3">
         <CredencialImprimible colaborador={colaborador} />
         <Button size="lg" className="h-12 w-full" onClick={() => setQrGrande(true)}>

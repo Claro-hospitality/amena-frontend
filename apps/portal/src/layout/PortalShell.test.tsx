@@ -20,7 +20,7 @@ function renderShell(tipo: TipoUsuarioPortal) {
 describe('PortalShell', () => {
   it('admin_empresa ve su navegación', () => {
     renderShell('admin_empresa')
-    expect(screen.getByRole('link', { name: 'Inicio' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Inicio' }).length).toBeGreaterThan(0)
     expect(screen.getByRole('link', { name: 'Colaboradores' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Cuotas' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Historial' })).not.toBeInTheDocument()
@@ -28,7 +28,7 @@ describe('PortalShell', () => {
 
   it('colaborador ve su navegación', () => {
     renderShell('colaborador')
-    expect(screen.getByRole('link', { name: 'Inicio' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Inicio' }).length).toBeGreaterThan(0)
     expect(screen.getByRole('link', { name: 'Menú' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Historial' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Colaboradores' })).not.toBeInTheDocument()

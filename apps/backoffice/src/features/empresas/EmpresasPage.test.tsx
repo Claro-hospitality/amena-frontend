@@ -69,7 +69,7 @@ describe('EmpresasPage', () => {
   it('muestra skeleton mientras carga (sin tabla ni vacío)', () => {
     api.listarEmpresas.mockReturnValue(new Promise(() => {}))
     renderizar('super_admin')
-    expect(screen.getByRole('heading', { name: 'Empresas' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /nueva empresa/i })).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByText(/aún no hay empresas/i)).not.toBeInTheDocument()
   })

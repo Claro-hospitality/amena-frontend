@@ -49,7 +49,7 @@ export function ColaboradoresPage() {
   }, [data, busqueda])
 
   if (tipo !== 'admin_empresa') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const verQR = (colaborador: Colaborador) => setDialogo({ tipo: 'credencial', colaborador })
@@ -60,9 +60,8 @@ export function ColaboradoresPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4 p-4 md:p-6">
-        <header className="flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold">Colaboradores</h1>
+      <div className="flex flex-col gap-4">
+        <header className="flex items-center justify-end gap-4">
           <Button onClick={nuevo} className="min-h-11">
             <Plus className="size-4" />
             <span className="hidden sm:inline">Nuevo colaborador</span>

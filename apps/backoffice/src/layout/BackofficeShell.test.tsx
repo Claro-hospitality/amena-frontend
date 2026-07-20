@@ -20,15 +20,9 @@ function renderShell(rol: RolBackoffice) {
 describe('BackofficeShell', () => {
   it('super_admin ve toda la navegación (incluidos Platillos y Menú)', () => {
     renderShell('super_admin')
-    for (const label of [
-      'Inicio',
-      'Empresas',
-      'Platillos',
-      'Menú',
-      'Colaboradores',
-      'Cierres',
-      'Facturas',
-    ]) {
+    // "Inicio" aparece también en las migas de pan (ruta '/'), por eso puede haber más de un link.
+    expect(screen.getAllByRole('link', { name: 'Inicio' }).length).toBeGreaterThan(0)
+    for (const label of ['Empresas', 'Platillos', 'Menú', 'Colaboradores', 'Cierres', 'Facturas']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
     expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument()

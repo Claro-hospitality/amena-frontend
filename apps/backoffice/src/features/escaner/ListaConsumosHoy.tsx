@@ -18,18 +18,17 @@ export function ListaConsumosHoy() {
   const { data, isLoading, isError, refetch } = useConsumosHoy()
 
   if (rol !== 'mesero' && rol !== 'super_admin') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const consumos = data ?? []
 
   return (
-    <div className="mx-auto flex h-full max-w-2xl flex-col gap-4 p-4 md:p-6">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <header className="flex items-center gap-3">
         <Button variant="outline" size="icon-sm" nativeButton={false} render={<Link to="/escaner" />} aria-label="Volver al escáner">
           <ArrowLeft className="size-4" />
         </Button>
-        <h1 className="text-xl font-semibold">Comidas de hoy</h1>
         {!isLoading && !isError && (
           <span className="ml-auto text-sm text-muted-foreground">{consumos.length} en total</span>
         )}

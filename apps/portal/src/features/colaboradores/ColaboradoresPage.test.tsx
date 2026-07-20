@@ -73,7 +73,7 @@ describe('ColaboradoresPage', () => {
   it('muestra skeleton mientras carga (sin tabla ni vacío)', () => {
     api.listarColaboradores.mockReturnValue(new Promise(() => {}))
     renderizar('admin_empresa')
-    expect(screen.getByRole('heading', { name: 'Colaboradores' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /nuevo/i })).toBeInTheDocument()
     expect(screen.queryByText(/aún no hay colaboradores/i)).not.toBeInTheDocument()
   })
 })

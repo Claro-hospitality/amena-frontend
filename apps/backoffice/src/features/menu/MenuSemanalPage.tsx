@@ -39,7 +39,7 @@ export function MenuSemanalPage() {
   const quitar = useQuitarMenuDia(lunesISO)
 
   if (rol !== 'super_admin') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const dias = diasHabiles(deISO(lunesISO))
@@ -63,9 +63,8 @@ export function MenuSemanalPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4 p-4 md:p-6">
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-xl font-semibold">Menú semanal</h1>
+      <div className="flex flex-col gap-4">
+        <header className="flex sm:justify-end">
           <NavegadorSemana
             lunesISO={lunesISO}
             onAnterior={() => irSemana(-1)}

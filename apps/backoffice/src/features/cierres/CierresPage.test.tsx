@@ -94,7 +94,7 @@ describe('CierresPage', () => {
   it('muestra skeleton mientras carga (sin tabla)', () => {
     api.listarCierres.mockReturnValue(new Promise(() => {}))
     renderizar('super_admin')
-    expect(screen.getByRole('heading', { name: 'Cierres semanales' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ejecutar corte/i })).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 

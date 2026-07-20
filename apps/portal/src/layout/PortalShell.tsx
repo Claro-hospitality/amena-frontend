@@ -96,8 +96,10 @@ export function PortalShell({
           </Sheet>
         </div>
       </header>
-      <Breadcrumbs />
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="flex min-w-0 flex-1 flex-col gap-5 p-4 md:p-6">
+        <Breadcrumbs />
+        {children}
+      </main>
     </div>
   )
 }

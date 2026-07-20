@@ -45,7 +45,7 @@ export function DeclararCuotasPage() {
   const declarar = useDeclararCuotas(lunesISO)
 
   if (tipo !== 'admin_empresa') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const dias = diasHabiles(deISO(lunesISO))
@@ -94,9 +94,8 @@ export function DeclararCuotasPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 pb-24 md:p-6 md:pb-28">
+    <div className="flex flex-col gap-4 pb-20 md:pb-24">
       <header className="flex flex-col gap-3">
-        <h1 className="text-xl font-semibold">Declarar semana</h1>
         <NavegadorSemana
           lunesISO={lunesISO}
           onAnterior={() => cambiarSemana(-1)}

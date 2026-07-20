@@ -32,7 +32,7 @@ export function CuotasSemanaPage() {
   const { data: consumos } = useConsumosSemana(lunesISO)
 
   if (tipo !== 'admin_empresa') {
-    return <p className="p-6 text-muted-foreground">No tienes acceso a esta sección.</p>
+    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
   const dias = diasHabiles(deISO(lunesISO))
@@ -40,10 +40,9 @@ export function CuotasSemanaPage() {
   const cuotasDe = (iso: string) => (cuotas ?? []).filter((q) => q.fecha === iso)
 
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-xl font-semibold">Cuotas de la semana</h1>
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Button
             variant="outline"
             size="sm"
