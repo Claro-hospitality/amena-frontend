@@ -33,22 +33,20 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          // Base común: superficie con borde, esquinas suaves de marca, texto legible.
+          // Base común: superficie sólida, esquinas suaves de marca. El color de
+          // texto/ícono lo hereda `text-*` de cada variante (via currentColor).
           toast:
-            "cn-toast group flex w-full items-start gap-2.5 rounded-2xl border px-4 py-3 text-sm",
-          title: "font-medium text-card-foreground",
-          description: "text-muted-foreground",
-          icon: "mt-0.5 size-4 shrink-0",
-          // Variantes de estado alineadas a los tokens de marca y al componente Alert:
-          // fondo tenue + borde del color + ícono coloreado, texto siempre legible.
+            "cn-toast group flex w-full items-start gap-2.5 rounded-2xl border border-transparent px-4 py-3 text-sm",
+          title: "font-medium text-current",
+          description: "text-current/90",
+          icon: "mt-0.5 size-4 shrink-0 text-current",
+          // Variantes de estado: fondo sólido del color del estado + texto/ícono
+          // en su color de contraste (token `-foreground`, blanco donde aplica).
           default: "bg-card text-card-foreground border-border",
-          success:
-            "border-success/30 bg-success/10 text-card-foreground [&_[data-icon]]:text-success",
-          info: "border-info/30 bg-info/10 text-card-foreground [&_[data-icon]]:text-info",
-          warning:
-            "border-warning/40 bg-warning/10 text-card-foreground [&_[data-icon]]:text-warning",
-          error:
-            "border-destructive/30 bg-destructive/10 text-card-foreground [&_[data-icon]]:text-destructive",
+          success: "bg-success text-success-foreground",
+          info: "bg-info text-info-foreground",
+          warning: "bg-warning text-warning-foreground",
+          error: "bg-destructive text-destructive-foreground",
         },
       }}
       {...props}

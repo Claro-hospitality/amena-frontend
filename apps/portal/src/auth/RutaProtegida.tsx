@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { PantallaCargando } from '../components/PantallaCargando'
+import { CambiarPasswordObligatorio } from '../features/auth/CambiarPasswordObligatorio'
 import { PortalShell } from '../layout/PortalShell'
 import { useAuth } from './useAuth'
 import {
@@ -38,6 +39,11 @@ export function RutaProtegida() {
 
   if (cargando) return <PantallaCargando />
   if (!session) return <Navigate to="/login" replace />
+
+  // Usuario dado de alta con contraseña temporal: debe cambiarla antes de entrar.
+  if (session.user.user_metadata?.must_change_password) {
+    return <CambiarPasswordObligatorio />
+  }
 
   const acceso: EstadoAcceso =
     validado && validado.userId === session.user.id ? validado.acceso : 'validando'

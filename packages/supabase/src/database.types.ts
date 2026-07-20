@@ -451,7 +451,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "usuarios_empresa_empresa_id_fkey"
+            foreignKeyName: "usuarios_portal_empresarial_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"

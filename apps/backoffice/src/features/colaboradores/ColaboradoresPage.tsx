@@ -47,7 +47,7 @@ export function ColaboradoresPage() {
       <header className="flex items-center justify-end gap-4">
         <Button onClick={() => setDialogoAbierto(true)}>
           <Plus className="size-4" />
-          Nuevo colaborador
+          Nuevo usuario
         </Button>
       </header>
 
@@ -124,7 +124,7 @@ function ColaboradoresVacio({ onCrear }: { onCrear: () => void }) {
       <EmptyContent>
         <Button onClick={onCrear}>
           <Plus className="size-4" />
-          Nuevo colaborador
+          Nuevo usuario
         </Button>
       </EmptyContent>
     </Empty>

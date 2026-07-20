@@ -24,6 +24,19 @@ export async function cerrarSesion(): Promise<void> {
   if (error) throw error
 }
 
+/**
+ * Cambia la contraseña del usuario autenticado y limpia el flag
+ * `must_change_password` (usuarios dados de alta con contraseña temporal).
+ * El listener de sesión (USER_UPDATED) refleja el cambio en las apps.
+ */
+export async function cambiarPassword(nueva: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({
+    password: nueva,
+    data: { must_change_password: false },
+  })
+  if (error) throw error
+}
+
 /** Devuelve la sesión actual (o null si no hay). */
 export async function obtenerSesion(): Promise<Session | null> {
   const { data } = await supabase.auth.getSession()

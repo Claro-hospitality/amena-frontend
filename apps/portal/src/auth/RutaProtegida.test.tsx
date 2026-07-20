@@ -76,4 +76,15 @@ describe('rutas protegidas del portal', () => {
     montar('/')
     expect(await screen.findByText(/no tienes acceso a este portal/i)).toBeInTheDocument()
   })
+
+  it('con must_change_password exige cambiar la contraseña antes de entrar', async () => {
+    auth.obtenerSesion.mockResolvedValue({
+      access_token: 'tok',
+      user: { id: 'u1', user_metadata: { must_change_password: true } },
+    })
+    stub({ empresas: ['e1'] })
+    montar('/')
+    expect(await screen.findByRole('button', { name: /guardar contraseña/i })).toBeInTheDocument()
+    expect(screen.getByText(/cambia tu contraseña/i)).toBeInTheDocument()
+  })
 })

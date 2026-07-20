@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 // Mockeamos la capa de datos (evita tocar Supabase). nombreEmpresa se conserva simple.
 const api = vi.hoisted(() => ({
   listarColaboradores: vi.fn(),
-  crearColaborador: vi.fn(),
+  altaUsuarioPortal: vi.fn(),
 }))
 vi.mock('./api', () => ({
   ...api,
@@ -78,14 +78,14 @@ describe('ColaboradoresPage', () => {
     api.listarColaboradores.mockResolvedValue([colaboradorFake])
     renderizar('super_admin')
     await screen.findByText('Juan Pérez')
-    await userEvent.click(screen.getByRole('button', { name: /nuevo colaborador/i }))
-    expect(await screen.findByRole('button', { name: /guardar/i })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /nuevo usuario/i }))
+    expect(await screen.findByRole('button', { name: /crear y generar/i })).toBeInTheDocument()
   })
 
   it('niega el acceso a roles que no son super_admin', async () => {
     api.listarColaboradores.mockResolvedValue([])
     renderizar('finanzas')
     expect(await screen.findByText(/no tienes acceso/i)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /nuevo colaborador/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /nuevo usuario/i })).not.toBeInTheDocument()
   })
 })
