@@ -106,7 +106,7 @@ export function EmpresasPage() {
 
 function TablaSkeleton() {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
       {Array.from({ length: 5 }).map((_, i) => (
         <Skeleton key={i} className="h-9 w-full" />
       ))}

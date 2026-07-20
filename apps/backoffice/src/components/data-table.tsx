@@ -53,7 +53,7 @@ export function DataTable<TData, TValue>({
   const filas = table.getRowModel().rows
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
       {toolbar ? <div className="border-b border-border p-3">{toolbar}</div> : null}
       <div className="w-full overflow-x-auto">
         <Table>
