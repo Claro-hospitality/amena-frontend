@@ -249,8 +249,9 @@ export type Database = {
           ciclo_facturacion: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at: string
           id: string
-          nombre: string
+          nombre_comercial: string
           precio_comida: number
+          razon_social: string | null
           rfc: string | null
           updated_at: string
         }
@@ -259,8 +260,9 @@ export type Database = {
           ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at?: string
           id?: string
-          nombre: string
+          nombre_comercial: string
           precio_comida: number
+          razon_social?: string | null
           rfc?: string | null
           updated_at?: string
         }
@@ -269,8 +271,9 @@ export type Database = {
           ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at?: string
           id?: string
-          nombre?: string
+          nombre_comercial?: string
           precio_comida?: number
+          razon_social?: string | null
           rfc?: string | null
           updated_at?: string
         }

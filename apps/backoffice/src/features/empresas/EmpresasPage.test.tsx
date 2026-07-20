@@ -17,7 +17,8 @@ import { EmpresasPage } from './EmpresasPage'
 
 const empresaFake = {
   id: 'e1',
-  nombre: 'Constructora Norte',
+  nombre_comercial: 'Constructora Norte',
+  razon_social: 'Constructora Norte S.A. de C.V.',
   rfc: null,
   precio_comida: 85,
   ciclo_facturacion: 'mensual' as const,

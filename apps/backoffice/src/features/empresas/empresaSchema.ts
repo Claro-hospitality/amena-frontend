@@ -5,7 +5,11 @@ import { z } from 'zod'
 const RFC_MX = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/
 
 export const empresaSchema = z.object({
-  nombre: z.string().trim().min(1, 'El nombre es requerido'),
+  nombre_comercial: z.string().trim().min(1, 'El nombre comercial es requerido'),
+  razon_social: z
+    .string()
+    .trim()
+    .transform((v) => (v === '' ? null : v)),
   rfc: z
     .string()
     .trim()

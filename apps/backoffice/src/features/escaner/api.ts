@@ -33,7 +33,7 @@ export async function registrarConsumo(colaboradorId: string, registradoPor: str
 export async function buscarColaborador(id: string): Promise<ColaboradorEscaneado | null> {
   const { data, error } = await supabase
     .from('colaboradores')
-    .select('id, nombre, empresa:empresas(nombre)')
+    .select('id, nombre, empresa:empresas(nombre:nombre_comercial)')
     .eq('id', id)
     .maybeSingle()
   if (error) throw error
@@ -54,7 +54,7 @@ export async function contarConsumosHoy(): Promise<number> {
 export async function listarConsumosHoy(): Promise<ConsumoHoy[]> {
   const { data, error } = await supabase
     .from('consumos')
-    .select('id, created_at, colaborador:colaboradores(nombre), empresa:empresas(nombre)')
+    .select('id, created_at, colaborador:colaboradores(nombre), empresa:empresas(nombre:nombre_comercial)')
     .eq('fecha', aISO(new Date()))
     .order('created_at', { ascending: false })
   if (error) throw error

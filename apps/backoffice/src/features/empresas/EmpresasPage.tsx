@@ -34,7 +34,7 @@ export function EmpresasPage() {
   const filtradas = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
     const base = empresas ?? []
-    return q ? base.filter((e) => e.nombre.toLowerCase().includes(q)) : base
+    return q ? base.filter((e) => e.nombre_comercial.toLowerCase().includes(q)) : base
   }, [empresas, busqueda])
 
   const hayEmpresas = (empresas ?? []).length > 0

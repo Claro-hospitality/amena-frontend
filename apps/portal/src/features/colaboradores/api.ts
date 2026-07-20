@@ -12,7 +12,7 @@ export interface DatosColaborador {
   email: string | null
 }
 
-const SELECT = '*, empresa:empresas(nombre)'
+const SELECT = '*, empresa:empresas(nombre:nombre_comercial)'
 
 /**
  * Colaboradores de la empresa del admin. La RLS ("admin CRUD de su empresa") ya filtra

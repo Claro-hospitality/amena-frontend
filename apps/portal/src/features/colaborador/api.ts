@@ -36,7 +36,7 @@ function rangoSemana(lunesISO: string) {
 export async function obtenerMiColaborador(): Promise<Colaborador | null> {
   const { data, error } = await supabase
     .from('colaboradores')
-    .select('*, empresa:empresas(nombre)')
+    .select('*, empresa:empresas(nombre:nombre_comercial)')
     .limit(1)
     .maybeSingle()
   if (error) throw error

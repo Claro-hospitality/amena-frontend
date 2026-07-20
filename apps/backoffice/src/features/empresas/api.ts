@@ -6,15 +6,16 @@ export type CicloFacturacion = Database['public']['Enums']['ciclo_facturacion']
 
 /** Datos editables de una empresa (lo que envía el formulario). */
 export interface DatosEmpresa {
-  nombre: string
+  nombre_comercial: string
+  razon_social: string | null
   rfc: string | null
   precio_comida: number
   ciclo_facturacion: CicloFacturacion
 }
 
-/** Lista todas las empresas (activas e inactivas), ordenadas por nombre. RLS filtra por rol. */
+/** Lista todas las empresas (activas e inactivas), ordenadas por nombre comercial. RLS filtra por rol. */
 export async function listarEmpresas(): Promise<Empresa[]> {
-  const { data, error } = await supabase.from('empresas').select('*').order('nombre')
+  const { data, error } = await supabase.from('empresas').select('*').order('nombre_comercial')
   if (error) throw error
   return data
 }

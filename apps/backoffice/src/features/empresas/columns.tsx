@@ -20,9 +20,19 @@ export function crearColumnasEmpresas({
 }: OpcionesColumnas): ColumnDef<Empresa>[] {
   const columnas: ColumnDef<Empresa>[] = [
     {
-      accessorKey: 'nombre',
-      header: 'Nombre',
-      cell: ({ row }) => <span className="font-medium">{row.original.nombre}</span>,
+      accessorKey: 'nombre_comercial',
+      header: 'Nombre comercial',
+      cell: ({ row }) => <span className="font-medium">{row.original.nombre_comercial}</span>,
+    },
+    {
+      accessorKey: 'razon_social',
+      header: 'Razón social',
+      cell: ({ row }) =>
+        row.original.razon_social ? (
+          row.original.razon_social
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     {
       accessorKey: 'precio_comida',
@@ -67,7 +77,7 @@ export function crearColumnasEmpresas({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => onEditar(empresa)}
-                    aria-label={`Editar ${empresa.nombre}`}
+                    aria-label={`Editar ${empresa.nombre_comercial}`}
                   >
                     <Pencil className="size-4" />
                   </Button>
@@ -82,7 +92,7 @@ export function crearColumnasEmpresas({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => onCambiarEstado(empresa)}
-                    aria-label={`${empresa.activo ? 'Desactivar' : 'Reactivar'} ${empresa.nombre}`}
+                    aria-label={`${empresa.activo ? 'Desactivar' : 'Reactivar'} ${empresa.nombre_comercial}`}
                   >
                     {empresa.activo ? (
                       <PowerOff className="size-4" />

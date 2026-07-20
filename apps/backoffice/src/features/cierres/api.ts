@@ -11,7 +11,7 @@ export type CierreConEmpresa = Cierre & { empresa: { nombre: string } | null }
 export async function listarCierres(): Promise<CierreConEmpresa[]> {
   const { data, error } = await supabase
     .from('cierres_semanales')
-    .select('*, empresa:empresas(nombre)')
+    .select('*, empresa:empresas(nombre:nombre_comercial)')
     .order('semana_inicio', { ascending: false })
   if (error) throw error
   return data as unknown as CierreConEmpresa[]

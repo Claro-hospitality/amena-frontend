@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { empresaSchema } from './empresaSchema'
 
-const base = { nombre: 'Constructora Norte', rfc: '', precio_comida: '85', ciclo_facturacion: 'mensual' }
+const base = {
+  nombre_comercial: 'Constructora Norte',
+  razon_social: '',
+  rfc: '',
+  precio_comida: '85',
+  ciclo_facturacion: 'mensual',
+}
 
 describe('empresaSchema', () => {
   it('acepta datos válidos y parsea el precio', () => {
@@ -10,14 +16,20 @@ describe('empresaSchema', () => {
     if (r.success) {
       expect(r.data.precio_comida).toBe(85)
       expect(r.data.rfc).toBeNull()
+      expect(r.data.razon_social).toBeNull()
       expect(r.data.ciclo_facturacion).toBe('mensual')
     }
   })
 
-  it('exige nombre', () => {
-    const r = empresaSchema.safeParse({ ...base, nombre: '  ' })
+  it('exige nombre comercial', () => {
+    const r = empresaSchema.safeParse({ ...base, nombre_comercial: '  ' })
     expect(r.success).toBe(false)
-    if (!r.success) expect(r.error.flatten().fieldErrors.nombre?.[0]).toMatch(/requerido/i)
+    if (!r.success) expect(r.error.flatten().fieldErrors.nombre_comercial?.[0]).toMatch(/requerido/i)
+  })
+
+  it('acepta razón social opcional y la conserva', () => {
+    const r = empresaSchema.safeParse({ ...base, razon_social: 'Constructora Norte S.A. de C.V.' })
+    expect(r.success && r.data.razon_social).toBe('Constructora Norte S.A. de C.V.')
   })
 
   it('exige precio mayor a 0', () => {

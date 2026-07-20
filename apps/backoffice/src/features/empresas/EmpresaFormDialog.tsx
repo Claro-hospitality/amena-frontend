@@ -87,15 +87,31 @@ export function EmpresaFormDialog({
         <form action={accion}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="nombre">Nombre</FieldLabel>
+              <FieldLabel htmlFor="nombre_comercial">Nombre comercial</FieldLabel>
               <Input
-                id="nombre"
-                name="nombre"
-                defaultValue={empresa?.nombre}
-                aria-invalid={Boolean(estado.errors.nombre)}
+                id="nombre_comercial"
+                name="nombre_comercial"
+                defaultValue={empresa?.nombre_comercial}
+                aria-invalid={Boolean(estado.errors.nombre_comercial)}
                 autoFocus
               />
-              {estado.errors.nombre && <FieldError>{estado.errors.nombre[0]}</FieldError>}
+              {estado.errors.nombre_comercial && (
+                <FieldError>{estado.errors.nombre_comercial[0]}</FieldError>
+              )}
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="razon_social">Razón social (opcional)</FieldLabel>
+              <Input
+                id="razon_social"
+                name="razon_social"
+                defaultValue={empresa?.razon_social ?? ''}
+                aria-invalid={Boolean(estado.errors.razon_social)}
+                placeholder="Nombre legal para facturación"
+              />
+              {estado.errors.razon_social && (
+                <FieldError>{estado.errors.razon_social[0]}</FieldError>
+              )}
             </Field>
 
             <Field>
