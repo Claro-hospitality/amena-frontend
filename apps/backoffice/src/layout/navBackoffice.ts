@@ -5,6 +5,7 @@ import {
   FileText,
   Home,
   ScanLine,
+  Settings,
   Users,
   UtensilsCrossed,
   type LucideIcon,
@@ -33,6 +34,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/colaboradores', label: 'Colaboradores', icon: Users },
     { to: '/cierres', label: 'Cierres', icon: ClipboardCheck },
     { to: '/facturas', label: 'Facturas', icon: FileText },
+    { to: '/configuracion', label: 'Configuración', icon: Settings },
   ],
   finanzas: [
     { to: '/inicio', label: 'Inicio', icon: Home },

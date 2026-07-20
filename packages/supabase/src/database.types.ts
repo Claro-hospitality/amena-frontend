@@ -135,6 +135,27 @@ export type Database = {
           },
         ]
       }
+      configuracion_sistema: {
+        Row: {
+          clave: string
+          descripcion: string | null
+          updated_at: string
+          valor: Json
+        }
+        Insert: {
+          clave: string
+          descripcion?: string | null
+          updated_at?: string
+          valor: Json
+        }
+        Update: {
+          clave?: string
+          descripcion?: string | null
+          updated_at?: string
+          valor?: Json
+        }
+        Relationships: []
+      }
       consumos: {
         Row: {
           colaborador_id: string
@@ -450,8 +471,15 @@ export type Database = {
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }
+      generar_cierre_semanal: {
+        Args: { p_empresa_id: string; p_semana_inicio: string }
+        Returns: Json
+      }
+      generar_cierres_pendientes: { Args: { p_fecha: string }; Returns: Json }
+      get_config: { Args: { p_clave: string }; Returns: Json }
       mis_colaboradores: { Args: never; Returns: string[] }
       mis_empresas_admin: { Args: never; Returns: string[] }
+      mis_empresas_colaborador: { Args: never; Returns: string[] }
       registrar_consumo: {
         Args: { p_colaborador_id: string; p_registrado_por: string }
         Returns: {

@@ -24,6 +24,14 @@ const EscanerPage = lazy(() =>
 const ListaConsumosHoy = lazy(() =>
   import('./features/escaner/ListaConsumosHoy').then((m) => ({ default: m.ListaConsumosHoy }))
 )
+const CierresPage = lazy(() =>
+  import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
+)
+const ConfiguracionPage = lazy(() =>
+  import('./features/configuracion/ConfiguracionPage').then((m) => ({
+    default: m.ConfiguracionPage,
+  }))
+)
 
 function CargandoRuta() {
   return (
@@ -94,7 +102,26 @@ export default function App() {
           }
         />
         <Route path="colaboradores" element={<Placeholder titulo="Colaboradores" />} />
-        <Route path="cierres" element={<Placeholder titulo="Cierres" />} />
+        <Route
+          path="cierres"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <CierresPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="configuracion"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ConfiguracionPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
         <Route path="facturas" element={<Placeholder titulo="Facturas" />} />
       </Route>
 

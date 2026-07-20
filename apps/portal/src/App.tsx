@@ -33,6 +33,9 @@ const MenuColaboradorPage = lazy(() =>
 const HistorialPage = lazy(() =>
   import('./features/colaborador/HistorialPage').then((m) => ({ default: m.HistorialPage }))
 )
+const CierresPage = lazy(() =>
+  import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
+)
 
 /** /inicio despacha por tipo: el colaborador ve su espacio; el admin, su panel. */
 function InicioRouter() {
@@ -93,6 +96,16 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <DeclararCuotasPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="cierres"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <CierresPage />
               </Suspense>
             </RutaErrorBoundary>
           }

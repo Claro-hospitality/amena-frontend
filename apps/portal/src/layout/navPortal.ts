@@ -15,6 +15,7 @@ export const navPorTipo: Record<TipoUsuarioPortal, ItemNav[]> = {
     { to: '/inicio', label: 'Inicio' },
     { to: '/colaboradores', label: 'Colaboradores' },
     { to: '/cuotas', label: 'Cuotas' },
+    { to: '/cierres', label: 'Cierres' },
   ],
   colaborador: [
     { to: '/inicio', label: 'Inicio' },
