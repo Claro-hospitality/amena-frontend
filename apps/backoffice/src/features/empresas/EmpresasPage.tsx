@@ -37,6 +37,8 @@ export function EmpresasPage() {
     return q ? base.filter((e) => e.nombre.toLowerCase().includes(q)) : base
   }, [empresas, busqueda])
 
+  const hayEmpresas = (empresas ?? []).length > 0
+
   const columnas = crearColumnasEmpresas({
     rol,
     onEditar: (empresa) => setDialogo({ tipo: 'form', empresa }),
@@ -60,21 +62,12 @@ export function EmpresasPage() {
           )}
         </header>
 
-        <Input
-          placeholder="Buscar por nombre…"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          className="max-w-sm"
-          aria-label="Buscar empresa por nombre"
-        />
-
         {isLoading ? (
           <TablaSkeleton />
         ) : isError ? (
           <EstadoError onReintentar={() => refetch()} />
-        ) : filtradas.length === 0 ? (
+        ) : !hayEmpresas ? (
           <EmpresasVacio
-            hayBusqueda={busqueda.trim() !== ''}
             puedeCrear={puedeGestionar}
             onCrear={() => setDialogo({ tipo: 'form', empresa: null })}
           />
@@ -83,6 +76,16 @@ export function EmpresasPage() {
             columns={columnas}
             data={filtradas}
             rowClassName={(empresa) => (empresa.activo ? undefined : 'opacity-60')}
+            toolbar={
+              <Input
+                placeholder="Buscar por nombre…"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="max-w-sm"
+                aria-label="Buscar empresa por nombre"
+              />
+            }
+            emptyMessage="Ninguna empresa coincide con tu búsqueda."
           />
         )}
       </div>
@@ -130,29 +133,17 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
   )
 }
 
-function EmpresasVacio({
-  hayBusqueda,
-  puedeCrear,
-  onCrear,
-}: {
-  hayBusqueda: boolean
-  puedeCrear: boolean
-  onCrear: () => void
-}) {
+function EmpresasVacio({ puedeCrear, onCrear }: { puedeCrear: boolean; onCrear: () => void }) {
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Building2 className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>{hayBusqueda ? 'Sin resultados' : 'Aún no hay empresas'}</EmptyTitle>
-        <EmptyDescription>
-          {hayBusqueda
-            ? 'Ninguna empresa coincide con tu búsqueda.'
-            : 'Registra la primera empresa convenio para empezar.'}
-        </EmptyDescription>
+        <EmptyTitle>Aún no hay empresas</EmptyTitle>
+        <EmptyDescription>Registra la primera empresa convenio para empezar.</EmptyDescription>
       </EmptyHeader>
-      {puedeCrear && !hayBusqueda && (
+      {puedeCrear && (
         <EmptyContent>
           <Button onClick={onCrear}>
             <Plus className="size-4" />
