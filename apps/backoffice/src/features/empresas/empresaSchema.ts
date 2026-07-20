@@ -6,10 +6,7 @@ const RFC_MX = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/
 
 export const empresaSchema = z.object({
   nombre_comercial: z.string().trim().min(1, 'El nombre comercial es requerido'),
-  razon_social: z
-    .string()
-    .trim()
-    .transform((v) => (v === '' ? null : v)),
+  razon_social: z.string().trim().min(1, 'La razón social es requerida'),
   rfc: z
     .string()
     .trim()

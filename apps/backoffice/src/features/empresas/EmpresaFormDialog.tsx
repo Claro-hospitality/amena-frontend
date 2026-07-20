@@ -101,7 +101,7 @@ export function EmpresaFormDialog({
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="razon_social">Razón social (opcional)</FieldLabel>
+              <FieldLabel htmlFor="razon_social">Razón social</FieldLabel>
               <Input
                 id="razon_social"
                 name="razon_social"
