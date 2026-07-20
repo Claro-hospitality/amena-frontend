@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@amena/ui/components/ui/card'
 import { Input } from '@amena/ui/components/ui/input'
@@ -32,7 +33,7 @@ export function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <p className="text-2xl font-semibold tracking-tight text-primary">Amena</p>
+          <LogotipoAmena className="mx-auto h-7 w-auto text-primary" />
           <CardTitle className="text-base font-medium text-muted-foreground">
             Portal de empresas
           </CardTitle>

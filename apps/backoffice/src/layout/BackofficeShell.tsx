@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
+import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import {
   Sidebar,
   SidebarContent,
@@ -34,7 +35,7 @@ export function BackofficeShell({ rol, children }: { rol: RolBackoffice; childre
       <SidebarInset className="min-w-0">
         <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background px-4">
           <SidebarTrigger aria-label="Alternar menú" />
-          <span className="text-lg font-semibold text-primary md:hidden">Amena</span>
+          <LogotipoAmena className="h-5 w-auto text-primary md:hidden" />
         </header>
         <div className="min-w-0 flex-1">{children}</div>
       </SidebarInset>
@@ -54,9 +55,7 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <span className="px-2 py-1 text-lg font-semibold text-sidebar-primary group-data-[collapsible=icon]:hidden">
-          Amena
-        </span>
+        <LogotipoAmena className="mx-2 my-1 h-5 w-auto text-sidebar-primary group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Menu } from 'lucide-react'
+import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
 import {
   Sheet,
@@ -43,7 +44,7 @@ export function PortalShell({
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="flex items-center gap-4 border-b border-border px-4 py-3 sm:px-6">
-        <span className="text-lg font-semibold text-primary">Amena</span>
+        <LogotipoAmena className="h-5 w-auto text-primary" />
 
         {/* md+: navegación en línea */}
         <nav className="hidden flex-1 items-center gap-1 md:flex">

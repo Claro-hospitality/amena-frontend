@@ -1,5 +1,9 @@
 // Barrel del kit @amena/ui — reexporta todos los componentes (base-rhea).
 // Generado; los consumidores pueden importar de '@amena/ui' o del subpath del componente.
+
+// Marca (no-shadcn): logotipo (wordmark) de Amena.
+export * from './components/logotipo-amena'
+
 export * from './components/ui/accordion'
 export * from './components/ui/alert-dialog'
 export * from './components/ui/alert'
