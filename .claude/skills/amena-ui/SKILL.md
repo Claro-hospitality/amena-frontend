@@ -27,6 +27,17 @@ description: Estándares obligatorios de UI/UX para el frontend de Amena. Usar S
 - `theme.css` es intocable desde tareas de features.
 - **Dark mode: fuera de alcance por ahora.** El tema tiene tokens de modo oscuro pero aún no se cablea en las apps. No agregar toggles ni asumir soporte. Aun así, usar solo tokens semánticos deja el dark mode "gratis" para cuando se active — hardcodear un color lo rompe.
 
+### Superficies y jerarquía visual (cards, tablas, secciones)
+
+Regla del proyecto, obligatoria en **ambas apps** (backoffice y portal):
+
+- **Contraste por superficie, no por sombra.** Todo contenedor que agrupa componentes (card de tabla, formulario, sección) debe distinguirse del fondo de la página por **superficie + borde**, jamás por sombra:
+  - Página = `bg-background` (crema, `--background`). Contenedor = `bg-card` (blanco, `--card`) + `border border-border`.
+  - **Nunca** dejar el contenedor transparente: se funde con la página (bug real corregido en `/empresas`). Si envuelves una tabla/lista/form, dale `bg-card`.
+- **Cero sombras.** Prohibido `shadow-*` en cards/contenedores que agrupan componentes — la jerarquía se logra con superficie y borde. ⚠️ El componente base `<Card>` de `@amena/ui` trae `shadow-sm` propio: al usarlo, anúlalo con `shadow-none`.
+- **Toolbar dentro del card.** Buscadores, filtros y acciones de una tabla van **dentro** del mismo card que agrupa la tabla (barra superior separada por `border-b`), no sueltos sobre la página. El `DataTable` del backoffice acepta un prop `toolbar` para esto.
+- **"Sin resultados" ≠ "vacío total".** Una búsqueda/filtro sin coincidencias muestra su mensaje **dentro** de la tabla (el buscador permanece visible, no se atrapa al usuario); el estado `empty` con CTA (§5) se reserva para cuando no existe ningún dato aún.
+
 ## 3. Datos: estado de servidor con TanStack Query
 
 **Norma ratificada del proyecto.** Los datos que vienen de Supabase son **estado de servidor**, no estado local, y se manejan con **TanStack Query** (`@tanstack/react-query`). No se manejan con `useState` + `useEffect`.
@@ -131,7 +142,8 @@ Toda lógica de UI no trivial lleva test junto al componente (`Componente.tsx` +
 6. ¿Fechas/montos formateados vía @amena/utils (nada inline)?
 7. ¿Verificado en los 3 breakpoints EN EL ORDEN de la app correspondiente?
 8. ¿Textos en español, con "colaboradores"?
-9. ¿Tests de UI por rol/comportamiento? ¿pnpm build, test y lint en verde?
+9. ¿Superficies correctas: los cards que agrupan componentes usan `bg-card` + borde (nunca transparentes ni con sombra), y los buscadores/toolbars van dentro del card? (§2)
+10. ¿Tests de UI por rol/comportamiento? ¿pnpm build, test y lint en verde?
 
 ## 10. Referencias externas
 
