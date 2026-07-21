@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { Platillo } from '../platillos/api'
 import { platillosDisponibles } from './logica'
 
-const platillo = (id: string): Platillo => ({
+const platillo = (id: number): Platillo => ({
   id,
-  nombre: id,
+  nombre: String(id),
   descripcion: null,
   foto_url: null,
   activo: true,
@@ -14,12 +14,12 @@ const platillo = (id: string): Platillo => ({
 
 describe('platillosDisponibles', () => {
   it('excluye los platillos ya asignados ese día', () => {
-    const activos = [platillo('a'), platillo('b'), platillo('c')]
-    expect(platillosDisponibles(activos, ['b']).map((p) => p.id)).toEqual(['a', 'c'])
+    const activos = [platillo(1), platillo(2), platillo(3)]
+    expect(platillosDisponibles(activos, [2]).map((p) => p.id)).toEqual([1, 3])
   })
 
   it('sin asignados devuelve todo el catálogo activo', () => {
-    const activos = [platillo('a'), platillo('b')]
+    const activos = [platillo(1), platillo(2)]
     expect(platillosDisponibles(activos, [])).toHaveLength(2)
   })
 })

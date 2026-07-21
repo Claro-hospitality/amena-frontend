@@ -17,19 +17,19 @@ export interface ContextoAcceso {
  *
  * Usa los helpers SECURITY DEFINER del backend (con auth.uid(), saltándose RLS):
  *   - mis_empresas_admin(): empresas que administra → 'admin_empresa'
- *   - mis_colaboradores(): colaboradores enlazados a su cuenta → 'colaborador'
+ *   - mis_comensales(): comensales enlazados a su cuenta → 'colaborador'
  * Si no aparece en ninguna, se le deniega el acceso.
  */
 export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
-  const [empresas, colaboradores] = await Promise.all([
+  const [empresas, comensales] = await Promise.all([
     supabase.rpc('mis_empresas_admin'),
-    supabase.rpc('mis_colaboradores'),
+    supabase.rpc('mis_comensales'),
   ])
 
-  if (empresas.data && empresas.data.length > 0) {
+  if (Array.isArray(empresas.data) && empresas.data.length > 0) {
     return { concedido: true, tipo: 'admin_empresa' }
   }
-  if (colaboradores.data && colaboradores.data.length > 0) {
+  if (Array.isArray(comensales.data) && comensales.data.length > 0) {
     return { concedido: true, tipo: 'colaborador' }
   }
   return { concedido: false, tipo: null }

@@ -17,15 +17,14 @@ vi.mock('qrcode.react', () => ({ QRCodeSVG: () => null, QRCodeCanvas: () => null
 import { InicioColaboradorPage } from './InicioColaboradorPage'
 
 const colaborador = {
-  id: '10000000-0000-0000-0000-000000000001',
-  empresa_id: 'e1',
+  id: 1,
+  usuario_id: 7,
   user_id: 'u1',
   nombre: 'Juan Pérez',
   email: null,
   telefono: null,
   activo: true,
-  created_at: '',
-  updated_at: '',
+  qr_token: '10000000-0000-0000-0000-000000000001',
   empresa: null,
 }
 

@@ -1,9 +1,17 @@
 import { supabase } from '@amena/supabase'
-import type { Database } from '@amena/supabase/types'
 
-/** Colaborador con los datos de su empresa (join) para el listado global. */
-export type Colaborador = Database['public']['Tables']['colaboradores']['Row'] & {
-  empresa: { nombre_comercial: string | null; razon_social: string } | null
+/**
+ * Colaborador (comensal) aplanado para el listado global: la identidad (nombre,
+ * email, empresa) vive en `usuarios_portal_empresarial`; `comensales` solo aporta
+ * `id` y `activo`.
+ */
+export interface Colaborador {
+  id: number
+  activo: boolean
+  nombre: string
+  email: string | null
+  empresa_id: number
+  empresa: { nombre_comercial: string | null; razon_social: string | null } | null
 }
 
 export type RolPortal = 'admin' | 'colaborador'
@@ -11,7 +19,7 @@ export type RolPortal = 'admin' | 'colaborador'
 /** Datos del formulario de alta (van a la edge function alta-usuario-portal). */
 export interface DatosAlta {
   rol: RolPortal
-  empresa_id: string
+  empresa_id: number
   nombre: string
   email: string
   telefono: string | null
@@ -29,7 +37,8 @@ export interface CredencialesAlta {
   tempPassword?: string
 }
 
-const SELECT = '*, empresa:empresas(nombre_comercial, razon_social)'
+const SELECT =
+  'id, activo, usuario:usuarios_portal_empresarial(nombre, email, empresa_id, empresa:empresas(nombre_comercial, razon_social))'
 
 /** Nombre a mostrar de la empresa (comercial, con respaldo a razón social). */
 export function nombreEmpresa(colaborador: Colaborador): string {
@@ -37,13 +46,23 @@ export function nombreEmpresa(colaborador: Colaborador): string {
 }
 
 /**
- * Lista los colaboradores de todas las empresas (RLS "colaboradores: super_admin todo").
- * Los admins de empresa viven en otra tabla y no aparecen aquí.
+ * Lista los comensales de todas las empresas (RLS "super_admin todo"). La identidad
+ * viene embebida de `usuarios_portal_empresarial`. Se aplana y se ordena por nombre en
+ * cliente (PostgREST no ordena por columnas embebidas).
  */
 export async function listarColaboradores(): Promise<Colaborador[]> {
-  const { data, error } = await supabase.from('colaboradores').select(SELECT).order('nombre')
+  const { data, error } = await supabase.from('comensales').select(SELECT)
   if (error) throw error
-  return data as Colaborador[]
+  return (data ?? [])
+    .map((c) => ({
+      id: c.id,
+      activo: c.activo,
+      nombre: c.usuario?.nombre ?? '',
+      email: c.usuario?.email ?? null,
+      empresa_id: c.usuario?.empresa_id ?? 0,
+      empresa: c.usuario?.empresa ?? null,
+    }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre))
 }
 
 /**

@@ -4,23 +4,23 @@ import { aISO, deISO, diasHabiles } from '@amena/utils'
 
 export type OrigenCuota = Database['public']['Enums']['origen_cuota']
 
-/** Cuota activa de la semana, con el colaborador al que pertenece. */
+/** Cuota activa de la semana, con el comensal al que pertenece. */
 export interface CuotaSemana {
-  id: string
+  id: number
   fecha: string
   origen: OrigenCuota
-  colaborador: { id: string; nombre: string }
+  colaborador: { id: number; nombre: string }
 }
 
-/** Consumo (par colaborador+fecha) para cruzar con las cuotas. */
+/** Consumo (par comensal+fecha) para cruzar con las cuotas. */
 export interface ConsumoSemana {
-  colaborador_id: string
+  comensal_id: number
   fecha: string
 }
 
-/** Un renglón de la declaración: un colaborador y las fechas que tendrá comida. */
+/** Un renglón de la declaración: un comensal y las fechas que tendrá comida. */
 export interface ItemDeclaracion {
-  colaborador_id: string
+  comensal_id: number
   fechas: string[]
 }
 
@@ -41,13 +41,25 @@ export async function listarCuotasSemana(lunesISO: string): Promise<CuotaSemana[
   const { desde, hasta } = rangoSemana(lunesISO)
   const { data, error } = await supabase
     .from('cuotas')
-    .select('id, fecha, origen, colaborador:colaboradores(id, nombre)')
+    .select('id, fecha, origen, comensal:comensales(id, usuario:usuarios_portal_empresarial(nombre))')
     .gte('fecha', desde)
     .lte('fecha', hasta)
     .eq('activo', true)
     .order('fecha')
   if (error) throw error
-  return (data ?? []) as unknown as CuotaSemana[]
+  return ((data ?? []) as FilaCuota[]).map((c) => ({
+    id: c.id,
+    fecha: c.fecha,
+    origen: c.origen,
+    colaborador: { id: c.comensal?.id ?? 0, nombre: c.comensal?.usuario?.nombre ?? '' },
+  }))
+}
+
+interface FilaCuota {
+  id: number
+  fecha: string
+  origen: OrigenCuota
+  comensal: { id: number; usuario: { nombre: string } | null } | null
 }
 
 /** Consumos [lun..vie] de la empresa del admin (RLS filtra la empresa). */
@@ -55,7 +67,7 @@ export async function listarConsumosSemana(lunesISO: string): Promise<ConsumoSem
   const { desde, hasta } = rangoSemana(lunesISO)
   const { data, error } = await supabase
     .from('consumos')
-    .select('colaborador_id, fecha')
+    .select('comensal_id, fecha')
     .gte('fecha', desde)
     .lte('fecha', hasta)
   if (error) throw error
@@ -67,7 +79,7 @@ export async function listarConsumosSemana(lunesISO: string): Promise<ConsumoSem
  * `origen` = 'declaracion' (viernes) o 'extra' (sobre la marcha).
  */
 export async function declararCuotas(
-  empresaId: string,
+  empresaId: number,
   declaracion: ItemDeclaracion[],
   origen: OrigenCuota = 'declaracion'
 ): Promise<ResumenDeclaracion> {

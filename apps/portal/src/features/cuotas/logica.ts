@@ -1,12 +1,12 @@
 import type { ConsumoSemana, ItemDeclaracion } from './api'
 
-/** Selección de la grilla: por colaborador, el conjunto de fechas marcadas. */
-export type SeleccionDeclaracion = Record<string, Set<string>>
+/** Selección de la grilla: por comensal, el conjunto de fechas marcadas. */
+export type SeleccionDeclaracion = Record<number, Set<string>>
 
-/** Convierte la selección en el payload de la RPC, omitiendo colaboradores sin fechas. */
+/** Convierte la selección en el payload de la RPC, omitiendo comensales sin fechas. */
 export function construirPayload(seleccion: SeleccionDeclaracion): ItemDeclaracion[] {
   return Object.entries(seleccion)
-    .map(([colaborador_id, fechas]) => ({ colaborador_id, fechas: [...fechas].sort() }))
+    .map(([clave, fechas]) => ({ comensal_id: Number(clave), fechas: [...fechas].sort() }))
     .filter((item) => item.fechas.length > 0)
 }
 
@@ -17,11 +17,11 @@ export function contarComidas(payload: ItemDeclaracion[]): { comidas: number; co
   return { comidas, colaboradores }
 }
 
-/** ¿El colaborador ya consumió su comida esa fecha? (cuota consumida vs disponible). */
+/** ¿El comensal ya consumió su comida esa fecha? (cuota consumida vs disponible). */
 export function estaConsumida(
-  colaboradorId: string,
+  comensalId: number,
   fechaISO: string,
   consumos: ConsumoSemana[]
 ): boolean {
-  return consumos.some((c) => c.colaborador_id === colaboradorId && c.fecha === fechaISO)
+  return consumos.some((c) => c.comensal_id === comensalId && c.fecha === fechaISO)
 }

@@ -11,22 +11,21 @@ import type { Colaborador } from './api'
 import { CredencialDialog } from './CredencialDialog'
 
 const colaborador = {
-  id: '10000000-0000-0000-0000-000000000001',
-  empresa_id: 'e1',
+  id: 1,
+  usuario_id: 5,
   user_id: null,
   nombre: 'María López',
   email: null,
   telefono: null,
   activo: true,
-  created_at: '',
-  updated_at: '',
+  qr_token: '10000000-0000-0000-0000-000000000001',
   empresa: { nombre: 'Constructora Norte' },
 } satisfies Colaborador
 
 describe('CredencialDialog', () => {
-  it('el QR codifica exactamente el id del colaborador', () => {
+  it('el QR codifica exactamente el qr_token del comensal', () => {
     render(<CredencialDialog colaborador={colaborador} onClose={() => {}} />)
-    expect(screen.getByTestId('qr-svg')).toHaveAttribute('data-value', colaborador.id)
+    expect(screen.getByTestId('qr-svg')).toHaveAttribute('data-value', colaborador.qr_token)
   })
 
   it('muestra el nombre y la empresa en la credencial', () => {

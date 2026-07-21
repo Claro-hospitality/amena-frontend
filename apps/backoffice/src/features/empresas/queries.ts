@@ -24,7 +24,7 @@ export function useCrearEmpresa() {
 export function useActualizarEmpresa() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, datos }: { id: string; datos: DatosEmpresa }) => actualizarEmpresa(id, datos),
+    mutationFn: ({ id, datos }: { id: number; datos: DatosEmpresa }) => actualizarEmpresa(id, datos),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_EMPRESAS }),
   })
 }
@@ -32,7 +32,7 @@ export function useActualizarEmpresa() {
 export function useCambiarEstadoEmpresa() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, activo }: { id: string; activo: boolean }) =>
+    mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
       cambiarEstadoEmpresa(id, activo),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_EMPRESAS }),
   })

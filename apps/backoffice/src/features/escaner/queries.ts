@@ -20,8 +20,8 @@ export function useConsumosHoy() {
 export function useRegistrarConsumo() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ colaboradorId, registradoPor }: { colaboradorId: string; registradoPor: string }) =>
-      registrarConsumo(colaboradorId, registradoPor),
+    mutationFn: ({ qrToken, registradoPor }: { qrToken: string; registradoPor: string }) =>
+      registrarConsumo(qrToken, registradoPor),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: CLAVE_CONTADOR })
       qc.invalidateQueries({ queryKey: CLAVE_LISTA })

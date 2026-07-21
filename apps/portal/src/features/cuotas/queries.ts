@@ -25,7 +25,7 @@ export function useDeclararCuotas(lunesISO: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (vars: {
-      empresaId: string
+      empresaId: number
       declaracion: ItemDeclaracion[]
       origen?: OrigenCuota
     }) => declararCuotas(vars.empresaId, vars.declaracion, vars.origen),

@@ -5,7 +5,6 @@ import { Button } from '@amena/ui/components/ui/button'
 import { horaCorta } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useAuth } from '../../auth/useAuth'
-import { buscarColaborador } from './api'
 import { CamaraQR } from './CamaraQR'
 import { ContadorHoy } from './ContadorHoy'
 import { ResultadoOverlay, type Resultado } from './ResultadoOverlay'
@@ -43,22 +42,20 @@ export function EscanerPage() {
 
     procesando.current = true
     registrar.mutate(
-      { colaboradorId: id, registradoPor },
+      { qrToken: id, registradoPor },
       {
-        onSuccess: async (consumo) => {
-          const colab = await buscarColaborador(id).catch(() => null)
+        onSuccess: (resultado) => {
           setResultado({
             tipo: 'exito',
-            nombre: colab?.nombre ?? 'Colaborador',
-            empresa: colab?.empresa?.nombre ?? null,
-            hora: horaCorta(new Date(consumo.created_at)),
+            nombre: resultado.comensalNombre || 'Comensal',
+            empresa: resultado.empresaNombre,
+            hora: horaCorta(new Date(resultado.consumo.created_at)),
           })
           procesando.current = false
         },
-        onError: async (error) => {
+        onError: (error) => {
           const motivo = mapearMotivoRechazo(error)
-          const colab = motivo === 'QR no válido' ? null : await buscarColaborador(id).catch(() => null)
-          setResultado({ tipo: 'rechazo', motivo, nombre: colab?.nombre ?? null })
+          setResultado({ tipo: 'rechazo', motivo, nombre: null })
           procesando.current = false
         },
       }

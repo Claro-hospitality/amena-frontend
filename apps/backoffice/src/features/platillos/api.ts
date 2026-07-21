@@ -21,7 +21,7 @@ export async function crearPlatillo(datos: DatosPlatillo): Promise<Platillo> {
   return data
 }
 
-export async function actualizarPlatillo(id: string, datos: DatosPlatillo): Promise<Platillo> {
+export async function actualizarPlatillo(id: number, datos: DatosPlatillo): Promise<Platillo> {
   const { data, error } = await supabase
     .from('platillos')
     .update(datos)
@@ -33,7 +33,7 @@ export async function actualizarPlatillo(id: string, datos: DatosPlatillo): Prom
 }
 
 /** Baja lógica — no aparece al armar menús nuevos, conserva historial. */
-export async function cambiarEstadoPlatillo(id: string, activo: boolean): Promise<Platillo> {
+export async function cambiarEstadoPlatillo(id: number, activo: boolean): Promise<Platillo> {
   const { data, error } = await supabase
     .from('platillos')
     .update({ activo })

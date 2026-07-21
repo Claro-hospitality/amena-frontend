@@ -3,7 +3,7 @@ import { aISO, deISO, diasHabiles } from '@amena/utils'
 import type { Platillo } from '../platillos/api'
 
 export interface MenuDiaConPlatillo {
-  id: string
+  id: number
   fecha: string
   platillo: Platillo
 }
@@ -23,7 +23,7 @@ export async function listarMenuSemana(lunesISO: string): Promise<MenuDiaConPlat
 }
 
 /** Agrega (o reactiva) un platillo a un día. Respeta unique(fecha, platillo_id) vía upsert. */
-export async function agregarPlatilloADia(fecha: string, platillo_id: string): Promise<void> {
+export async function agregarPlatilloADia(fecha: string, platillo_id: number): Promise<void> {
   const { error } = await supabase
     .from('menu_dias')
     .upsert({ fecha, platillo_id, activo: true }, { onConflict: 'fecha,platillo_id' })
@@ -31,7 +31,7 @@ export async function agregarPlatilloADia(fecha: string, platillo_id: string): P
 }
 
 /** Quita un platillo de un día — baja lógica (conserva historia). */
-export async function quitarMenuDia(id: string): Promise<void> {
+export async function quitarMenuDia(id: number): Promise<void> {
   const { error } = await supabase.from('menu_dias').update({ activo: false }).eq('id', id)
   if (error) throw error
 }

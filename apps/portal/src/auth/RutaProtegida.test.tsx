@@ -33,11 +33,11 @@ function montar(rutaInicial: string) {
 
 const sesionFake = { access_token: 'tok', user: { id: 'u1' } }
 
-function stub({ empresas = [] as string[], colaboradores = [] as string[] }) {
+function stub({ empresas = [] as number[], comensales = [] as number[] }) {
   db.rpc.mockImplementation((name: string) => {
-    const map: Record<string, string[]> = {
+    const map: Record<string, number[]> = {
       mis_empresas_admin: empresas,
-      mis_colaboradores: colaboradores,
+      mis_comensales: comensales,
     }
     return Promise.resolve({ data: map[name] ?? [], error: null })
   })
@@ -58,21 +58,21 @@ describe('rutas protegidas del portal', () => {
 
   it('admin_empresa llega a /inicio', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
-    stub({ empresas: ['e1'] })
+    stub({ empresas: [1] })
     montar('/')
     expect(await screen.findByText(/portal de la empresa/i)).toBeInTheDocument()
   })
 
   it('colaborador es redirigido a su inicio', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
-    stub({ empresas: [], colaboradores: ['c1'] })
+    stub({ empresas: [], comensales: [1] })
     montar('/')
     expect(await screen.findByRole('heading', { name: 'Mi espacio' })).toBeInTheDocument()
   })
 
   it('usuario sin acceso → pantalla sin acceso', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
-    stub({ empresas: [], colaboradores: [] })
+    stub({ empresas: [], comensales: [] })
     montar('/')
     expect(await screen.findByText(/no tienes acceso a este portal/i)).toBeInTheDocument()
   })
@@ -82,7 +82,7 @@ describe('rutas protegidas del portal', () => {
       access_token: 'tok',
       user: { id: 'u1', user_metadata: { must_change_password: true } },
     })
-    stub({ empresas: ['e1'] })
+    stub({ empresas: [1] })
     montar('/')
     expect(await screen.findByRole('button', { name: /guardar contraseña/i })).toBeInTheDocument()
     expect(screen.getByText(/cambia tu contraseña/i)).toBeInTheDocument()

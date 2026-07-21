@@ -54,9 +54,11 @@ export function CredencialDialog({
         </div>
 
         {/* Canvas oculto en alta resolución solo para la descarga PNG */}
-        <div ref={canvasRef} className="hidden" aria-hidden>
-          <QRCodeCanvas value={colaborador.id} size={512} />
-        </div>
+        {colaborador.qr_token && (
+          <div ref={canvasRef} className="hidden" aria-hidden>
+            <QRCodeCanvas value={colaborador.qr_token} size={512} />
+          </div>
+        )}
 
         <DialogFooter className="mt-2 print:hidden">
           <Button variant="outline" onClick={descargarPNG}>

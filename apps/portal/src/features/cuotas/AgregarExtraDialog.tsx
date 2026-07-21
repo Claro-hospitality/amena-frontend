@@ -52,7 +52,7 @@ export function AgregarExtraDialog({
     declarar.mutate(
       {
         empresaId,
-        declaracion: [{ colaborador_id: colaborador.id, fechas: [fecha] }],
+        declaracion: [{ comensal_id: colaborador.id, fechas: [fecha] }],
         origen: 'extra',
       },
       {

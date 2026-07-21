@@ -26,14 +26,14 @@ export async function crearEmpresa(datos: DatosEmpresa): Promise<Empresa> {
   return data
 }
 
-export async function actualizarEmpresa(id: string, datos: DatosEmpresa): Promise<Empresa> {
+export async function actualizarEmpresa(id: number, datos: DatosEmpresa): Promise<Empresa> {
   const { data, error } = await supabase.from('empresas').update(datos).eq('id', id).select().single()
   if (error) throw error
   return data
 }
 
 /** Baja/alta lógica — nunca se borra la fila (conserva historial para facturación). */
-export async function cambiarEstadoEmpresa(id: string, activo: boolean): Promise<Empresa> {
+export async function cambiarEstadoEmpresa(id: number, activo: boolean): Promise<Empresa> {
   const { data, error } = await supabase
     .from('empresas')
     .update({ activo })

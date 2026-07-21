@@ -20,7 +20,7 @@ import { MenuSemanalPage } from './MenuSemanalPage'
 
 const semanaActual = diasHabiles(lunesDeSemana(new Date())).map(aISO)
 const platilloFake = {
-  id: 'p1',
+  id: 1,
   nombre: 'Milanesa con puré',
   descripcion: null,
   foto_url: null,
@@ -60,7 +60,7 @@ describe('MenuSemanalPage', () => {
 
   it('con platillos: muestra el asignado y ya no ofrece copiar', async () => {
     menuApi.listarMenuSemana.mockResolvedValue([
-      { id: 'm1', fecha: semanaActual[0], platillo: platilloFake },
+      { id: 1, fecha: semanaActual[0], platillo: platilloFake },
     ])
     renderizar('super_admin')
     expect((await screen.findAllByText('Milanesa con puré')).length).toBeGreaterThan(0)

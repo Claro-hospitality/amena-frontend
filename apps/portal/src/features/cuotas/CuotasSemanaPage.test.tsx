@@ -16,7 +16,7 @@ vi.mock('./api', () => cuotasApi)
 // que carga el cliente real de Supabase; se mockea para no depender de env en CI.
 const colabApi = vi.hoisted(() => ({
   listarColaboradores: vi.fn().mockResolvedValue([]),
-  obtenerMiEmpresaId: vi.fn().mockResolvedValue('emp1'),
+  obtenerMiEmpresaId: vi.fn().mockResolvedValue(1),
   crearColaborador: vi.fn(),
   actualizarColaborador: vi.fn(),
   cambiarEstadoColaborador: vi.fn(),
@@ -30,8 +30,8 @@ const dias = diasHabiles(lunesDeSemana(new Date())).map(aISO)
 const dia0 = dias[0]
 
 const cuotas = [
-  { id: 'q1', fecha: dia0, origen: 'declaracion', colaborador: { id: 'a', nombre: 'Ana López' } },
-  { id: 'q2', fecha: dia0, origen: 'extra', colaborador: { id: 'b', nombre: 'Beto Ruiz' } },
+  { id: 1, fecha: dia0, origen: 'declaracion', colaborador: { id: 1, nombre: 'Ana López' } },
+  { id: 2, fecha: dia0, origen: 'extra', colaborador: { id: 2, nombre: 'Beto Ruiz' } },
 ]
 
 function renderizar(tipo: TipoUsuarioPortal) {
@@ -52,7 +52,7 @@ function renderizar(tipo: TipoUsuarioPortal) {
 beforeEach(() => {
   vi.clearAllMocks()
   cuotasApi.listarCuotasSemana.mockResolvedValue(cuotas)
-  cuotasApi.listarConsumosSemana.mockResolvedValue([{ colaborador_id: 'a', fecha: dia0 }])
+  cuotasApi.listarConsumosSemana.mockResolvedValue([{ comensal_id: 1, fecha: dia0 }])
 })
 
 describe('CuotasSemanaPage', () => {

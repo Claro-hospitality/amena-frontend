@@ -7,11 +7,11 @@ import { X } from 'lucide-react'
  * Best-effort Screen Wake Lock para que la pantalla no se apague mientras se muestra.
  */
 export function QrPantallaCompleta({
-  id,
+  valor,
   nombre,
   onCerrar,
 }: {
-  id: string
+  valor: string
   nombre: string
   onCerrar: () => void
 }) {
@@ -39,7 +39,7 @@ export function QrPantallaCompleta({
         <X className="size-6" />
       </button>
 
-      <QRCodeSVG value={id} size={320} className="h-auto w-full max-w-[80vw] sm:max-w-sm" />
+      <QRCodeSVG value={valor} size={320} className="h-auto w-full max-w-[80vw] sm:max-w-sm" />
       <p className="text-2xl font-semibold text-black">{nombre}</p>
       <p className="text-sm text-black/50">Toca la X para cerrar</p>
     </div>

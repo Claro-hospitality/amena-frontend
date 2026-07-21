@@ -39,11 +39,11 @@ export type Database = {
           comprometidas: number
           consumidas: number
           created_at: string
-          empresa_id: string
+          empresa_id: number
           estado: Database["public"]["Enums"]["estado_cierre"]
           extras: number
-          factura_id: string | null
-          id: string
+          factura_id: number | null
+          id: number
           monto_total: number
           precio_unitario: number
           semana_inicio: string
@@ -53,11 +53,11 @@ export type Database = {
           comprometidas: number
           consumidas: number
           created_at?: string
-          empresa_id: string
+          empresa_id: number
           estado?: Database["public"]["Enums"]["estado_cierre"]
           extras: number
-          factura_id?: string | null
-          id?: string
+          factura_id?: number | null
+          id?: number
           monto_total: number
           precio_unitario: number
           semana_inicio: string
@@ -67,11 +67,11 @@ export type Database = {
           comprometidas?: number
           consumidas?: number
           created_at?: string
-          empresa_id?: string
+          empresa_id?: number
           estado?: Database["public"]["Enums"]["estado_cierre"]
           extras?: number
-          factura_id?: string | null
-          id?: string
+          factura_id?: number | null
+          id?: number
           monto_total?: number
           precio_unitario?: number
           semana_inicio?: string
@@ -94,46 +94,34 @@ export type Database = {
           },
         ]
       }
-      colaboradores: {
+      comensales: {
         Row: {
           activo: boolean
           created_at: string
-          email: string | null
-          empresa_id: string
-          id: string
-          nombre: string
-          telefono: string | null
+          id: number
           updated_at: string
-          user_id: string | null
+          usuario_id: number
         }
         Insert: {
           activo?: boolean
           created_at?: string
-          email?: string | null
-          empresa_id: string
-          id?: string
-          nombre: string
-          telefono?: string | null
+          id?: number
           updated_at?: string
-          user_id?: string | null
+          usuario_id: number
         }
         Update: {
           activo?: boolean
           created_at?: string
-          email?: string | null
-          empresa_id?: string
-          id?: string
-          nombre?: string
-          telefono?: string | null
+          id?: number
           updated_at?: string
-          user_id?: string | null
+          usuario_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "colaboradores_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
+            foreignKeyName: "comensales_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: true
+            referencedRelation: "usuarios_portal_empresarial"
             referencedColumns: ["id"]
           },
         ]
@@ -161,35 +149,35 @@ export type Database = {
       }
       consumos: {
         Row: {
-          colaborador_id: string
+          comensal_id: number
           created_at: string
-          empresa_id: string
+          empresa_id: number
           fecha: string
-          id: string
+          id: number
           registrado_por: string | null
         }
         Insert: {
-          colaborador_id: string
+          comensal_id: number
           created_at?: string
-          empresa_id: string
+          empresa_id: number
           fecha?: string
-          id?: string
+          id?: number
           registrado_por?: string | null
         }
         Update: {
-          colaborador_id?: string
+          comensal_id?: number
           created_at?: string
-          empresa_id?: string
+          empresa_id?: number
           fecha?: string
-          id?: string
+          id?: number
           registrado_por?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "consumos_colaborador_id_fkey"
-            columns: ["colaborador_id"]
+            foreignKeyName: "consumos_comensal_id_fkey"
+            columns: ["comensal_id"]
             isOneToOne: false
-            referencedRelation: "colaboradores"
+            referencedRelation: "comensales"
             referencedColumns: ["id"]
           },
           {
@@ -208,40 +196,75 @@ export type Database = {
           },
         ]
       }
+      credenciales_qr: {
+        Row: {
+          activo: boolean
+          comensal_id: number
+          created_at: string
+          id: number
+          qr_token: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          comensal_id: number
+          created_at?: string
+          id?: number
+          qr_token?: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          comensal_id?: number
+          created_at?: string
+          id?: number
+          qr_token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credenciales_qr_comensal_id_fkey"
+            columns: ["comensal_id"]
+            isOneToOne: false
+            referencedRelation: "comensales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cuotas: {
         Row: {
           activo: boolean
-          colaborador_id: string
+          comensal_id: number
           created_at: string
           fecha: string
-          id: string
+          id: number
           origen: Database["public"]["Enums"]["origen_cuota"]
           updated_at: string
         }
         Insert: {
           activo?: boolean
-          colaborador_id: string
+          comensal_id: number
           created_at?: string
           fecha: string
-          id?: string
+          id?: number
           origen?: Database["public"]["Enums"]["origen_cuota"]
           updated_at?: string
         }
         Update: {
           activo?: boolean
-          colaborador_id?: string
+          comensal_id?: number
           created_at?: string
           fecha?: string
-          id?: string
+          id?: number
           origen?: Database["public"]["Enums"]["origen_cuota"]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "cuotas_colaborador_id_fkey"
-            columns: ["colaborador_id"]
+            foreignKeyName: "cuotas_comensal_id_fkey"
+            columns: ["comensal_id"]
             isOneToOne: false
-            referencedRelation: "colaboradores"
+            referencedRelation: "comensales"
             referencedColumns: ["id"]
           },
         ]
@@ -251,7 +274,7 @@ export type Database = {
           activo: boolean
           ciclo_facturacion: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at: string
-          id: string
+          id: number
           nombre_comercial: string | null
           precio_comida: number
           razon_social: string | null
@@ -262,7 +285,7 @@ export type Database = {
           activo?: boolean
           ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at?: string
-          id?: string
+          id?: number
           nombre_comercial?: string | null
           precio_comida: number
           razon_social?: string | null
@@ -273,7 +296,7 @@ export type Database = {
           activo?: boolean
           ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at?: string
-          id?: string
+          id?: number
           nombre_comercial?: string | null
           precio_comida?: number
           razon_social?: string | null
@@ -286,9 +309,9 @@ export type Database = {
         Row: {
           activo: boolean
           created_at: string
-          empresa_id: string
+          empresa_id: number
           estado: Database["public"]["Enums"]["estado_factura"]
-          id: string
+          id: number
           monto: number
           pdf_url: string | null
           periodo_fin: string
@@ -298,9 +321,9 @@ export type Database = {
         Insert: {
           activo?: boolean
           created_at?: string
-          empresa_id: string
+          empresa_id: number
           estado?: Database["public"]["Enums"]["estado_factura"]
-          id?: string
+          id?: number
           monto: number
           pdf_url?: string | null
           periodo_fin: string
@@ -310,9 +333,9 @@ export type Database = {
         Update: {
           activo?: boolean
           created_at?: string
-          empresa_id?: string
+          empresa_id?: number
           estado?: Database["public"]["Enums"]["estado_factura"]
-          id?: string
+          id?: number
           monto?: number
           pdf_url?: string | null
           periodo_fin?: string
@@ -334,24 +357,24 @@ export type Database = {
           activo: boolean
           created_at: string
           fecha: string
-          id: string
-          platillo_id: string
+          id: number
+          platillo_id: number
           updated_at: string
         }
         Insert: {
           activo?: boolean
           created_at?: string
           fecha: string
-          id?: string
-          platillo_id: string
+          id?: number
+          platillo_id: number
           updated_at?: string
         }
         Update: {
           activo?: boolean
           created_at?: string
           fecha?: string
-          id?: string
-          platillo_id?: string
+          id?: number
+          platillo_id?: number
           updated_at?: string
         }
         Relationships: [
@@ -370,7 +393,7 @@ export type Database = {
           created_at: string
           descripcion: string | null
           foto_url: string | null
-          id: string
+          id: number
           nombre: string
           updated_at: string
         }
@@ -379,7 +402,7 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           foto_url?: string | null
-          id?: string
+          id?: number
           nombre: string
           updated_at?: string
         }
@@ -388,11 +411,43 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           foto_url?: string | null
-          id?: string
+          id?: number
           nombre?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      roles_portal_empresarial: {
+        Row: {
+          activo: boolean
+          created_at: string
+          rol: Database["public"]["Enums"]["rol_portal"]
+          updated_at: string
+          usuario_id: number
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          rol: Database["public"]["Enums"]["rol_portal"]
+          updated_at?: string
+          usuario_id: number
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          rol?: Database["public"]["Enums"]["rol_portal"]
+          updated_at?: string
+          usuario_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_portal_empresarial_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_portal_empresarial"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usuarios_backoffice: {
         Row: {
@@ -425,7 +480,9 @@ export type Database = {
         Row: {
           activo: boolean
           created_at: string
-          empresa_id: string
+          email: string | null
+          empresa_id: number
+          id: number
           nombre: string
           telefono: string | null
           updated_at: string
@@ -434,7 +491,9 @@ export type Database = {
         Insert: {
           activo?: boolean
           created_at?: string
-          empresa_id: string
+          email?: string | null
+          empresa_id: number
+          id?: number
           nombre: string
           telefono?: string | null
           updated_at?: string
@@ -443,7 +502,9 @@ export type Database = {
         Update: {
           activo?: boolean
           created_at?: string
-          empresa_id?: string
+          email?: string | null
+          empresa_id?: number
+          id?: number
           nombre?: string
           telefono?: string | null
           updated_at?: string
@@ -465,15 +526,15 @@ export type Database = {
     }
     Functions: {
       auth_user_id_por_email: { Args: { p_email: string }; Returns: string }
-      colaboradores_de_mis_empresas: { Args: never; Returns: string[] }
+      comensales_de_mis_empresas: { Args: never; Returns: number[] }
       cuota_disponible: {
-        Args: { p_colaborador_id: string; p_fecha: string }
+        Args: { p_comensal_id: number; p_fecha: string }
         Returns: boolean
       }
       declarar_cuotas: {
         Args: {
           p_declaracion: Json
-          p_empresa_id: string
+          p_empresa_id: number
           p_origen?: Database["public"]["Enums"]["origen_cuota"]
         }
         Returns: Json
@@ -482,32 +543,20 @@ export type Database = {
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }
       generar_cierre_semanal: {
-        Args: { p_empresa_id: string; p_semana_inicio: string }
+        Args: { p_empresa_id: number; p_semana_inicio: string }
         Returns: Json
       }
       generar_cierres_pendientes: { Args: { p_fecha: string }; Returns: Json }
       get_config: { Args: { p_clave: string }; Returns: Json }
-      mis_colaboradores: { Args: never; Returns: string[] }
-      mis_empresas_admin: { Args: never; Returns: string[] }
-      mis_empresas_colaborador: { Args: never; Returns: string[] }
+      mis_comensales: { Args: never; Returns: number[] }
+      mis_empresas_admin: { Args: never; Returns: number[] }
+      mis_empresas_comensal: { Args: never; Returns: number[] }
       registrar_consumo: {
-        Args: { p_colaborador_id: string; p_registrado_por: string }
-        Returns: {
-          colaborador_id: string
-          created_at: string
-          empresa_id: string
-          fecha: string
-          id: string
-          registrado_por: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "consumos"
-          isOneToOne: true
-          isSetofReturn: false
-        }
+        Args: { p_qr_token: string; p_registrado_por: string }
+        Returns: Json
       }
       tiene_algun_rol: { Args: never; Returns: boolean }
+      usuarios_de_mis_empresas: { Args: never; Returns: number[] }
     }
     Enums: {
       ciclo_facturacion: "semanal" | "mensual"
@@ -515,6 +564,7 @@ export type Database = {
       estado_factura: "pendiente" | "pagada" | "cancelada"
       origen_cuota: "declaracion" | "extra"
       rol_backoffice: "super_admin" | "mesero" | "finanzas"
+      rol_portal: "admin" | "colaborador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -650,6 +700,7 @@ export const Constants = {
       estado_factura: ["pendiente", "pagada", "cancelada"],
       origen_cuota: ["declaracion", "extra"],
       rol_backoffice: ["super_admin", "mesero", "finanzas"],
+      rol_portal: ["admin", "colaborador"],
     },
   },
 } as const

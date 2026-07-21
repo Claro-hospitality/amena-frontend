@@ -1,6 +1,11 @@
 import { supabase } from '@amena/supabase'
 import { aISO, deISO, diasHabiles } from '@amena/utils'
-import type { Colaborador } from '../colaboradores/api'
+import {
+  aplanarComensal,
+  SELECT_COMENSAL,
+  type Colaborador,
+  type FilaComensal,
+} from '../colaboradores/api'
 
 export type { Colaborador }
 
@@ -32,15 +37,11 @@ function rangoSemana(lunesISO: string) {
   return { desde: dias[0], hasta: dias[dias.length - 1] }
 }
 
-/** Mi propia fila (RLS limita a la fila del usuario; no se filtra por user_id a mano). */
+/** Mi propio comensal (RLS limita a la fila del usuario; no se filtra por user_id a mano). */
 export async function obtenerMiColaborador(): Promise<Colaborador | null> {
-  const { data, error } = await supabase
-    .from('colaboradores')
-    .select('*, empresa:empresas(nombre:nombre_comercial)')
-    .limit(1)
-    .maybeSingle()
+  const { data, error } = await supabase.from('comensales').select(SELECT_COMENSAL).limit(1).maybeSingle()
   if (error) throw error
-  return (data as unknown as Colaborador) ?? null
+  return data ? aplanarComensal(data as FilaComensal) : null
 }
 
 /** ¿Tengo cuota activa hoy? ¿Ya consumí? */

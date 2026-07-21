@@ -71,7 +71,7 @@ export function ListaConsumosHoy() {
                 {horaCorta(new Date(c.created_at))}
               </span>
               <span className="min-w-0 flex-1 truncate font-medium">
-                {c.colaborador?.nombre ?? 'Colaborador'}
+                {c.comensal?.usuario?.nombre ?? 'Comensal'}
               </span>
               {c.empresa?.nombre && (
                 <span className="min-w-0 max-w-[40%] truncate text-sm text-muted-foreground">

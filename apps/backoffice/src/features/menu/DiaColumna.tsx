@@ -17,8 +17,8 @@ export function DiaColumna({
   fecha: Date
   asignados: MenuDiaConPlatillo[]
   activos: Platillo[]
-  onAgregar: (fechaISO: string, platilloId: string) => void
-  onQuitar: (id: string) => void
+  onAgregar: (fechaISO: string, platilloId: number) => void
+  onQuitar: (id: number) => void
 }) {
   const pasado = esFechaPasada(fecha)
   const fechaISO = aISO(fecha)

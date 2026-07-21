@@ -21,7 +21,7 @@ export function useMiEmpresaId() {
 export function useCrearColaborador() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (datos: DatosColaborador & { empresa_id: string }) => crearColaborador(datos),
+    mutationFn: (datos: DatosColaborador & { empresa_id: number }) => crearColaborador(datos),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
 }
@@ -29,8 +29,8 @@ export function useCrearColaborador() {
 export function useActualizarColaborador() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, datos }: { id: string; datos: DatosColaborador }) =>
-      actualizarColaborador(id, datos),
+    mutationFn: ({ usuarioId, datos }: { usuarioId: number; datos: DatosColaborador }) =>
+      actualizarColaborador(usuarioId, datos),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
 }
@@ -38,7 +38,7 @@ export function useActualizarColaborador() {
 export function useCambiarEstadoColaborador() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, activo }: { id: string; activo: boolean }) =>
+    mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
       cambiarEstadoColaborador(id, activo),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
