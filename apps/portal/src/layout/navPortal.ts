@@ -1,25 +1,35 @@
+import {
+  CalendarDays,
+  ClipboardCheck,
+  History,
+  Home,
+  UtensilsCrossed,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
 
 export interface ItemNav {
   to: string
   label: string
+  icon: LucideIcon
 }
 
 /**
- * Items del header por tipo de usuario (rutas placeholder por ahora).
+ * Items de navegación por tipo de usuario.
  * - admin_empresa: administra su empresa y sus colaboradores.
  * - colaborador: ve su QR y su historial de consumos.
  */
 export const navPorTipo: Record<TipoUsuarioPortal, ItemNav[]> = {
   admin_empresa: [
-    { to: '/inicio', label: 'Inicio' },
-    { to: '/colaboradores', label: 'Colaboradores' },
-    { to: '/cuotas', label: 'Cuotas' },
-    { to: '/cierres', label: 'Cierres' },
+    { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/colaboradores', label: 'Colaboradores', icon: Users },
+    { to: '/cuotas', label: 'Cuotas', icon: CalendarDays },
+    { to: '/cierres', label: 'Cierres', icon: ClipboardCheck },
   ],
   colaborador: [
-    { to: '/inicio', label: 'Inicio' },
-    { to: '/menu', label: 'Menú' },
-    { to: '/historial', label: 'Historial' },
+    { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/menu', label: 'Menú', icon: UtensilsCrossed },
+    { to: '/historial', label: 'Historial', icon: History },
   ],
 }
