@@ -118,7 +118,8 @@ describe('CierresPage', () => {
     expect(within(tabla).getByText('Constructora Norte')).toBeInTheDocument()
     expect(within(tabla).getByText('Estudio Creativo Sur')).toBeInTheDocument()
 
-    await user.selectOptions(screen.getByLabelText('Filtrar por empresa'), 'e2')
+    await user.click(screen.getByLabelText('Filtrar por empresa'))
+    await user.click(await screen.findByRole('option', { name: 'Estudio Creativo Sur' }))
 
     const tablaFiltrada = screen.getByRole('table')
     expect(within(tablaFiltrada).queryByText('Constructora Norte')).not.toBeInTheDocument()

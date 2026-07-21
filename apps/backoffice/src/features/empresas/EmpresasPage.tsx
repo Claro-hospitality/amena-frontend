@@ -13,8 +13,8 @@ import {
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
+import { DataTable } from '@amena/ui/components/data-table'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { DataTable } from '../../components/data-table'
 import type { Empresa } from './api'
 import { ConfirmarEstadoDialog } from './ConfirmarEstadoDialog'
 import { crearColumnasEmpresas } from './columns'
@@ -53,7 +53,7 @@ export function EmpresasPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
         {puedeGestionar && (
           <header className="flex items-center justify-end gap-4">
             <Button onClick={() => setDialogo({ tipo: 'form', empresa: null })}>

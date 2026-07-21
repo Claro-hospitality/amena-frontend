@@ -45,8 +45,8 @@ describe('ConfiguracionPage', () => {
 
   it('carga el día de corte actual en el select', async () => {
     renderizar('super_admin')
-    const select = (await screen.findByLabelText('Día de corte semanal')) as HTMLSelectElement
-    expect(select.value).toBe('domingo')
+    const select = await screen.findByLabelText('Día de corte semanal')
+    expect(select).toHaveTextContent('Domingo')
   })
 
   it('deshabilita Guardar mientras no haya cambios', async () => {
@@ -60,7 +60,8 @@ describe('ConfiguracionPage', () => {
     renderizar('super_admin')
     const select = await screen.findByLabelText('Día de corte semanal')
 
-    await user.selectOptions(select, 'lunes')
+    await user.click(select)
+    await user.click(await screen.findByRole('option', { name: 'Lunes' }))
     await user.click(screen.getByRole('button', { name: 'Guardar' }))
 
     // Confirmar dentro del diálogo (explica el efecto).

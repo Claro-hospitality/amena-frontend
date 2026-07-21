@@ -12,8 +12,8 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
+import { DataTable } from '@amena/ui/components/data-table'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { DataTable } from '../../components/data-table'
 import { useEmpresas } from '../empresas/queries'
 import { nombreEmpresa } from './api'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
@@ -43,7 +43,7 @@ export function ColaboradoresPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
       <header className="flex items-center justify-end gap-4">
         <Button onClick={() => setDialogoAbierto(true)}>
           <Plus className="size-4" />
