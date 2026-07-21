@@ -25,14 +25,21 @@ import { navPorTipo } from './navPortal'
  */
 export function PortalShell({
   tipo,
+  esComensal = false,
   children,
 }: {
   tipo: TipoUsuarioPortal
+  /** Un admin que además es comensal ve un acceso extra a su propio QR. */
+  esComensal?: boolean
   children: ReactNode
 }) {
   const { cerrarSesion } = useAuth()
   const [drawerAbierto, setDrawerAbierto] = useState(false)
-  const items = navPorTipo[tipo]
+  // El admin que también come ve "Mi QR" (el colaborador ya lo tiene en su Inicio).
+  const items =
+    tipo === 'admin_empresa' && esComensal
+      ? [...navPorTipo[tipo], { to: '/mi-qr', label: 'Mi QR' }]
+      : navPorTipo[tipo]
 
   const claseLink = ({ isActive }: { isActive: boolean }) =>
     cn(

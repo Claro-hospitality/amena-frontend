@@ -51,9 +51,9 @@ export function RutaProtegida() {
   if (acceso === 'validando') return <PantallaCargando />
   if (!acceso.concedido || !acceso.tipo) return <Navigate to="/sin-acceso" replace />
 
-  const contexto: ContextoAcceso = { tipo: acceso.tipo }
+  const contexto: ContextoAcceso = { tipo: acceso.tipo, esComensal: acceso.esComensal }
   return (
-    <PortalShell tipo={acceso.tipo}>
+    <PortalShell tipo={acceso.tipo} esComensal={acceso.esComensal}>
       <Outlet context={contexto} />
     </PortalShell>
   )

@@ -33,6 +33,9 @@ const MenuColaboradorPage = lazy(() =>
 const HistorialPage = lazy(() =>
   import('./features/colaborador/HistorialPage').then((m) => ({ default: m.HistorialPage }))
 )
+const MiCredencialPage = lazy(() =>
+  import('./features/colaborador/MiCredencialPage').then((m) => ({ default: m.MiCredencialPage }))
+)
 const CierresPage = lazy(() =>
   import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
 )
@@ -126,6 +129,16 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <HistorialPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="mi-qr"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <MiCredencialPage />
               </Suspense>
             </RutaErrorBoundary>
           }
