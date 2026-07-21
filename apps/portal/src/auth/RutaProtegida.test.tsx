@@ -60,7 +60,7 @@ describe('rutas protegidas del portal', () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
     stub({ empresas: [1] })
     montar('/')
-    expect(await screen.findByText(/portal de la empresa/i)).toBeInTheDocument()
+    expect(await screen.findByText(/panel de la empresa/i)).toBeInTheDocument()
   })
 
   it('colaborador es redirigido a su inicio', async () => {

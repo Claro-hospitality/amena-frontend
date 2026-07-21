@@ -13,12 +13,17 @@ import { CredencialImprimible } from '../colaboradores/CredencialImprimible'
 import { QrPantallaCompleta } from './QrPantallaCompleta'
 import { useMiColaborador } from './queries'
 
-/**
- * "Mi QR": la credencial del usuario logueado. Pensada para un admin que además
- * es comensal (el colaborador ya la ve en su Inicio). Muestra el QR y permite
- * ampliarlo a pantalla completa para escanearlo.
- */
+/** Página "Mi QR" (ruta /mi-qr). Envuelve la credencial reutilizable. */
 export function MiCredencialPage() {
+  return <MiCredencial />
+}
+
+/**
+ * Credencial del usuario logueado: QR + "mostrar en grande". Reutilizable en la
+ * página /mi-qr y en el Inicio del admin que además es comensal. Si la cuenta no
+ * es comensal, muestra un mensaje claro (sin error).
+ */
+export function MiCredencial() {
   const { data: colaborador, isLoading, isError, refetch } = useMiColaborador()
   const [qrGrande, setQrGrande] = useState(false)
 
