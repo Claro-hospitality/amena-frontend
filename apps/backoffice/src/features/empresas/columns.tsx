@@ -11,23 +11,32 @@ interface OpcionesColumnas {
   rol: RolBackoffice
   onEditar: (empresa: Empresa) => void
   onCambiarEstado: (empresa: Empresa) => void
+  onVerDetalle: (empresa: Empresa) => void
 }
 
 export function crearColumnasEmpresas({
   rol,
   onEditar,
   onCambiarEstado,
+  onVerDetalle,
 }: OpcionesColumnas): ColumnDef<Empresa>[] {
   const columnas: ColumnDef<Empresa>[] = [
     {
       accessorKey: 'nombre_comercial',
       header: 'Nombre comercial',
-      cell: ({ row }) =>
-        row.original.nombre_comercial ? (
-          <span className="font-medium">{row.original.nombre_comercial}</span>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        ),
+      cell: ({ row }) => {
+        const empresa = row.original
+        const etiqueta = empresa.nombre_comercial ?? empresa.razon_social ?? '—'
+        return (
+          <Button
+            variant="link"
+            className="h-auto p-0 font-medium text-foreground"
+            onClick={() => onVerDetalle(empresa)}
+          >
+            {etiqueta}
+          </Button>
+        )
+      },
     },
     {
       accessorKey: 'razon_social',

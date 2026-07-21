@@ -35,10 +35,14 @@ const etiquetaRol = (v: string) => (v === 'admin' ? 'Administrador de empresa' :
  * monta por apertura (con `key`).
  */
 export function ColaboradorFormDialog({
-  empresas,
+  empresas = [],
+  empresaFija,
   onClose,
 }: {
-  empresas: Empresa[]
+  /** Catálogo para elegir empresa. Ignorado si se pasa `empresaFija`. */
+  empresas?: Empresa[]
+  /** Si viene, la empresa queda fija (no elegible): alta desde el detalle de esa empresa. */
+  empresaFija?: Empresa
   onClose: () => void
 }) {
   const alta = useAltaUsuario()
@@ -100,33 +104,41 @@ export function ColaboradorFormDialog({
                   {estado.errors.rol && <FieldError>{estado.errors.rol[0]}</FieldError>}
                 </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="empresa_id">Empresa</FieldLabel>
-                  <Select name="empresa_id">
-                    <SelectTrigger
-                      id="empresa_id"
-                      className="w-full"
-                      aria-invalid={Boolean(estado.errors.empresa_id)}
-                    >
-                      <SelectValue placeholder="Selecciona una empresa">
-                        {(id) => {
-                          const e = empresas.find((x) => String(x.id) === id)
-                          return e ? etiquetaEmpresa(e) : ''
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {empresas.map((e) => (
-                        <SelectItem key={e.id} value={String(e.id)}>
-                          {etiquetaEmpresa(e)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {estado.errors.empresa_id && (
-                    <FieldError>{estado.errors.empresa_id[0]}</FieldError>
-                  )}
-                </Field>
+                {empresaFija ? (
+                  <Field>
+                    <FieldLabel htmlFor="empresa_fija">Empresa</FieldLabel>
+                    <Input id="empresa_fija" value={etiquetaEmpresa(empresaFija)} disabled readOnly />
+                    <input type="hidden" name="empresa_id" value={String(empresaFija.id)} />
+                  </Field>
+                ) : (
+                  <Field>
+                    <FieldLabel htmlFor="empresa_id">Empresa</FieldLabel>
+                    <Select name="empresa_id">
+                      <SelectTrigger
+                        id="empresa_id"
+                        className="w-full"
+                        aria-invalid={Boolean(estado.errors.empresa_id)}
+                      >
+                        <SelectValue placeholder="Selecciona una empresa">
+                          {(id) => {
+                            const e = empresas.find((x) => String(x.id) === id)
+                            return e ? etiquetaEmpresa(e) : ''
+                          }}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {empresas.map((e) => (
+                          <SelectItem key={e.id} value={String(e.id)}>
+                            {etiquetaEmpresa(e)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {estado.errors.empresa_id && (
+                      <FieldError>{estado.errors.empresa_id[0]}</FieldError>
+                    )}
+                  </Field>
+                )}
 
                 <Field>
                   <FieldLabel htmlFor="nombre">Nombre</FieldLabel>

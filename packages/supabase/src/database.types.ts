@@ -555,6 +555,7 @@ export type Database = {
         Args: { p_qr_token: string; p_registrado_por: string }
         Returns: Json
       }
+      resumen_empresa: { Args: { p_empresa_id: number }; Returns: Json }
       tiene_algun_rol: { Args: never; Returns: boolean }
       usuarios_de_mis_empresas: { Args: never; Returns: number[] }
     }

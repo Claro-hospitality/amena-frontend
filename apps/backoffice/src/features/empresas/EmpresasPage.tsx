@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Building2, Plus, TriangleAlert } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -25,6 +25,7 @@ type Dialogo = { tipo: 'form'; empresa: Empresa | null } | { tipo: 'estado'; emp
 
 export function EmpresasPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
+  const navigate = useNavigate()
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
   const [busqueda, setBusqueda] = useState('')
   const [dialogo, setDialogo] = useState<Dialogo | null>(null)
@@ -45,6 +46,7 @@ export function EmpresasPage() {
     rol,
     onEditar: (empresa) => setDialogo({ tipo: 'form', empresa }),
     onCambiarEstado: (empresa) => setDialogo({ tipo: 'estado', empresa }),
+    onVerDetalle: (empresa) => navigate(`/empresas/${empresa.id}`),
   })
 
   if (rol !== 'super_admin' && rol !== 'finanzas') {

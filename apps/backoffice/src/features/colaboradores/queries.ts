@@ -1,10 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { altaUsuarioPortal, listarColaboradores, type DatosAlta } from './api'
+import {
+  altaUsuarioPortal,
+  listarColaboradores,
+  listarColaboradoresEmpresa,
+  type DatosAlta,
+} from './api'
 
-const CLAVE_COLABORADORES = ['colaboradores', 'backoffice'] as const
+const CLAVE_COLABORADORES = ['colaboradores'] as const
 
 export function useColaboradores() {
-  return useQuery({ queryKey: CLAVE_COLABORADORES, queryFn: listarColaboradores })
+  return useQuery({ queryKey: [...CLAVE_COLABORADORES, 'backoffice'], queryFn: listarColaboradores })
+}
+
+/** Colaboradores (comensales) de una empresa concreta. */
+export function useColaboradoresEmpresa(empresaId: number) {
+  return useQuery({
+    queryKey: [...CLAVE_COLABORADORES, 'empresa', empresaId],
+    queryFn: () => listarColaboradoresEmpresa(empresaId),
+  })
 }
 
 export function useAltaUsuario() {
@@ -12,7 +25,7 @@ export function useAltaUsuario() {
   return useMutation({
     mutationFn: (datos: DatosAlta) => altaUsuarioPortal(datos),
     // Un colaborador nuevo aparece en el listado; un admin no (otra tabla), pero
-    // invalidar es inocuo.
+    // invalidar es inocuo. Invalida todo el árbol 'colaboradores' (global y por empresa).
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
 }

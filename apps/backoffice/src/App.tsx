@@ -12,9 +12,9 @@ import { InicioPage } from './features/inicio/InicioPage'
 const EmpresasPage = lazy(() =>
   import('./features/empresas/EmpresasPage').then((m) => ({ default: m.EmpresasPage }))
 )
-const ColaboradoresPage = lazy(() =>
-  import('./features/colaboradores/ColaboradoresPage').then((m) => ({
-    default: m.ColaboradoresPage,
+const EmpresaDetallePage = lazy(() =>
+  import('./features/empresas/EmpresaDetallePage').then((m) => ({
+    default: m.EmpresaDetallePage,
   }))
 )
 const PlatillosPage = lazy(() =>
@@ -93,6 +93,16 @@ export default function App() {
           }
         />
         <Route
+          path="empresas/:empresaId"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <EmpresaDetallePage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
           path="platillos"
           element={
             <RutaErrorBoundary>
@@ -108,16 +118,6 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <MenuSemanalPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="colaboradores"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <ColaboradoresPage />
               </Suspense>
             </RutaErrorBoundary>
           }

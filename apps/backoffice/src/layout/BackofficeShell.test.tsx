@@ -22,7 +22,7 @@ describe('BackofficeShell', () => {
     renderShell('super_admin')
     // "Inicio" aparece también en las migas de pan (ruta '/'), por eso puede haber más de un link.
     expect(screen.getAllByRole('link', { name: 'Inicio' }).length).toBeGreaterThan(0)
-    for (const label of ['Empresas', 'Platillos', 'Menú', 'Colaboradores', 'Cierres', 'Facturas']) {
+    for (const label of ['Empresas', 'Platillos', 'Menú', 'Cierres', 'Facturas']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
     expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument()

@@ -65,6 +65,12 @@ export async function listarColaboradores(): Promise<Colaborador[]> {
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
 }
 
+/** Comensales de una empresa concreta (para el detalle de empresa). */
+export async function listarColaboradoresEmpresa(empresaId: number): Promise<Colaborador[]> {
+  const todos = await listarColaboradores()
+  return todos.filter((c) => c.empresa_id === empresaId)
+}
+
 /**
  * Da de alta un usuario del portal (admin o colaborador) vía la edge function
  * `alta-usuario-portal`: crea su cuenta con contraseña temporal y devuelve las
