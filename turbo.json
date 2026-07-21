@@ -11,6 +11,11 @@
       "persistent": true,
       "passThroughEnv": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN"]
     },
+    "dev:prod": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN"]
+    },
     "test": {
       "dependsOn": ["^build"]
     },
