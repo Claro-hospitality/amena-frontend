@@ -182,7 +182,7 @@ export function ColaboradorFormDialog({
   )
 }
 
-function Credenciales({
+export function Credenciales({
   credenciales,
   onClose,
 }: {
@@ -198,6 +198,29 @@ function Credenciales({
     }
   }
 
+  // La persona ya tenía cuenta: solo se enlazó el rol, sin credenciales nuevas.
+  if (credenciales.yaTeniaCuenta) {
+    return (
+      <>
+        <DialogHeader>
+          <DialogTitle>Rol asignado</DialogTitle>
+          <DialogDescription>
+            Ya existía una cuenta con ese correo. Se le asignó el nuevo rol y{' '}
+            <strong>usa su contraseña actual</strong> — no se generan credenciales nuevas.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-3">
+          <CampoCredencial etiqueta="Correo" valor={credenciales.email} onCopiar={copiar} />
+        </div>
+
+        <DialogFooter className="mt-6">
+          <Button onClick={onClose}>Listo</Button>
+        </DialogFooter>
+      </>
+    )
+  }
+
   return (
     <>
       <DialogHeader>
@@ -210,11 +233,13 @@ function Credenciales({
 
       <div className="flex flex-col gap-3">
         <CampoCredencial etiqueta="Correo" valor={credenciales.email} onCopiar={copiar} />
-        <CampoCredencial
-          etiqueta="Contraseña temporal"
-          valor={credenciales.tempPassword}
-          onCopiar={copiar}
-        />
+        {credenciales.tempPassword && (
+          <CampoCredencial
+            etiqueta="Contraseña temporal"
+            valor={credenciales.tempPassword}
+            onCopiar={copiar}
+          />
+        )}
       </div>
 
       <DialogFooter className="mt-6">

@@ -17,11 +17,16 @@ export interface DatosAlta {
   telefono: string | null
 }
 
-/** Credenciales devueltas UNA sola vez por el alta. */
+/**
+ * Resultado del alta. Si se creó una cuenta nueva, trae `tempPassword` (una sola vez).
+ * Si el email ya tenía cuenta, `yaTeniaCuenta=true` y NO hay `tempPassword` (usa su
+ * contraseña actual): solo se enlazó el rol.
+ */
 export interface CredencialesAlta {
   rol: RolPortal
   email: string
-  tempPassword: string
+  yaTeniaCuenta: boolean
+  tempPassword?: string
 }
 
 const SELECT = '*, empresa:empresas(nombre_comercial, razon_social)'
