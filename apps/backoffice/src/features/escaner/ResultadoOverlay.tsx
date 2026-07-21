@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Check, X } from 'lucide-react'
+import { reproducirSonidoEscaner } from './sonidoEscaner'
 
 export type Resultado =
   | { tipo: 'exito'; nombre: string; empresa: string | null; hora: string }
@@ -22,6 +23,7 @@ export function ResultadoOverlay({
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(resultado.tipo === 'exito' ? 120 : [80, 60, 80])
     }
+    reproducirSonidoEscaner(resultado.tipo)
     const t = setTimeout(onCerrar, autoMs)
     return () => clearTimeout(t)
   }, [resultado, onCerrar, autoMs])
