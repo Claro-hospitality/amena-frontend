@@ -56,6 +56,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@amena/ui/components/ui/tabs'
 import { Textarea } from '@amena/ui/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
+import { IconosShowcase } from './IconosShowcase'
 import { Fila, Seccion } from './primitivos'
 
 /**
@@ -65,20 +66,33 @@ import { Fila, Seccion } from './primitivos'
 export function ComponentesPage() {
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-8">
-        <p className="text-sm text-muted-foreground">
-          Componentes globales de <code className="font-mono">@amena/ui</code> y sus variantes.
-          Los colores, la tipografía y los tamaños viven en <strong>Branding</strong>.
-        </p>
+      <Tabs defaultValue="componentes" className="flex flex-col gap-6">
+        <TabsList>
+          <TabsTrigger value="componentes">Componentes</TabsTrigger>
+          <TabsTrigger value="iconos">Iconos</TabsTrigger>
+        </TabsList>
 
-        <Botones />
-        <Badges />
-        <Tarjetas />
-        <Alertas />
-        <Formulario />
-        <Overlays />
-        <Datos />
-      </div>
+        <TabsContent value="componentes">
+          <div className="flex flex-col gap-8">
+            <p className="text-sm text-muted-foreground">
+              Componentes globales de <code className="font-mono">@amena/ui</code> y sus variantes.
+              Los colores, la tipografía y los tamaños viven en <strong>Branding</strong>.
+            </p>
+
+            <Botones />
+            <Badges />
+            <Tarjetas />
+            <Alertas />
+            <Formulario />
+            <Overlays />
+            <Datos />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="iconos">
+          <IconosShowcase />
+        </TabsContent>
+      </Tabs>
     </TooltipProvider>
   )
 }
