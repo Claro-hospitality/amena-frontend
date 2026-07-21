@@ -1,14 +1,17 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
-// Entrada del toast: aparece con un fundido EN SU POSICIÓN, sin deslizarse desde
-// ningún borde. Sonner arranca la entrada en `translateY(-100%)` (viene de
-// arriba); aquí neutralizamos ese desplazamiento inicial dejando el toast ya en
-// su sitio (`--y: translateY(0)`), de modo que solo anime la opacidad (sonner ya
-// la transiciona a 400ms). Se scopea al estado NO montado para no afectar el
-// apilamiento de varios toasts ni la animación de salida.
+// Entrada y salida del toast: aparece y desaparece con un fundido EN SU POSICIÓN,
+// sin deslizarse desde/hacia ningún borde. Sonner arranca la entrada en
+// `translateY(-100%)` (viene de arriba) y la salida también la desplaza hacia
+// arriba; aquí neutralizamos ese desplazamiento en ambos extremos dejando el
+// toast en su sitio (`--y: translateY(0)`), de modo que solo anime la opacidad
+// (sonner ya la transiciona a 400ms). La salida es así la inversa exacta de la
+// entrada. Se scopea al estado NO montado (entrada) y al `data-removed` (salida)
+// para no afectar el apilamiento de varios toasts.
 const toasterAnimationCss = `
-  [data-sonner-toaster] [data-sonner-toast]:not([data-mounted='true']) {
+  [data-sonner-toaster] [data-sonner-toast]:not([data-mounted='true']),
+  [data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
     --y: translateY(0) !important;
   }
 `
