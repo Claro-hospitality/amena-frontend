@@ -1,7 +1,12 @@
 /**
  * Sonidos de retroalimentación del escáner, generados con la Web Audio API
- * (sin archivos ni librerías): tono ascendente y brillante para la confirmación,
- * zumbido grave para el rechazo. Complementa a la vibración en tablet/móvil.
+ * (sin archivos ni librerías). Buscan un timbre NATURAL tipo campana/marimba,
+ * no un beep sintético:
+ *  - onda senoidal + un armónico de octava tenue (brillo de campana),
+ *  - envolvente de ataque suave y cola que resuena (decaimiento exponencial),
+ *  - filtro paso-bajo que redondea el tono.
+ * Éxito: dos notas que ascienden y resuenan. Rechazo: dos notas graves que
+ * descienden, cálidas. Complementa a la vibración en tablet/móvil.
  *
  * El AudioContext se crea de forma perezosa y se reanuda al vuelo: para cuando
  * se escanea un QR el mesero ya interactuó con la página (arrancó la cámara),
@@ -21,26 +26,48 @@ function contexto(): AudioContext | null {
   return ctx
 }
 
-/** Un tono con envolvente suave (evita clicks) que se agenda respecto a `currentTime`. */
-function tono(
+/**
+ * Una nota con timbre de campana: fundamental + octava tenue, envolvente
+ * percusiva (ataque corto, cola larga que decae) y paso-bajo para suavizar.
+ */
+function nota(
   ac: AudioContext,
   frecuencia: number,
   inicio: number,
   duracion: number,
-  forma: OscillatorType = 'sine',
-  volumen = 0.2,
+  { forma = 'sine' as OscillatorType, volumen = 0.22, brillo = 2800 } = {},
 ) {
   const t0 = ac.currentTime + inicio
-  const osc = ac.createOscillator()
+
   const gain = ac.createGain()
-  osc.type = forma
-  osc.frequency.value = frecuencia
   gain.gain.setValueAtTime(0.0001, t0)
-  gain.gain.exponentialRampToValueAtTime(volumen, t0 + 0.012)
-  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duracion)
-  osc.connect(gain).connect(ac.destination)
-  osc.start(t0)
-  osc.stop(t0 + duracion + 0.02)
+  gain.gain.exponentialRampToValueAtTime(volumen, t0 + 0.02) // ataque suave
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duracion) // cola que resuena
+
+  const filtro = ac.createBiquadFilter()
+  filtro.type = 'lowpass'
+  filtro.frequency.value = brillo
+
+  const fundamental = ac.createOscillator()
+  fundamental.type = forma
+  fundamental.frequency.value = frecuencia
+  fundamental.connect(gain)
+
+  // Armónico una octava arriba, tenue: da el brillo de campana sin sonar a beep.
+  const armonico = ac.createOscillator()
+  armonico.type = 'sine'
+  armonico.frequency.value = frecuencia * 2
+  const armonicoGain = ac.createGain()
+  armonicoGain.gain.value = 0.3
+  armonico.connect(armonicoGain).connect(gain)
+
+  gain.connect(filtro).connect(ac.destination)
+
+  const fin = t0 + duracion + 0.05
+  fundamental.start(t0)
+  armonico.start(t0)
+  fundamental.stop(fin)
+  armonico.stop(fin)
 }
 
 /** Reproduce el sonido de confirmación (éxito) o de rechazo. No falla si no hay audio. */
@@ -50,12 +77,12 @@ export function reproducirSonidoEscaner(tipo: TipoSonido) {
   if (ac.state === 'suspended') void ac.resume()
 
   if (tipo === 'exito') {
-    // Dos notas ascendentes (A5 → E6): confirmación positiva y clara.
-    tono(ac, 880, 0, 0.12)
-    tono(ac, 1318.5, 0.1, 0.16)
+    // Dos notas ascendentes que resuenan (C6 → G6, quinta justa): campana positiva.
+    nota(ac, 1046.5, 0, 0.5, { volumen: 0.22, brillo: 3200 })
+    nota(ac, 1567.98, 0.11, 0.6, { volumen: 0.2, brillo: 3400 })
   } else {
-    // Zumbido grave descendente (square): lectura sin corte / rechazo.
-    tono(ac, 220, 0, 0.18, 'square', 0.16)
-    tono(ac, 155, 0.15, 0.24, 'square', 0.16)
+    // Dos notas graves descendentes (G4 → D#4, más cálidas y con más cuerpo).
+    nota(ac, 392, 0, 0.5, { forma: 'triangle', volumen: 0.2, brillo: 1400 })
+    nota(ac, 311.13, 0.14, 0.62, { forma: 'triangle', volumen: 0.2, brillo: 1300 })
   }
 }

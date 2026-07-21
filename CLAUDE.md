@@ -33,9 +33,12 @@ packages/
 
 ```bash
 pnpm install                 # instalar todo el workspace
-pnpm dev                     # ambas apps en modo dev
+pnpm dev                     # ambas apps en modo dev (backend LOCAL: localhost:54331)
 pnpm dev:backoffice          # solo backoffice
 pnpm dev:portal              # solo portal
+pnpm prod                    # front LOCAL contra el backend de PROD (Supabase Cloud); backoffice :5184 / portal :5183
+pnpm prod:backoffice         # solo backoffice contra prod
+pnpm prod:portal             # solo portal contra prod
 pnpm build                   # build de todo (Turborepo cachea lo no afectado)
 pnpm test                    # tests de todo el workspace
 pnpm lint                    # lint de todo el workspace
@@ -89,6 +92,7 @@ git branch -d <modulo>                  # borrar rama al integrar
 
 ## Ambientes
 
-- `.env.local` → desarrollo: apunta al Supabase local del repo `amena-backend` (API en `http://localhost:54331`)
-- `.env.production` → producción: apunta al proyecto "Amena" de Supabase Cloud
-- Deploy: Firebase Hosting, un site por app (backoffice y portal)
+- **`pnpm dev`** (mode `development`) → `.env.local`: apunta al Supabase **local** de `amena-backend` (`http://localhost:54331`). Puertos backoffice 5174 / portal 5173.
+- **`pnpm prod`** (mode `prod`, Vite `--mode prod`) → `.env.prod` (gitignored, local por app): front local contra el **Supabase Cloud de producción**. Puertos backoffice 5184 / portal 5183, así que puede correr **a la vez** que `pnpm dev` sin chocar. ⚠️ Escribe en la BD real de prod.
+- **Build/deploy** (mode `production`) → usa los secrets de GitHub (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SENTRY_DSN`) en el workflow, no un `.env` local. Nombre de mode distinto (`prod` ≠ `production`) para no interferir con el build.
+- Deploy: Firebase Hosting (proyecto `amena-20df0`), un site por app (backoffice / portal), al mergear `dev → main` (`.github/workflows/deploy.yml`).
