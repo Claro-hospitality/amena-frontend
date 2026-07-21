@@ -1,8 +1,17 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { Dialog, DialogContent } from '@amena/ui/components/ui/dialog'
 import type { CredencialesAlta } from './api'
 import { Credenciales } from './ColaboradorFormDialog'
+
+// ColaboradorFormDialog importa ./queries (que a su vez importa ./api → cliente de
+// Supabase, el cual falla sin env, p. ej. en CI). Este test solo renderiza el
+// subcomponente Credenciales, que no usa esos hooks: mock con factory para NO cargar
+// el módulo real (ni su cadena a Supabase).
+vi.mock('./queries', () => ({
+  useColaboradores: vi.fn(),
+  useAltaUsuario: vi.fn(),
+}))
 
 function renderizar(credenciales: CredencialesAlta) {
   return render(
