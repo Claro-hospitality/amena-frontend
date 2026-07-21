@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, TriangleAlert, Users } from 'lucide-react'
+import { Pencil, Plus, TriangleAlert, Users } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { DataTable, type ColumnDef } from '@amena/ui/components/data-table'
@@ -13,12 +13,14 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
 import type { Empresa } from '../empresas/api'
 import type { UsuarioEmpresa } from './api'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
+import { EditarRolesDialog } from './EditarRolesDialog'
 import { useUsuariosEmpresa } from './queries'
 
-const columnas: ColumnDef<UsuarioEmpresa>[] = [
+const columnasBase: ColumnDef<UsuarioEmpresa>[] = [
   {
     accessorKey: 'nombre',
     header: 'Nombre',
@@ -60,6 +62,35 @@ const columnas: ColumnDef<UsuarioEmpresa>[] = [
   },
 ]
 
+/** Columna de acciones (editar roles) — solo para quien puede gestionar. */
+function columnaAcciones(
+  onEditar: (u: UsuarioEmpresa) => void
+): ColumnDef<UsuarioEmpresa> {
+  return {
+    id: 'acciones',
+    header: () => <span className="sr-only">Acciones</span>,
+    cell: ({ row }) => (
+      <div className="flex justify-end">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => onEditar(row.original)}
+                aria-label={`Editar roles de ${row.original.nombre}`}
+              >
+                <Pencil className="size-4" />
+              </Button>
+            }
+          />
+          <TooltipContent>Editar roles</TooltipContent>
+        </Tooltip>
+      </div>
+    ),
+  }
+}
+
 /**
  * Listado de TODOS los usuarios del portal (admins + colaboradores) de una empresa,
  * con alta que fija la empresa. Vive dentro del detalle de empresa.
@@ -75,6 +106,7 @@ export function UsuariosEmpresa({
   const { data, isLoading, isError, refetch } = useUsuariosEmpresa(empresa.id)
   const [busqueda, setBusqueda] = useState('')
   const [altaAbierta, setAltaAbierta] = useState(false)
+  const [editando, setEditando] = useState<UsuarioEmpresa | null>(null)
 
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
@@ -82,6 +114,11 @@ export function UsuariosEmpresa({
     if (!q) return base
     return base.filter((u) => `${u.nombre} ${u.email ?? ''}`.toLowerCase().includes(q))
   }, [data, busqueda])
+
+  const columnas = useMemo(
+    () => (puedeGestionar ? [...columnasBase, columnaAcciones(setEditando)] : columnasBase),
+    [puedeGestionar]
+  )
 
   const hayUsuarios = (data ?? []).length > 0
 
@@ -126,6 +163,13 @@ export function UsuariosEmpresa({
 
       {altaAbierta && (
         <ColaboradorFormDialog empresaFija={empresa} onClose={() => setAltaAbierta(false)} />
+      )}
+      {editando && (
+        <EditarRolesDialog
+          key={editando.id}
+          usuario={editando}
+          onClose={() => setEditando(null)}
+        />
       )}
     </section>
   )

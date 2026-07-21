@@ -105,6 +105,24 @@ export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioE
 }
 
 /**
+ * Agrega o quita un rol (admin/colaborador) a un usuario del portal vía el RPC
+ * `establecer_rol_portal`. colaborador ON crea/reactiva su comensal + QR; OFF hace
+ * baja lógica del comensal (deja de consumir, historial intacto).
+ */
+export async function establecerRolPortal(
+  usuarioId: number,
+  rol: RolPortal,
+  activo: boolean
+): Promise<void> {
+  const { error } = await supabase.rpc('establecer_rol_portal', {
+    p_usuario_id: usuarioId,
+    p_rol: rol,
+    p_activo: activo,
+  })
+  if (error) throw error
+}
+
+/**
  * Da de alta un usuario del portal (admin o colaborador) vía la edge function
  * `alta-usuario-portal`: crea su cuenta con contraseña temporal y devuelve las
  * credenciales una sola vez. La creación real (auth + fila del rol) es del backend

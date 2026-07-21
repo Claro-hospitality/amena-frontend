@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { altaUsuarioPortal, listarColaboradores, listarUsuariosEmpresa, type DatosAlta } from './api'
+import {
+  altaUsuarioPortal,
+  establecerRolPortal,
+  listarColaboradores,
+  listarUsuariosEmpresa,
+  type DatosAlta,
+  type RolPortal,
+} from './api'
 
 export function useColaboradores() {
   return useQuery({ queryKey: ['colaboradores', 'backoffice'], queryFn: listarColaboradores })
@@ -10,6 +17,26 @@ export function useUsuariosEmpresa(empresaId: number) {
   return useQuery({
     queryKey: ['usuarios', 'empresa', empresaId],
     queryFn: () => listarUsuariosEmpresa(empresaId),
+  })
+}
+
+/** Agrega/quita un rol a un usuario del portal; refresca el listado y el resumen. */
+export function useEstablecerRol() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      usuarioId,
+      rol,
+      activo,
+    }: {
+      usuarioId: number
+      rol: RolPortal
+      activo: boolean
+    }) => establecerRolPortal(usuarioId, rol, activo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['usuarios'] })
+      qc.invalidateQueries({ queryKey: ['empresa'] })
+    },
   })
 }
 

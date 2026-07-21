@@ -542,6 +542,14 @@ export type Database = {
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }
+      establecer_rol_portal: {
+        Args: {
+          p_activo: boolean
+          p_rol: Database["public"]["Enums"]["rol_portal"]
+          p_usuario_id: number
+        }
+        Returns: Json
+      }
       generar_cierre_semanal: {
         Args: { p_empresa_id: number; p_semana_inicio: string }
         Returns: Json
