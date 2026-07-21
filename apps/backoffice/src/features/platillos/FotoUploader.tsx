@@ -71,7 +71,7 @@ export function FotoUploader({ fotoActual }: { fotoActual: string | null }) {
         )}
         <input type="hidden" name="quitar_foto" value={quitando ? '1' : ''} />
       </div>
-      <p className="text-xs text-muted-foreground">JPG, PNG o WebP · máx. 2 MB</p>
+      <p className="text-xs text-muted-foreground">JPG, PNG o WebP · máx. 5 MB</p>
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
