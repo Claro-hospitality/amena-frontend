@@ -65,10 +65,43 @@ export async function listarColaboradores(): Promise<Colaborador[]> {
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
 }
 
-/** Comensales de una empresa concreta (para el detalle de empresa). */
-export async function listarColaboradoresEmpresa(empresaId: number): Promise<Colaborador[]> {
-  const todos = await listarColaboradores()
-  return todos.filter((c) => c.empresa_id === empresaId)
+/**
+ * Un usuario del portal de una empresa (admin y/o colaborador) para el listado
+ * del detalle de empresa. `esColaborador` se deriva del rol o de tener comensal.
+ */
+export interface UsuarioEmpresa {
+  id: number
+  nombre: string
+  email: string | null
+  activo: boolean
+  esAdmin: boolean
+  esColaborador: boolean
+}
+
+/**
+ * Lista TODOS los usuarios del portal de una empresa (admins + colaboradores) con
+ * su rol. Filtra por `empresa_id` en `usuarios_portal_empresarial`; embebe sus
+ * roles y si tiene comensal. RLS: super_admin ve todo; finanzas ve los usuarios y
+ * comensales pero no los roles (por eso `esAdmin` puede quedar en false para finanzas).
+ */
+export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioEmpresa[]> {
+  const { data, error } = await supabase
+    .from('usuarios_portal_empresarial')
+    .select('id, nombre, email, activo, roles:roles_portal_empresarial(rol, activo), comensal:comensales(id)')
+    .eq('empresa_id', empresaId)
+    .order('nombre')
+  if (error) throw error
+  return (data ?? []).map((u) => {
+    const roles = (u.roles ?? []).filter((r) => r.activo)
+    return {
+      id: u.id,
+      nombre: u.nombre ?? '',
+      email: u.email ?? null,
+      activo: u.activo,
+      esAdmin: roles.some((r) => r.rol === 'admin'),
+      esColaborador: roles.some((r) => r.rol === 'colaborador') || u.comensal != null,
+    }
+  })
 }
 
 /**

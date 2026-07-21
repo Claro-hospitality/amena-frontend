@@ -19,7 +19,7 @@ vi.mock('../cierres/api', () => cierresApi)
 
 const colaboradoresApi = vi.hoisted(() => ({
   listarColaboradores: vi.fn(),
-  listarColaboradoresEmpresa: vi.fn(),
+  listarUsuariosEmpresa: vi.fn(),
   altaUsuarioPortal: vi.fn(),
   nombreEmpresa: () => '—',
 }))
@@ -70,8 +70,9 @@ beforeEach(() => {
   empresasApi.listarEmpresas.mockResolvedValue([empresaFake])
   resumenApi.obtenerResumenEmpresa.mockResolvedValue(resumenFake)
   cierresApi.listarCierres.mockResolvedValue([])
-  colaboradoresApi.listarColaboradoresEmpresa.mockResolvedValue([
-    { id: 1, activo: true, nombre: 'Juan Pérez', email: 'juan@x.com', empresa_id: 1, empresa: null },
+  colaboradoresApi.listarUsuariosEmpresa.mockResolvedValue([
+    { id: 1, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true },
+    { id: 2, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false },
   ])
 })
 
@@ -85,10 +86,11 @@ describe('EmpresaDetallePage', () => {
     expect(screen.getByText('$1,500.00')).toBeInTheDocument() // gasto histórico
   })
 
-  it('lista los colaboradores de la empresa', async () => {
+  it('lista todos los usuarios de la empresa (admins + colaboradores)', async () => {
     renderizar('super_admin')
     expect(await screen.findByText('Juan Pérez')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Colaboradores' })).toBeInTheDocument()
+    expect(screen.getByText('Adriana Ruiz')).toBeInTheDocument() // admin también aparece
+    expect(screen.getByRole('heading', { name: 'Usuarios' })).toBeInTheDocument()
   })
 
   it('super_admin ve las acciones de editar/estado; finanzas no', async () => {

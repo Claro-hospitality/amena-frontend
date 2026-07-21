@@ -5,14 +5,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const api = vi.hoisted(() => ({
   listarColaboradores: vi.fn(),
-  listarColaboradoresEmpresa: vi.fn(),
+  listarUsuariosEmpresa: vi.fn(),
   altaUsuarioPortal: vi.fn(),
   nombreEmpresa: () => '—',
 }))
 vi.mock('./api', () => api)
 
 import type { Empresa } from '../empresas/api'
-import { ColaboradoresEmpresa } from './ColaboradoresEmpresa'
+import { UsuariosEmpresa } from './UsuariosEmpresa'
 
 const empresa: Empresa = {
   id: 1,
@@ -30,28 +30,32 @@ function renderizar(puedeGestionar = true) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={qc}>
-      <ColaboradoresEmpresa empresa={empresa} puedeGestionar={puedeGestionar} />
+      <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} />
     </QueryClientProvider>
   )
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
-  api.listarColaboradoresEmpresa.mockResolvedValue([
-    { id: 1, activo: true, nombre: 'Juan Pérez', email: 'juan@x.com', empresa_id: 1, empresa: null },
+  api.listarUsuariosEmpresa.mockResolvedValue([
+    { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false },
+    { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true },
   ])
 })
 
-describe('ColaboradoresEmpresa', () => {
-  it('lista los colaboradores de la empresa', async () => {
+describe('UsuariosEmpresa', () => {
+  it('lista admins y colaboradores con su rol', async () => {
     renderizar()
-    expect(await screen.findByText('Juan Pérez')).toBeInTheDocument()
+    expect(await screen.findByText('Adriana Ruiz')).toBeInTheDocument()
+    expect(screen.getByText('Juan Pérez')).toBeInTheDocument()
+    expect(screen.getByText('Administrador')).toBeInTheDocument()
+    expect(screen.getByText('Colaborador')).toBeInTheDocument()
   })
 
-  it('el alta fija la empresa (campo deshabilitado, sin selector de empresa)', async () => {
+  it('el alta fija la empresa (campo deshabilitado)', async () => {
     const user = userEvent.setup()
     renderizar(true)
-    await screen.findByText('Juan Pérez')
+    await screen.findByText('Adriana Ruiz')
     await user.click(screen.getByRole('button', { name: 'Nuevo usuario' }))
 
     const campoEmpresa = await screen.findByLabelText('Empresa')
@@ -61,7 +65,7 @@ describe('ColaboradoresEmpresa', () => {
 
   it('en modo lectura (finanzas) no ofrece dar de alta', async () => {
     renderizar(false)
-    await screen.findByText('Juan Pérez')
+    await screen.findByText('Adriana Ruiz')
     expect(screen.queryByRole('button', { name: 'Nuevo usuario' })).not.toBeInTheDocument()
   })
 })

@@ -17,7 +17,7 @@ import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { ColaboradoresEmpresa } from '../colaboradores/ColaboradoresEmpresa'
+import { UsuariosEmpresa } from '../colaboradores/UsuariosEmpresa'
 import type { CierreConEmpresa } from '../cierres/api'
 import { CierreDetalleDialog } from '../cierres/CierreDetalleDialog'
 import { crearColumnasCierres } from '../cierres/columns'
@@ -113,8 +113,8 @@ export function EmpresaDetallePage() {
         {/* Métricas */}
         <ResumenSeccion empresaId={id} />
 
-        {/* Colaboradores de la empresa */}
-        <ColaboradoresEmpresa empresa={empresa} puedeGestionar={puedeGestionar} />
+        {/* Usuarios de la empresa (admins + colaboradores) */}
+        <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} />
 
         {/* Histórico de cierres semanales */}
         <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} />

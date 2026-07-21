@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Plus, TriangleAlert, Users } from 'lucide-react'
+import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
-import { DataTable } from '@amena/ui/components/data-table'
+import { DataTable, type ColumnDef } from '@amena/ui/components/data-table'
 import {
   Empty,
   EmptyContent,
@@ -13,18 +14,57 @@ import {
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import type { Empresa } from '../empresas/api'
+import type { UsuarioEmpresa } from './api'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
-import { columnasColaboradores } from './columns'
-import { useColaboradoresEmpresa } from './queries'
+import { useUsuariosEmpresa } from './queries'
 
-/** Sin la columna "Empresa": en el detalle de empresa es redundante. */
-const columnas = columnasColaboradores.filter((c) => c.id !== 'empresa')
+const columnas: ColumnDef<UsuarioEmpresa>[] = [
+  {
+    accessorKey: 'nombre',
+    header: 'Nombre',
+    cell: ({ row }) => <span className="font-medium">{row.original.nombre}</span>,
+  },
+  {
+    accessorKey: 'email',
+    header: 'Correo',
+    cell: ({ row }) =>
+      row.original.email ? (
+        row.original.email
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
+  },
+  {
+    id: 'rol',
+    header: 'Rol',
+    cell: ({ row }) => {
+      const { esAdmin, esColaborador } = row.original
+      if (!esAdmin && !esColaborador) return <span className="text-muted-foreground">—</span>
+      return (
+        <div className="flex flex-wrap gap-1">
+          {esAdmin && <Badge variant="outline">Administrador</Badge>}
+          {esColaborador && <Badge variant="secondary">Colaborador</Badge>}
+        </div>
+      )
+    },
+  },
+  {
+    accessorKey: 'activo',
+    header: 'Estado',
+    cell: ({ row }) =>
+      row.original.activo ? (
+        <Badge className="bg-success text-success-foreground">Activo</Badge>
+      ) : (
+        <Badge variant="outline">Inactivo</Badge>
+      ),
+  },
+]
 
 /**
- * Listado de colaboradores (comensales) de UNA empresa, con alta que fija la empresa.
- * Vive dentro de la página de detalle de empresa.
+ * Listado de TODOS los usuarios del portal (admins + colaboradores) de una empresa,
+ * con alta que fija la empresa. Vive dentro del detalle de empresa.
  */
-export function ColaboradoresEmpresa({
+export function UsuariosEmpresa({
   empresa,
   puedeGestionar = true,
 }: {
@@ -32,7 +72,7 @@ export function ColaboradoresEmpresa({
   /** Solo super_admin puede dar de alta; finanzas ve el listado en modo lectura. */
   puedeGestionar?: boolean
 }) {
-  const { data, isLoading, isError, refetch } = useColaboradoresEmpresa(empresa.id)
+  const { data, isLoading, isError, refetch } = useUsuariosEmpresa(empresa.id)
   const [busqueda, setBusqueda] = useState('')
   const [altaAbierta, setAltaAbierta] = useState(false)
 
@@ -40,18 +80,18 @@ export function ColaboradoresEmpresa({
     const q = busqueda.trim().toLowerCase()
     const base = data ?? []
     if (!q) return base
-    return base.filter((c) => `${c.nombre} ${c.email ?? ''}`.toLowerCase().includes(q))
+    return base.filter((u) => `${u.nombre} ${u.email ?? ''}`.toLowerCase().includes(q))
   }, [data, busqueda])
 
-  const hayColaboradores = (data ?? []).length > 0
+  const hayUsuarios = (data ?? []).length > 0
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col gap-3">
+    <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-          Colaboradores
+          Usuarios
         </h2>
-        {hayColaboradores && puedeGestionar && (
+        {hayUsuarios && puedeGestionar && (
           <Button size="sm" onClick={() => setAltaAbierta(true)}>
             <Plus className="size-4" />
             Nuevo usuario
@@ -63,27 +103,24 @@ export function ColaboradoresEmpresa({
         <TablaSkeleton />
       ) : isError ? (
         <EstadoError onReintentar={() => refetch()} />
-      ) : !hayColaboradores ? (
-        <ColaboradoresVacio
-          puedeGestionar={puedeGestionar}
-          onCrear={() => setAltaAbierta(true)}
-        />
+      ) : !hayUsuarios ? (
+        <UsuariosVacio puedeGestionar={puedeGestionar} onCrear={() => setAltaAbierta(true)} />
       ) : (
         <DataTable
           columns={columnas}
           data={filtrados}
           fillHeight={false}
-          rowClassName={(c) => (c.activo ? undefined : 'opacity-60')}
+          rowClassName={(u) => (u.activo ? undefined : 'opacity-60')}
           toolbar={
             <Input
               placeholder="Buscar por nombre o correo…"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="max-w-sm"
-              aria-label="Buscar colaborador"
+              aria-label="Buscar usuario"
             />
           }
-          emptyMessage="Ningún colaborador coincide con la búsqueda."
+          emptyMessage="Ningún usuario coincide con la búsqueda."
         />
       )}
 
@@ -111,7 +148,7 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
         <EmptyMedia variant="icon">
           <TriangleAlert className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>No se pudieron cargar los colaboradores</EmptyTitle>
+        <EmptyTitle>No se pudieron cargar los usuarios</EmptyTitle>
         <EmptyDescription>Ocurrió un error al consultar los datos.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -123,7 +160,7 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
   )
 }
 
-function ColaboradoresVacio({
+function UsuariosVacio({
   puedeGestionar,
   onCrear,
 }: {
@@ -136,11 +173,11 @@ function ColaboradoresVacio({
         <EmptyMedia variant="icon">
           <Users className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>Aún no hay colaboradores</EmptyTitle>
+        <EmptyTitle>Aún no hay usuarios</EmptyTitle>
         <EmptyDescription>
           {puedeGestionar
-            ? 'Registra al primer colaborador de esta empresa.'
-            : 'Esta empresa aún no tiene colaboradores registrados.'}
+            ? 'Registra al primer usuario (admin o colaborador) de esta empresa.'
+            : 'Esta empresa aún no tiene usuarios registrados.'}
         </EmptyDescription>
       </EmptyHeader>
       {puedeGestionar && (
