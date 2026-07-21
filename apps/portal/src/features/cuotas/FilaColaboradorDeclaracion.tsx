@@ -14,7 +14,7 @@ export function FilaColaboradorDeclaracion({
   seleccion,
   onCambio,
 }: {
-  colaborador: { id: string; nombre: string }
+  colaborador: { id: number; nombre: string }
   dias: Date[]
   yaDeclaradas: Set<string>
   seleccion: Set<string>

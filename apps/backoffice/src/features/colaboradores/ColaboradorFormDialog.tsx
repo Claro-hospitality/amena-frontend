@@ -110,14 +110,14 @@ export function ColaboradorFormDialog({
                     >
                       <SelectValue placeholder="Selecciona una empresa">
                         {(id) => {
-                          const e = empresas.find((x) => x.id === id)
+                          const e = empresas.find((x) => String(x.id) === id)
                           return e ? etiquetaEmpresa(e) : ''
                         }}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {empresas.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>
+                        <SelectItem key={e.id} value={String(e.id)}>
                           {etiquetaEmpresa(e)}
                         </SelectItem>
                       ))}

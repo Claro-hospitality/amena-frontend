@@ -3,7 +3,7 @@ import { colaboradorSchema } from './colaboradorSchema'
 
 const base = {
   rol: 'colaborador',
-  empresa_id: 'e1',
+  empresa_id: '1',
   nombre: 'Juan Pérez',
   email: 'juan@cn.com',
   telefono: '',
@@ -16,6 +16,7 @@ describe('colaboradorSchema', () => {
     if (r.success) {
       expect(r.data.rol).toBe('colaborador')
       expect(r.data.telefono).toBeNull()
+      expect(r.data.empresa_id).toBe(1)
     }
   })
 

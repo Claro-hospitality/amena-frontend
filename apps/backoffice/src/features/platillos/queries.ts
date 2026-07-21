@@ -24,7 +24,7 @@ export function useCrearPlatillo() {
 export function useActualizarPlatillo() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, datos }: { id: string; datos: DatosPlatillo }) =>
+    mutationFn: ({ id, datos }: { id: number; datos: DatosPlatillo }) =>
       actualizarPlatillo(id, datos),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_PLATILLOS }),
   })
@@ -33,7 +33,7 @@ export function useActualizarPlatillo() {
 export function useCambiarEstadoPlatillo() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, activo }: { id: string; activo: boolean }) =>
+    mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
       cambiarEstadoPlatillo(id, activo),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_PLATILLOS }),
   })

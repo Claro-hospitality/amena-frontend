@@ -20,15 +20,14 @@ import type { TipoUsuarioPortal } from '../../auth/validarAccesoPortal'
 import { ColaboradoresPage } from './ColaboradoresPage'
 
 const colaboradorFake = {
-  id: '10000000-0000-0000-0000-000000000001',
-  empresa_id: 'e1',
+  id: 1,
+  usuario_id: 5,
   user_id: null,
   nombre: 'María López',
   email: 'maria@empresa.com',
   telefono: null,
   activo: true,
-  created_at: '',
-  updated_at: '',
+  qr_token: '10000000-0000-0000-0000-000000000001',
   empresa: { nombre: 'Constructora Norte' },
 }
 

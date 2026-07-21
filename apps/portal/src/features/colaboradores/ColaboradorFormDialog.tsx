@@ -39,7 +39,7 @@ export function ColaboradorFormDialog({
       if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
       try {
         if (colaborador) {
-          await actualizar.mutateAsync({ id: colaborador.id, datos: parsed.data })
+          await actualizar.mutateAsync({ usuarioId: colaborador.usuario_id, datos: parsed.data })
           toast.success('Colaborador actualizado')
         } else {
           if (!empresaId) {
@@ -72,7 +72,7 @@ export function ColaboradorFormDialog({
           <DialogDescription>
             {esEdicion
               ? 'Actualiza los datos del colaborador.'
-              : 'Al registrarlo, su QR queda listo (es el identificador de la fila).'}
+              : 'Al registrarlo se genera su acceso al portal y su credencial QR.'}
           </DialogDescription>
         </DialogHeader>
 

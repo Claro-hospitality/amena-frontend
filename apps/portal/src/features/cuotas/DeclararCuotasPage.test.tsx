@@ -26,15 +26,14 @@ import type { TipoUsuarioPortal } from '../../auth/validarAccesoPortal'
 import { DeclararCuotasPage } from './DeclararCuotasPage'
 
 const colaborador = {
-  id: 'c1',
-  empresa_id: 'emp1',
+  id: 1,
+  usuario_id: 10,
   user_id: null,
   nombre: 'Ana López',
   email: null,
   telefono: null,
   activo: true,
-  created_at: '',
-  updated_at: '',
+  qr_token: 'tok-1',
   empresa: { nombre: 'Constructora' },
 }
 
@@ -56,7 +55,7 @@ function renderizar(tipo: TipoUsuarioPortal) {
 beforeEach(() => {
   vi.clearAllMocks()
   colabApi.listarColaboradores.mockResolvedValue([colaborador])
-  colabApi.obtenerMiEmpresaId.mockResolvedValue('emp1')
+  colabApi.obtenerMiEmpresaId.mockResolvedValue(1)
   cuotasApi.listarCuotasSemana.mockResolvedValue([])
   cuotasApi.listarConsumosSemana.mockResolvedValue([])
   cuotasApi.declararCuotas.mockResolvedValue({ creadas: 5, reactivadas: 0, ya_existentes: 0 })
@@ -90,9 +89,9 @@ describe('DeclararCuotasPage', () => {
 
     expect(cuotasApi.declararCuotas).toHaveBeenCalledTimes(1)
     const [empresaId, declaracion] = cuotasApi.declararCuotas.mock.calls[0]
-    expect(empresaId).toBe('emp1')
+    expect(empresaId).toBe(1)
     expect(declaracion).toHaveLength(1)
-    expect(declaracion[0]).toMatchObject({ colaborador_id: 'c1' })
+    expect(declaracion[0]).toMatchObject({ comensal_id: 1 })
     expect(declaracion[0].fechas).toHaveLength(5)
   })
 

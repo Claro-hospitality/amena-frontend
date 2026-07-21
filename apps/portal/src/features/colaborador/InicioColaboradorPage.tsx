@@ -39,7 +39,12 @@ export function InicioColaboradorPage() {
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col items-center gap-3">
         <CredencialImprimible colaborador={colaborador} />
-        <Button size="lg" className="h-12 w-full" onClick={() => setQrGrande(true)}>
+        <Button
+          size="lg"
+          className="h-12 w-full"
+          onClick={() => setQrGrande(true)}
+          disabled={!colaborador.qr_token}
+        >
           <Maximize2 className="size-5" />
           Mostrar en grande
         </Button>
@@ -62,9 +67,9 @@ export function InicioColaboradorPage() {
         )}
       </section>
 
-      {qrGrande && (
+      {qrGrande && colaborador.qr_token && (
         <QrPantallaCompleta
-          id={colaborador.id}
+          valor={colaborador.qr_token}
           nombre={colaborador.nombre}
           onCerrar={() => setQrGrande(false)}
         />

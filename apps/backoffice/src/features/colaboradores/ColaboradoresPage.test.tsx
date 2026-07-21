@@ -16,7 +16,7 @@ vi.mock('./api', () => ({
 }))
 vi.mock('../empresas/queries', () => ({
   useEmpresas: () => ({
-    data: [{ id: 'e1', nombre_comercial: 'Constructora Norte', razon_social: 'CN SA', activo: true }],
+    data: [{ id: 1, nombre_comercial: 'Constructora Norte', razon_social: 'CN SA', activo: true }],
   }),
 }))
 
@@ -24,14 +24,11 @@ import type { RolBackoffice } from '../../auth/validarAccesoPortal'
 import { ColaboradoresPage } from './ColaboradoresPage'
 
 const colaboradorFake = {
-  id: 'c1',
-  empresa_id: 'e1',
+  id: 1,
+  empresa_id: 1,
   nombre: 'Juan Pérez',
   email: 'juan@cn.com',
   activo: true,
-  user_id: null,
-  created_at: '',
-  updated_at: '',
   empresa: { nombre_comercial: 'Constructora Norte', razon_social: 'CN SA' },
 }
 

@@ -49,7 +49,7 @@ export function CierresPage() {
   const empresas = useMemo(() => {
     const mapa = new Map<string, string>()
     for (const c of cierres ?? []) {
-      if (c.empresa) mapa.set(c.empresa_id, c.empresa.nombre)
+      if (c.empresa) mapa.set(String(c.empresa_id), c.empresa.nombre)
     }
     return [...mapa.entries()]
       .map(([id, nombre]) => ({ id, nombre }))
@@ -64,7 +64,7 @@ export function CierresPage() {
 
   const filtrados = useMemo(() => {
     return (cierres ?? []).filter((c) => {
-      if (empresaSel && c.empresa_id !== empresaSel) return false
+      if (empresaSel && String(c.empresa_id) !== empresaSel) return false
       if (desde && c.semana_inicio < desde) return false
       if (hasta && c.semana_inicio > hasta) return false
       return true

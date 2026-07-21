@@ -15,7 +15,7 @@ export function SelectorPlatillo({
   onAgregar,
 }: {
   opciones: Platillo[]
-  onAgregar: (platilloId: string) => void
+  onAgregar: (platilloId: number) => void
 }) {
   const [instancia, setInstancia] = useState(0)
 

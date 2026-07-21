@@ -18,7 +18,7 @@ export function useMenuSemana(lunesISO: string) {
 export function useAgregarPlatillo(lunesISO: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ fecha, platilloId }: { fecha: string; platilloId: string }) =>
+    mutationFn: ({ fecha, platilloId }: { fecha: string; platilloId: number }) =>
       agregarPlatilloADia(fecha, platilloId),
     onSuccess: () => qc.invalidateQueries({ queryKey: claveSemana(lunesISO) }),
   })
@@ -27,7 +27,7 @@ export function useAgregarPlatillo(lunesISO: string) {
 export function useQuitarMenuDia(lunesISO: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => quitarMenuDia(id),
+    mutationFn: (id: number) => quitarMenuDia(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: claveSemana(lunesISO) }),
   })
 }

@@ -6,7 +6,7 @@ import type { MenuDiaConPlatillo } from './api'
 import { DiaColumna } from './DiaColumna'
 
 const platillo: Platillo = {
-  id: 'p1',
+  id: 1,
   nombre: 'Milanesa con puré',
   descripcion: null,
   foto_url: null,
@@ -14,7 +14,7 @@ const platillo: Platillo = {
   created_at: '',
   updated_at: '',
 }
-const asignado: MenuDiaConPlatillo = { id: 'm1', fecha: '', platillo }
+const asignado: MenuDiaConPlatillo = { id: 1, fecha: '', platillo }
 const noop = vi.fn()
 
 function renderizar(fecha: Date) {

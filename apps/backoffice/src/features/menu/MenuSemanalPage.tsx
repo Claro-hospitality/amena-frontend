@@ -51,12 +51,12 @@ export function MenuSemanalPage() {
     setLunesISO((prev) => moverLunes(prev, delta))
     setDiaMovil(0)
   }
-  const onAgregar = (fecha: string, platilloId: string) =>
+  const onAgregar = (fecha: string, platilloId: number) =>
     agregar.mutate(
       { fecha, platilloId },
       { onError: () => toast.error('No se pudo agregar el platillo. Intenta de nuevo.') }
     )
-  const onQuitar = (id: string) =>
+  const onQuitar = (id: number) =>
     quitar.mutate(id, {
       onError: () => toast.error('No se pudo quitar el platillo. Intenta de nuevo.'),
     })

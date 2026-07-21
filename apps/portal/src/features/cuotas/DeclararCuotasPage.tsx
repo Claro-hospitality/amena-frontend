@@ -51,7 +51,7 @@ export function DeclararCuotasPage() {
   const dias = diasHabiles(deISO(lunesISO))
   const activos = (colaboradores ?? []).filter((c) => c.activo)
 
-  const yaPorColaborador: Record<string, Set<string>> = {}
+  const yaPorColaborador: Record<number, Set<string>> = {}
   for (const cuota of cuotas ?? []) {
     ;(yaPorColaborador[cuota.colaborador.id] ??= new Set()).add(cuota.fecha)
   }
@@ -64,10 +64,10 @@ export function DeclararCuotasPage() {
     setSeleccion({})
   }
 
-  const seleccionablesDe = (colabId: string) =>
+  const seleccionablesDe = (colabId: number) =>
     dias.filter((d) => !esFechaPasada(d) && !yaPorColaborador[colabId]?.has(aISO(d))).map(aISO)
 
-  const setColaborador = (colabId: string, fechas: string[]) =>
+  const setColaborador = (colabId: number, fechas: string[]) =>
     setSeleccion((prev) => ({ ...prev, [colabId]: new Set(fechas) }))
 
   const todosTodaLaSemana = () => {
