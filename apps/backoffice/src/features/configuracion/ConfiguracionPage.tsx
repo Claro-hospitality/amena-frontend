@@ -20,7 +20,13 @@ import {
   CardTitle,
 } from '@amena/ui/components/ui/card'
 import { Field, FieldLabel } from '@amena/ui/components/ui/field'
-import { NativeSelect, NativeSelectOption } from '@amena/ui/components/ui/native-select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@amena/ui/components/ui/select'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { toast } from 'sonner'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
@@ -97,19 +103,21 @@ function FormDiaCorte({ diaActual }: { diaActual: DiaSemana }) {
     <div className="flex flex-col gap-4">
       <Field className="max-w-xs">
         <FieldLabel htmlFor="dia_corte">Día de corte semanal</FieldLabel>
-        <NativeSelect
-          id="dia_corte"
-          className="w-full"
+        <Select
           value={seleccion}
-          onChange={(e) => setSeleccion(e.target.value as DiaSemana)}
-          aria-label="Día de corte semanal"
+          onValueChange={(valor) => setSeleccion(valor as DiaSemana)}
         >
-          {DIAS_SEMANA.map((dia) => (
-            <NativeSelectOption key={dia} value={dia}>
-              {capitalizar(dia)}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+          <SelectTrigger id="dia_corte" className="w-full" aria-label="Día de corte semanal">
+            <SelectValue>{(valor) => capitalizar(valor as string)}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {DIAS_SEMANA.map((dia) => (
+              <SelectItem key={dia} value={dia}>
+                {capitalizar(dia)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </Field>
 
       <div>

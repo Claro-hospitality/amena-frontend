@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom'
 import { Plus, QrCode, TriangleAlert, Users } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
+import { DataTable, type ColumnDef } from '@amena/ui/components/data-table'
 import {
   Empty,
   EmptyContent,
@@ -13,14 +14,6 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@amena/ui/components/ui/table'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import type { Colaborador } from './api'
@@ -48,6 +41,8 @@ export function ColaboradoresPage() {
     return q ? base.filter((c) => c.nombre.toLowerCase().includes(q)) : base
   }, [data, busqueda])
 
+  const hayColaboradores = (data ?? []).length > 0
+
   if (tipo !== 'admin_empresa') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
@@ -57,6 +52,18 @@ export function ColaboradoresPage() {
   const cambiarEstado = (colaborador: Colaborador) => setDialogo({ tipo: 'estado', colaborador })
   const nuevo = () => setDialogo({ tipo: 'form', colaborador: null })
   const cerrar = () => setDialogo(null)
+
+  const columnas = crearColumnasColaboradores({ onVerQR: verQR, onEditar: editar, onCambiarEstado: cambiarEstado })
+
+  const buscador = (
+    <Input
+      placeholder="Buscar por nombre…"
+      value={busqueda}
+      onChange={(e) => setBusqueda(e.target.value)}
+      className="md:max-w-sm"
+      aria-label="Buscar colaborador por nombre"
+    />
+  )
 
   return (
     <TooltipProvider>
@@ -69,41 +76,42 @@ export function ColaboradoresPage() {
           </Button>
         </header>
 
-        <Input
-          placeholder="Buscar por nombre…"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          className="md:max-w-sm"
-          aria-label="Buscar colaborador por nombre"
-        />
-
         {isLoading ? (
           <ListaSkeleton />
         ) : isError ? (
           <EstadoError onReintentar={() => refetch()} />
-        ) : filtrados.length === 0 ? (
-          <ColaboradoresVacio hayBusqueda={busqueda.trim() !== ''} onCrear={nuevo} />
+        ) : !hayColaboradores ? (
+          <ColaboradoresVacio hayBusqueda={false} onCrear={nuevo} />
         ) : (
           <>
-            {/* Móvil: cards */}
+            {/* Móvil: buscador + cards */}
             <div className="flex flex-col gap-3 md:hidden">
-              {filtrados.map((colaborador) => (
-                <ColaboradorCard
-                  key={colaborador.id}
-                  colaborador={colaborador}
-                  onVerQR={verQR}
-                  onEditar={editar}
-                  onCambiarEstado={cambiarEstado}
-                />
-              ))}
+              {buscador}
+              {filtrados.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">
+                  Ningún colaborador coincide con tu búsqueda.
+                </p>
+              ) : (
+                filtrados.map((colaborador) => (
+                  <ColaboradorCard
+                    key={colaborador.id}
+                    colaborador={colaborador}
+                    onVerQR={verQR}
+                    onEditar={editar}
+                    onCambiarEstado={cambiarEstado}
+                  />
+                ))
+              )}
             </div>
-            {/* md+: tabla */}
+            {/* md+: tabla estándar con el buscador dentro del card */}
             <div className="hidden md:block">
-              <TablaColaboradores
-                colaboradores={filtrados}
-                onVerQR={verQR}
-                onEditar={editar}
-                onCambiarEstado={cambiarEstado}
+              <DataTable
+                columns={columnas}
+                data={filtrados}
+                rowClassName={(c) => (c.activo ? undefined : 'opacity-60')}
+                fillHeight={false}
+                toolbar={buscador}
+                emptyMessage="Ningún colaborador coincide con tu búsqueda."
               />
             </div>
           </>
@@ -127,68 +135,68 @@ export function ColaboradoresPage() {
   )
 }
 
-function TablaColaboradores({
-  colaboradores,
+function crearColumnasColaboradores({
   onVerQR,
   onEditar,
   onCambiarEstado,
 }: {
-  colaboradores: Colaborador[]
   onVerQR: (c: Colaborador) => void
   onEditar: (c: Colaborador) => void
   onCambiarEstado: (c: Colaborador) => void
-}) {
-  return (
-    <div className="w-full overflow-x-auto rounded-lg border border-border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Correo</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Acceso</TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {colaboradores.map((colaborador) => (
-            <TableRow key={colaborador.id} className={colaborador.activo ? undefined : 'opacity-60'}>
-              <TableCell className="font-medium">{colaborador.nombre}</TableCell>
-              <TableCell className="text-muted-foreground">{colaborador.email ?? '—'}</TableCell>
-              <TableCell>
-                {colaborador.activo ? (
-                  <Badge className="bg-success text-success-foreground">Activo</Badge>
-                ) : (
-                  <Badge variant="secondary">Inactivo</Badge>
-                )}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="outline">
-                    {colaborador.user_id != null ? 'Con acceso' : 'Sin acceso'}
-                  </Badge>
-                  <BotonInvitar colaborador={colaborador} />
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex justify-end gap-1">
-                  <Button variant="outline" size="sm" onClick={() => onVerQR(colaborador)}>
-                    <QrCode className="size-4" />
-                    Ver QR
-                  </Button>
-                  <AccionesColaborador
-                    colaborador={colaborador}
-                    onEditar={onEditar}
-                    onCambiarEstado={onCambiarEstado}
-                  />
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
+}): ColumnDef<Colaborador>[] {
+  return [
+    {
+      accessorKey: 'nombre',
+      header: 'Nombre',
+      cell: ({ row }) => <span className="font-medium">{row.original.nombre}</span>,
+    },
+    {
+      accessorKey: 'email',
+      header: 'Correo',
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.email ?? '—'}</span>
+      ),
+    },
+    {
+      id: 'estado',
+      header: 'Estado',
+      cell: ({ row }) =>
+        row.original.activo ? (
+          <Badge className="bg-success text-success-foreground">Activo</Badge>
+        ) : (
+          <Badge variant="secondary">Inactivo</Badge>
+        ),
+    },
+    {
+      id: 'acceso',
+      header: 'Acceso',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5">
+          <Badge variant="outline">
+            {row.original.user_id != null ? 'Con acceso' : 'Sin acceso'}
+          </Badge>
+          <BotonInvitar colaborador={row.original} />
+        </div>
+      ),
+    },
+    {
+      id: 'acciones',
+      header: () => <span className="sr-only">Acciones</span>,
+      cell: ({ row }) => (
+        <div className="flex justify-end gap-1">
+          <Button variant="outline" size="sm" onClick={() => onVerQR(row.original)}>
+            <QrCode className="size-4" />
+            Ver QR
+          </Button>
+          <AccionesColaborador
+            colaborador={row.original}
+            onEditar={onEditar}
+            onCambiarEstado={onCambiarEstado}
+          />
+        </div>
+      ),
+    },
+  ]
 }
 
 function ListaSkeleton() {

@@ -21,14 +21,20 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Field, FieldLabel } from '@amena/ui/components/ui/field'
-import { NativeSelect, NativeSelectOption } from '@amena/ui/components/ui/native-select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@amena/ui/components/ui/select'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { Spinner } from '@amena/ui/components/ui/spinner'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { deISO, rangoSemanaLegible } from '@amena/utils'
+import { DataTable } from '@amena/ui/components/data-table'
 import { toast } from 'sonner'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { DataTable } from '../../components/data-table'
 import type { CierreConEmpresa } from './api'
 import { CierreDetalleDialog } from './CierreDetalleDialog'
 import { crearColumnasCierres } from './columns'
@@ -73,6 +79,8 @@ export function CierresPage() {
 
   const columnas = crearColumnasCierres({ onVerDetalle: (c) => setDetalle(c) })
 
+  const hayCierres = (cierres ?? []).length > 0
+
   if (rol !== 'super_admin' && rol !== 'finanzas') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
@@ -94,7 +102,7 @@ export function CierresPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
         {esSuperAdmin && (
           <header className="flex items-center justify-end gap-4">
             <Button onClick={() => setConfirmarCorte(true)} disabled={ejecutar.isPending}>
@@ -104,70 +112,89 @@ export function CierresPage() {
           </header>
         )}
 
-        <div className="flex flex-wrap items-end gap-3">
-          <Field className="w-full max-w-52 sm:w-auto">
-            <FieldLabel htmlFor="filtro-empresa">Empresa</FieldLabel>
-            <NativeSelect
-              id="filtro-empresa"
-              className="w-full"
-              value={empresaSel}
-              onChange={(e) => setEmpresaSel(e.target.value)}
-              aria-label="Filtrar por empresa"
-            >
-              <NativeSelectOption value="">Todas las empresas</NativeSelectOption>
-              {empresas.map((e) => (
-                <NativeSelectOption key={e.id} value={e.id}>
-                  {e.nombre}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </Field>
-
-          <Field className="w-full max-w-52 sm:w-auto">
-            <FieldLabel htmlFor="filtro-desde">Desde la semana</FieldLabel>
-            <NativeSelect
-              id="filtro-desde"
-              className="w-full"
-              value={desde}
-              onChange={(e) => setDesde(e.target.value)}
-              aria-label="Filtrar desde la semana"
-            >
-              <NativeSelectOption value="">Cualquiera</NativeSelectOption>
-              {semanas.map((s) => (
-                <NativeSelectOption key={s} value={s}>
-                  {rangoSemanaLegible(deISO(s))}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </Field>
-
-          <Field className="w-full max-w-52 sm:w-auto">
-            <FieldLabel htmlFor="filtro-hasta">Hasta la semana</FieldLabel>
-            <NativeSelect
-              id="filtro-hasta"
-              className="w-full"
-              value={hasta}
-              onChange={(e) => setHasta(e.target.value)}
-              aria-label="Filtrar hasta la semana"
-            >
-              <NativeSelectOption value="">Cualquiera</NativeSelectOption>
-              {semanas.map((s) => (
-                <NativeSelectOption key={s} value={s}>
-                  {rangoSemanaLegible(deISO(s))}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </Field>
-        </div>
-
         {isLoading ? (
           <TablaSkeleton />
         ) : isError ? (
           <EstadoError onReintentar={() => refetch()} />
-        ) : filtrados.length === 0 ? (
-          <CierresVacio hayFiltros={Boolean(empresaSel || desde || hasta)} />
+        ) : !hayCierres ? (
+          <CierresVacio hayFiltros={false} />
         ) : (
-          <DataTable columns={columnas} data={filtrados} />
+          <DataTable
+            columns={columnas}
+            data={filtrados}
+            toolbar={
+              <div className="flex flex-wrap items-end gap-3">
+                <Field className="w-full max-w-52 sm:w-auto">
+                  <FieldLabel htmlFor="filtro-empresa">Empresa</FieldLabel>
+                  <Select
+                    value={empresaSel}
+                    onValueChange={(valor) => setEmpresaSel(valor as string)}
+                  >
+                    <SelectTrigger id="filtro-empresa" className="w-full" aria-label="Filtrar por empresa">
+                      <SelectValue>
+                        {(valor) =>
+                          valor
+                            ? (empresas.find((e) => e.id === valor)?.nombre ?? 'Empresa')
+                            : 'Todas las empresas'
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Todas las empresas</SelectItem>
+                      {empresas.map((e) => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field className="w-full max-w-52 sm:w-auto">
+                  <FieldLabel htmlFor="filtro-desde">Desde la semana</FieldLabel>
+                  <Select value={desde} onValueChange={(valor) => setDesde(valor as string)}>
+                    <SelectTrigger id="filtro-desde" className="w-full" aria-label="Filtrar desde la semana">
+                      <SelectValue>
+                        {(valor) =>
+                          valor ? rangoSemanaLegible(deISO(valor as string)) : 'Cualquiera'
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Cualquiera</SelectItem>
+                      {semanas.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {rangoSemanaLegible(deISO(s))}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field className="w-full max-w-52 sm:w-auto">
+                  <FieldLabel htmlFor="filtro-hasta">Hasta la semana</FieldLabel>
+                  <Select value={hasta} onValueChange={(valor) => setHasta(valor as string)}>
+                    <SelectTrigger id="filtro-hasta" className="w-full" aria-label="Filtrar hasta la semana">
+                      <SelectValue>
+                        {(valor) =>
+                          valor ? rangoSemanaLegible(deISO(valor as string)) : 'Cualquiera'
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Cualquiera</SelectItem>
+                      {semanas.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {rangoSemanaLegible(deISO(s))}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            }
+            emptyMessage="Ningún cierre coincide con los filtros seleccionados."
+          />
         )}
       </div>
 
