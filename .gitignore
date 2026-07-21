@@ -3,6 +3,9 @@ node_modules/
 
 # Builds y caché
 dist/
+
+# Grafo de conocimiento (graphify) — artefacto local regenerable
+graphify-out/
 dist-ssr/
 .turbo/
 *.tsbuildinfo
