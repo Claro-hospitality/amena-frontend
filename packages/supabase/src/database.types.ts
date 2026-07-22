@@ -525,6 +525,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      asignar_rol_unico: {
+        Args: {
+          p_rol: Database["public"]["Enums"]["rol_portal"]
+          p_usuario_id: number
+        }
+        Returns: Json
+      }
       auth_user_id_por_email: { Args: { p_email: string }; Returns: string }
       comensales_de_mis_empresas: { Args: never; Returns: number[] }
       cuota_disponible: {

@@ -22,7 +22,7 @@ beforeEach(() => {
 })
 
 describe('listarUsuariosEmpresa', () => {
-  it('deriva los roles SOLO del rol (no del comensal) y expone comeActivo', async () => {
+  it('deriva los roles SOLO del rol (no del comensal), expone el rol único y comeActivo', async () => {
     mocks.order.mockResolvedValue({
       data: [
         {
@@ -65,6 +65,7 @@ describe('listarUsuariosEmpresa', () => {
         activo: true,
         esAdmin: true,
         esColaborador: false,
+        rol: 'admin',
         comeActivo: true,
       },
       {
@@ -74,6 +75,7 @@ describe('listarUsuariosEmpresa', () => {
         activo: true,
         esAdmin: false,
         esColaborador: false, // tener comensal ya NO implica colaborador
+        rol: null,
         comeActivo: false,
       },
       {
@@ -83,6 +85,7 @@ describe('listarUsuariosEmpresa', () => {
         activo: true,
         esAdmin: false,
         esColaborador: false, // rol colaborador inactivo no cuenta
+        rol: null,
         comeActivo: false,
       },
     ])

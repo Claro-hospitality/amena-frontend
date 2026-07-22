@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   altaUsuarioPortal,
+  asignarRolUnico,
   establecerComidaComensal,
   establecerRolPortal,
   listarColaboradores,
@@ -34,6 +35,19 @@ export function useEstablecerRol() {
       rol: RolPortal
       activo: boolean
     }) => establecerRolPortal(usuarioId, rol, activo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['usuarios'] })
+      qc.invalidateQueries({ queryKey: ['empresa'] })
+    },
+  })
+}
+
+/** Fija el rol único (admin XOR colaborador) de un usuario; refresca listado y resumen. */
+export function useAsignarRolUnico() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ usuarioId, rol }: { usuarioId: number; rol: RolPortal }) =>
+      asignarRolUnico(usuarioId, rol),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['usuarios'] })
       qc.invalidateQueries({ queryKey: ['empresa'] })

@@ -78,6 +78,12 @@ export interface UsuarioEmpresa {
   activo: boolean
   esAdmin: boolean
   esColaborador: boolean
+  /**
+   * El rol único activo de la persona (admin XOR colaborador), o `null` si aún no
+   * tiene ninguno. Cada persona tiene un solo rol; sirve para preseleccionar el
+   * selector de rol.
+   */
+  rol: RolPortal | null
   /** True si su comensal está activo (consume + QR vigente). */
   comeActivo: boolean
 }
@@ -100,13 +106,16 @@ export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioE
   if (error) throw error
   return (data ?? []).map((u) => {
     const roles = (u.roles ?? []).filter((r) => r.activo)
+    const esAdmin = roles.some((r) => r.rol === 'admin')
+    const esColaborador = roles.some((r) => r.rol === 'colaborador')
     return {
       id: u.id,
       nombre: u.nombre ?? '',
       email: u.email ?? null,
       activo: u.activo,
-      esAdmin: roles.some((r) => r.rol === 'admin'),
-      esColaborador: roles.some((r) => r.rol === 'colaborador'),
+      esAdmin,
+      esColaborador,
+      rol: esAdmin ? 'admin' : esColaborador ? 'colaborador' : null,
       comeActivo: u.comensal?.activo ?? false,
     }
   })
@@ -126,6 +135,20 @@ export async function establecerRolPortal(
     p_usuario_id: usuarioId,
     p_rol: rol,
     p_activo: activo,
+  })
+  if (error) throw error
+}
+
+/**
+ * Fija el rol ÚNICO (admin XOR colaborador) de un usuario del portal vía el RPC
+ * `asignar_rol_unico`: activa el rol elegido y desactiva el otro de forma atómica.
+ * Cada persona tiene un solo rol (qué ve en el portal); NO toca al comensal ni su
+ * capacidad de comer.
+ */
+export async function asignarRolUnico(usuarioId: number, rol: RolPortal): Promise<void> {
+  const { error } = await supabase.rpc('asignar_rol_unico', {
+    p_usuario_id: usuarioId,
+    p_rol: rol,
   })
   if (error) throw error
 }
