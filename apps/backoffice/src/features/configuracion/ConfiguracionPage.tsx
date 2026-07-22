@@ -60,7 +60,9 @@ function SeccionCortesSemanales() {
       <CardHeader>
         <CardTitle>Cortes semanales</CardTitle>
         <CardDescription>
-          Día en que se generan automáticamente los cierres de todas las empresas.
+          Día de la semana en que se genera automáticamente el corte semanal de todas las
+          empresas: se cierra la semana y se calcula lo comprometido, lo consumido y el monto a
+          facturar.
         </CardDescription>
       </CardHeader>
       <CardContent>
