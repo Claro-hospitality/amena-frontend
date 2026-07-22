@@ -115,12 +115,12 @@ export function EmpresaDetallePage() {
         <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
           <TabsList>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
-            <TabsTrigger value="cortes">Cortes semanales</TabsTrigger>
+            <TabsTrigger value="cierres">Cierres semanales</TabsTrigger>
           </TabsList>
           <TabsContent value="usuarios" className="flex min-h-0 flex-col">
             <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} fillHeight />
           </TabsContent>
-          <TabsContent value="cortes" className="flex min-h-0 flex-col">
+          <TabsContent value="cierres" className="flex min-h-0 flex-col">
             <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} fillHeight />
           </TabsContent>
         </Tabs>
@@ -270,7 +270,7 @@ function HistoricoSeccion({
     <section className={`flex flex-col gap-3 ${fillHeight ? 'min-h-0 flex-1' : ''}`}>
       {!fillHeight && (
         <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-          Cortes semanales
+          Cierres semanales
         </h2>
       )}
       {isLoading ? (
@@ -284,7 +284,7 @@ function HistoricoSeccion({
           <CardContent className="flex flex-col items-start gap-3 p-5">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <TriangleAlert className="size-4" />
-              No se pudieron cargar los cortes.
+              No se pudieron cargar los cierres.
             </p>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               Reintentar
@@ -296,7 +296,7 @@ function HistoricoSeccion({
           columns={columnas}
           data={cierresEmpresa}
           fillHeight={fillHeight}
-          emptyMessage="Aún no hay cortes para esta empresa."
+          emptyMessage="Aún no hay cierres para esta empresa."
         />
       )}
     </section>
