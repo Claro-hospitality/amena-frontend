@@ -51,19 +51,15 @@ const columnasBase: ColumnDef<UsuarioEmpresa>[] = [
     id: 'rol',
     header: 'Vista',
     cell: ({ row }) => {
-      const { esAdmin, esColaborador } = row.original
-      if (!esAdmin && !esColaborador) return <span className="text-muted-foreground">—</span>
-      return (
-        <div className="flex flex-wrap gap-1">
-          {esAdmin && <Badge variant="outline">Administrador</Badge>}
-          {esColaborador && <Badge variant="secondary">Colaborador</Badge>}
-        </div>
-      )
+      const { rol } = row.original
+      if (rol === 'admin') return <Badge variant="outline">Administrador</Badge>
+      if (rol === 'colaborador') return <Badge variant="secondary">Colaborador</Badge>
+      return <span className="text-muted-foreground">—</span>
     },
   },
   {
     id: 'come',
-    header: 'Come',
+    header: 'Comensal',
     cell: ({ row }) =>
       row.original.comeActivo ? (
         <Badge className="bg-success text-success-foreground">Activo</Badge>
@@ -71,16 +67,6 @@ const columnasBase: ColumnDef<UsuarioEmpresa>[] = [
         <Badge variant="outline" className="text-muted-foreground">
           Inactivo
         </Badge>
-      ),
-  },
-  {
-    accessorKey: 'activo',
-    header: 'Estado',
-    cell: ({ row }) =>
-      row.original.activo ? (
-        <Badge className="bg-success text-success-foreground">Activo</Badge>
-      ) : (
-        <Badge variant="outline">Inactivo</Badge>
       ),
   },
 ]

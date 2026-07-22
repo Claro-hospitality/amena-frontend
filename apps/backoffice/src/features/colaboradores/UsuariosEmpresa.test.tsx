@@ -7,6 +7,7 @@ const api = vi.hoisted(() => ({
   listarColaboradores: vi.fn(),
   listarUsuariosEmpresa: vi.fn(),
   altaUsuarioPortal: vi.fn(),
+  asignarRolUnico: vi.fn(),
   establecerRolPortal: vi.fn(),
   establecerComidaComensal: vi.fn(),
   nombreEmpresa: () => '—',
@@ -39,11 +40,12 @@ function renderizar(puedeGestionar = true) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  api.asignarRolUnico.mockResolvedValue(undefined)
   api.establecerRolPortal.mockResolvedValue(undefined)
   api.establecerComidaComensal.mockResolvedValue(undefined)
   api.listarUsuariosEmpresa.mockResolvedValue([
-    { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false, comeActivo: true },
-    { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true, comeActivo: false },
+    { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false, rol: 'admin', comeActivo: true },
+    { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true, rol: 'colaborador', comeActivo: false },
   ])
 })
 
@@ -54,6 +56,18 @@ describe('UsuariosEmpresa', () => {
     expect(screen.getByText('Juan Pérez')).toBeInTheDocument()
     expect(screen.getByText('Administrador')).toBeInTheDocument()
     expect(screen.getByText('Colaborador')).toBeInTheDocument()
+  })
+
+  it('la tabla no muestra columna "Estado" y renombra "Come" a "Comensal"', async () => {
+    renderizar()
+    await screen.findByText('Adriana Ruiz')
+    expect(
+      screen.getByRole('columnheader', { name: 'Comensal' })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('columnheader', { name: 'Estado' })
+    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: 'Come' })).not.toBeInTheDocument()
   })
 
   it('el alta fija la empresa (campo deshabilitado)', async () => {
@@ -76,30 +90,36 @@ describe('UsuariosEmpresa', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('editar roles: activar Administrador llama al RPC', async () => {
+  it('editar rol: elegir Administrador llama a asignar_rol_unico con el rol elegido', async () => {
     const user = userEvent.setup()
     renderizar(true)
-    await screen.findByText('Juan Pérez')
+    await screen.findByText('Juan Pérez') // Juan es colaborador
     await user.click(screen.getByRole('button', { name: 'Editar roles de Juan Pérez' }))
-    expect(await screen.findByText('Roles de Juan Pérez')).toBeInTheDocument()
+    expect(await screen.findByText('Rol de Juan Pérez')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('switch', { name: 'Administrador' }))
-    await waitFor(() => expect(api.establecerRolPortal).toHaveBeenCalledWith(2, 'admin', true))
+    // Selección única: elegir Administrador aplica directo (sin confirmación).
+    await user.click(screen.getByRole('radio', { name: 'Administrador' }))
+    await waitFor(() => expect(api.asignarRolUnico).toHaveBeenCalledWith(2, 'admin'))
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
   })
 
-  it('editar roles: quitar Colaborador aplica directo (sin confirmación, roles = solo vista)', async () => {
+  it('editar rol: es selección única (elegir uno no deja ambos marcados)', async () => {
     const user = userEvent.setup()
     renderizar(true)
-    await screen.findByText('Juan Pérez')
+    await screen.findByText('Juan Pérez') // preselecciona Colaborador
     await user.click(screen.getByRole('button', { name: 'Editar roles de Juan Pérez' }))
-    await screen.findByText('Roles de Juan Pérez')
+    await screen.findByText('Rol de Juan Pérez')
 
-    // Los roles son solo de vista: apagar el switch llama al RPC sin diálogo de confirmación.
-    await user.click(screen.getByRole('switch', { name: 'Colaborador' }))
-    await waitFor(() =>
-      expect(api.establecerRolPortal).toHaveBeenCalledWith(2, 'colaborador', false)
-    )
-    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    const admin = screen.getByRole('radio', { name: 'Administrador' })
+    const colaborador = screen.getByRole('radio', { name: 'Colaborador' })
+    expect(colaborador).toBeChecked()
+    expect(admin).not.toBeChecked()
+
+    await user.click(admin)
+    await waitFor(() => expect(admin).toBeChecked())
+    expect(colaborador).not.toBeChecked()
+    expect(api.asignarRolUnico).toHaveBeenCalledExactlyOnceWith(2, 'admin')
+    expect(api.asignarRolUnico).not.toHaveBeenCalledWith(2, 'colaborador')
   })
 
   it('comida: activar (comensal inactivo) aplica directo vía el RPC', async () => {

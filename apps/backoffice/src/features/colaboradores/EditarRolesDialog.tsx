@@ -10,14 +10,16 @@ import {
   DialogTitle,
 } from '@amena/ui/components/ui/dialog'
 import { Label } from '@amena/ui/components/ui/label'
-import { Switch } from '@amena/ui/components/ui/switch'
+import { RadioGroup, RadioGroupItem } from '@amena/ui/components/ui/radio-group'
 import type { RolPortal, UsuarioEmpresa } from './api'
-import { useEstablecerRol } from './queries'
+import { useAsignarRolUnico } from './queries'
 
 /**
- * Edita los roles (admin/colaborador) de un usuario del portal. Los roles son SOLO
- * de vista: definen qué ve en el portal, no si come. Cada cambio aplica directo vía
- * el RPC (sin confirmación); la capacidad de comer se gestiona aparte (comensal).
+ * Elige el rol ÚNICO (admin XOR colaborador) de un usuario del portal. El rol define
+ * qué ve en el portal, no si come. Se elige un solo rol vía radio-group y se aplica
+ * directo (sin confirmación) vía el RPC `asignar_rol_unico`, que activa el elegido y
+ * desactiva el otro de forma atómica. La capacidad de comer se gestiona aparte
+ * (comensal).
  */
 export function EditarRolesDialog({
   usuario,
@@ -26,34 +28,25 @@ export function EditarRolesDialog({
   usuario: UsuarioEmpresa
   onClose: () => void
 }) {
-  const establecer = useEstablecerRol()
-  const [admin, setAdmin] = useState(usuario.esAdmin)
-  const [colaborador, setColaborador] = useState(usuario.esColaborador)
+  const asignar = useAsignarRolUnico()
+  const [rol, setRol] = useState<RolPortal | null>(usuario.rol)
 
-  const aplicar = (rol: RolPortal, activo: boolean, revertir: () => void) => {
-    establecer.mutate(
-      { usuarioId: usuario.id, rol, activo },
+  const aplicar = (nuevoRol: RolPortal) => {
+    const anterior = rol
+    setRol(nuevoRol)
+    asignar.mutate(
+      { usuarioId: usuario.id, rol: nuevoRol },
       {
         onSuccess: () =>
           toast.success(
-            `${rol === 'admin' ? 'Administrador' : 'Colaborador'} ${activo ? 'asignado' : 'quitado'}`
+            `${nuevoRol === 'admin' ? 'Administrador' : 'Colaborador'} asignado a ${usuario.nombre}`
           ),
         onError: () => {
           toast.error('No se pudo cambiar el rol. Intenta de nuevo.')
-          revertir()
+          setRol(anterior)
         },
       }
     )
-  }
-
-  const alternarAdmin = (v: boolean) => {
-    setAdmin(v)
-    aplicar('admin', v, () => setAdmin(!v))
-  }
-
-  const alternarColaborador = (v: boolean) => {
-    setColaborador(v)
-    aplicar('colaborador', v, () => setColaborador(!v))
   }
 
   return (
@@ -65,41 +58,37 @@ export function EditarRolesDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Roles de {usuario.nombre}</DialogTitle>
+          <DialogTitle>Rol de {usuario.nombre}</DialogTitle>
           <DialogDescription>
-            Los roles definen qué ve en el portal. No afectan si puede comer.
+            Cada persona tiene un solo rol (define qué ve en el portal). No afecta si
+            puede comer.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-5">
-          <div className="flex items-start justify-between gap-4">
+        <RadioGroup
+          value={rol ?? undefined}
+          onValueChange={(valor) => aplicar(valor as RolPortal)}
+          disabled={asignar.isPending}
+          aria-label="Rol"
+        >
+          <div className="flex items-start gap-3">
+            <RadioGroupItem id="rol-admin" value="admin" className="mt-0.5" />
             <div className="flex flex-col gap-0.5">
               <Label htmlFor="rol-admin">Administrador</Label>
               <p className="text-xs text-muted-foreground">Ve el panel de la empresa.</p>
             </div>
-            <Switch
-              id="rol-admin"
-              checked={admin}
-              onCheckedChange={alternarAdmin}
-              disabled={establecer.isPending}
-            />
           </div>
 
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <RadioGroupItem id="rol-colaborador" value="colaborador" className="mt-0.5" />
             <div className="flex flex-col gap-0.5">
               <Label htmlFor="rol-colaborador">Colaborador</Label>
               <p className="text-xs text-muted-foreground">
                 Ve su credencial, menú e historial.
               </p>
             </div>
-            <Switch
-              id="rol-colaborador"
-              checked={colaborador}
-              onCheckedChange={alternarColaborador}
-              disabled={establecer.isPending}
-            />
           </div>
-        </div>
+        </RadioGroup>
 
         <DialogFooter className="mt-6">
           <Button onClick={onClose}>Listo</Button>
