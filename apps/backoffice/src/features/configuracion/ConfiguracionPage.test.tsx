@@ -6,8 +6,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mockeamos la capa de datos (incluye DIAS_SEMANA, que la página importa como valor).
 const api = vi.hoisted(() => ({
-  obtenerDiaCorte: vi.fn(),
-  actualizarDiaCorte: vi.fn(),
+  obtenerDiaCierre: vi.fn(),
+  actualizarDiaCierre: vi.fn(),
   DIAS_SEMANA: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'],
 }))
 vi.mock('./api', () => api)
@@ -32,8 +32,8 @@ function renderizar(rol: RolBackoffice) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  api.obtenerDiaCorte.mockResolvedValue('domingo')
-  api.actualizarDiaCorte.mockResolvedValue(undefined)
+  api.obtenerDiaCierre.mockResolvedValue('domingo')
+  api.actualizarDiaCierre.mockResolvedValue(undefined)
 })
 
 describe('ConfiguracionPage', () => {
@@ -43,22 +43,22 @@ describe('ConfiguracionPage', () => {
     expect(screen.queryByRole('heading', { name: 'Configuración' })).not.toBeInTheDocument()
   })
 
-  it('carga el día de corte actual en el select', async () => {
+  it('carga el día de cierre actual en el select', async () => {
     renderizar('super_admin')
-    const select = await screen.findByLabelText('Día de corte semanal')
+    const select = await screen.findByLabelText('Día de cierre semanal')
     expect(select).toHaveTextContent('Domingo')
   })
 
   it('deshabilita Guardar mientras no haya cambios', async () => {
     renderizar('super_admin')
-    await screen.findByLabelText('Día de corte semanal')
+    await screen.findByLabelText('Día de cierre semanal')
     expect(screen.getByRole('button', { name: 'Guardar' })).toBeDisabled()
   })
 
   it('guarda el nuevo día tras confirmar', async () => {
     const user = userEvent.setup()
     renderizar('super_admin')
-    const select = await screen.findByLabelText('Día de corte semanal')
+    const select = await screen.findByLabelText('Día de cierre semanal')
 
     await user.click(select)
     await user.click(await screen.findByRole('option', { name: 'Lunes' }))
@@ -69,6 +69,6 @@ describe('ConfiguracionPage', () => {
     expect(within(dialogo).getByText(/se ejecutarán cada lunes/i)).toBeInTheDocument()
     await user.click(within(dialogo).getByRole('button', { name: 'Guardar' }))
 
-    expect(api.actualizarDiaCorte).toHaveBeenCalledWith('lunes')
+    expect(api.actualizarDiaCierre).toHaveBeenCalledWith('lunes')
   })
 })

@@ -17,7 +17,7 @@ export async function listarCierres(): Promise<CierreConEmpresa[]> {
   return data as unknown as CierreConEmpresa[]
 }
 
-export interface ResultadoCorte {
+export interface ResultadoCierre {
   corrio: boolean
   forzado?: boolean
   motivo?: string
@@ -30,14 +30,14 @@ export interface ResultadoCorte {
 }
 
 /**
- * Dispara el corte manual (force=true) vía la Edge Function corte-semanal. Ignora el día
+ * Dispara el cierre manual (force=true) vía la Edge Function cierre-semanal. Ignora el día
  * configurado y genera los cierres de la última semana completa. Solo super_admin (la UI lo
  * oculta a otros roles; el filtrado real de datos lo hace la función con service_role).
  */
-export async function ejecutarCorteManual(): Promise<ResultadoCorte> {
-  const { data, error } = await supabase.functions.invoke('corte-semanal', {
+export async function ejecutarCierreManual(): Promise<ResultadoCierre> {
+  const { data, error } = await supabase.functions.invoke('cierre-semanal', {
     body: { force: true },
   })
   if (error) throw error
-  return data as ResultadoCorte
+  return data as ResultadoCierre
 }
