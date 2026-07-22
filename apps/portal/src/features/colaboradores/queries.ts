@@ -7,6 +7,7 @@ import {
   listarColaboradores,
   obtenerMiEmpresaId,
   type DatosColaborador,
+  type RolAlta,
 } from './api'
 
 const CLAVE_COLABORADORES = ['colaboradores'] as const
@@ -22,7 +23,8 @@ export function useMiEmpresaId() {
 export function useCrearColaborador() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (datos: DatosColaborador & { empresa_id: number }) => crearColaborador(datos),
+    mutationFn: (datos: DatosColaborador & { empresa_id: number; rol: RolAlta }) =>
+      crearColaborador(datos),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
 }

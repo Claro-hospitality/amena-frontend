@@ -41,6 +41,9 @@ export interface DatosColaborador {
   email: string | null
 }
 
+/** Rol con el que se da de alta una persona del portal. */
+export type RolAlta = 'admin' | 'colaborador'
+
 /**
  * Credenciales de acceso resultado del alta (las devuelve `alta-usuario-portal`). Si se creó
  * una cuenta nueva trae `tempPassword` (se muestra UNA sola vez); si el email ya tenía cuenta,
@@ -127,16 +130,17 @@ export async function obtenerMiEmpresaId(): Promise<number> {
 }
 
 /**
- * Da de alta un colaborador vía la Edge Function `alta-usuario-portal`: crea su
- * identidad en `usuarios_portal_empresarial`, su fila en `comensales` y su credencial
- * QR. La creación real (service role) es del backend; el front solo invoca. Devuelve las
- * credenciales de acceso (contraseña temporal) para entregárselas al colaborador.
+ * Da de alta una persona del portal (colaborador o admin) vía la Edge Function
+ * `alta-usuario-portal`: crea su identidad en `usuarios_portal_empresarial` y su rol; si es
+ * colaborador el trigger crea además su comensal + credencial QR. La creación real (service
+ * role) es del backend; el front solo invoca. El backend valida que un admin de empresa solo
+ * pueda crear en SU empresa. Devuelve las credenciales de acceso (contraseña temporal).
  */
 export async function crearColaborador(
-  datos: DatosColaborador & { empresa_id: number }
+  datos: DatosColaborador & { empresa_id: number; rol: RolAlta }
 ): Promise<CredencialesAlta> {
   const { data, error } = await supabase.functions.invoke('alta-usuario-portal', {
-    body: { ...datos, rol: 'colaborador' },
+    body: datos,
   })
   if (error) {
     // FunctionsHttpError (p. ej. 403): el body {error} viene en error.context (el Response).

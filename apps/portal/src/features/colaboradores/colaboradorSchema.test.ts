@@ -18,4 +18,14 @@ describe('colaboradorSchema', () => {
     expect(colaboradorSchema.safeParse({ nombre: 'X', email: 'ana@empresa.com' }).success).toBe(true)
     expect(colaboradorSchema.safeParse({ nombre: 'X', email: 'nope' }).success).toBe(false)
   })
+
+  it('rol: cae a colaborador si falta o viene vacío; acepta admin', () => {
+    const base = { nombre: 'X', email: 'ana@empresa.com' }
+    const sinRol = colaboradorSchema.safeParse(base)
+    expect(sinRol.success && sinRol.data.rol).toBe('colaborador')
+    const vacio = colaboradorSchema.safeParse({ ...base, rol: '' })
+    expect(vacio.success && vacio.data.rol).toBe('colaborador')
+    const admin = colaboradorSchema.safeParse({ ...base, rol: 'admin' })
+    expect(admin.success && admin.data.rol).toBe('admin')
+  })
 })
