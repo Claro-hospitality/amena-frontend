@@ -22,6 +22,22 @@ export async function listarMenuSemana(lunesISO: string): Promise<MenuDiaConPlat
   return (data ?? []) as unknown as MenuDiaConPlatillo[]
 }
 
+/** Menú de un rango de fechas [desdeISO, hastaISO] (para la vista por mes). */
+export async function listarMenuRango(
+  desdeISO: string,
+  hastaISO: string
+): Promise<MenuDiaConPlatillo[]> {
+  const { data, error } = await supabase
+    .from('menu_dias')
+    .select('id, fecha, platillo:platillos(*)')
+    .gte('fecha', desdeISO)
+    .lte('fecha', hastaISO)
+    .eq('activo', true)
+    .order('fecha')
+  if (error) throw error
+  return (data ?? []) as unknown as MenuDiaConPlatillo[]
+}
+
 /** Agrega (o reactiva) un platillo a un día. Respeta unique(fecha, platillo_id) vía upsert. */
 export async function agregarPlatilloADia(fecha: string, platillo_id: number): Promise<void> {
   const { error } = await supabase

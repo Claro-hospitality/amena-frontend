@@ -22,6 +22,11 @@ export function etiquetaDia(fecha: Date): string {
   return format(fecha, "EEEE d", { locale: es })
 }
 
+/** Nombre del mes con año, p. ej. "julio 2026". */
+export function etiquetaMes(fecha: Date): string {
+  return format(fecha, 'MMMM yyyy', { locale: es })
+}
+
 /** Etiqueta corta de un día para toggles/chips, p. ej. "lun. 13". */
 export function etiquetaDiaCorta(fecha: Date): string {
   return format(fecha, 'EEE d', { locale: es })
