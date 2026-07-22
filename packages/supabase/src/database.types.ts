@@ -97,6 +97,7 @@ export type Database = {
       comensales: {
         Row: {
           activo: boolean
+          consumo_libre: boolean
           created_at: string
           id: number
           updated_at: string
@@ -104,6 +105,7 @@ export type Database = {
         }
         Insert: {
           activo?: boolean
+          consumo_libre?: boolean
           created_at?: string
           id?: number
           updated_at?: string
@@ -111,6 +113,7 @@ export type Database = {
         }
         Update: {
           activo?: boolean
+          consumo_libre?: boolean
           created_at?: string
           id?: number
           updated_at?: string
@@ -274,7 +277,10 @@ export type Database = {
           activo: boolean
           ciclo_facturacion: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at: string
+          dias_permitidos: number[]
           id: number
+          limite_diario: number | null
+          modo_consumo: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial: string | null
           precio_comida: number
           razon_social: string | null
@@ -285,7 +291,10 @@ export type Database = {
           activo?: boolean
           ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at?: string
+          dias_permitidos?: number[]
           id?: number
+          limite_diario?: number | null
+          modo_consumo?: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial?: string | null
           precio_comida: number
           razon_social?: string | null
@@ -296,7 +305,10 @@ export type Database = {
           activo?: boolean
           ciclo_facturacion?: Database["public"]["Enums"]["ciclo_facturacion"]
           created_at?: string
+          dias_permitidos?: number[]
           id?: number
+          limite_diario?: number | null
+          modo_consumo?: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial?: string | null
           precio_comida?: number
           razon_social?: string | null
@@ -553,6 +565,10 @@ export type Database = {
         Args: { p_activo: boolean; p_usuario_id: number }
         Returns: Json
       }
+      establecer_consumo_libre: {
+        Args: { p_activo: boolean; p_usuario_id: number }
+        Returns: Json
+      }
       establecer_rol_portal: {
         Args: {
           p_activo: boolean
@@ -582,6 +598,7 @@ export type Database = {
       ciclo_facturacion: "semanal" | "mensual"
       estado_cierre: "abierto" | "cerrado"
       estado_factura: "pendiente" | "pagada" | "cancelada"
+      modo_consumo: "declaracion" | "libre"
       origen_cuota: "declaracion" | "extra"
       rol_backoffice: "super_admin" | "mesero" | "finanzas"
       rol_portal: "admin" | "colaborador"
@@ -718,6 +735,7 @@ export const Constants = {
       ciclo_facturacion: ["semanal", "mensual"],
       estado_cierre: ["abierto", "cerrado"],
       estado_factura: ["pendiente", "pagada", "cancelada"],
+      modo_consumo: ["declaracion", "libre"],
       origen_cuota: ["declaracion", "extra"],
       rol_backoffice: ["super_admin", "mesero", "finanzas"],
       rol_portal: ["admin", "colaborador"],

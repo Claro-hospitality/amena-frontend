@@ -3,12 +3,17 @@ import type { Database } from '@amena/supabase/types'
 import { aISO } from '@amena/utils'
 
 export type Consumo = Database['public']['Tables']['consumos']['Row']
+export type ModoConsumo = Database['public']['Enums']['modo_consumo']
 
 /** Resultado del registro: la RPC devuelve la fila y el nombre del comensal/empresa. */
 export interface ResultadoConsumo {
   consumo: Consumo
   comensalNombre: string
   empresaNombre: string | null
+  /** Cuántos consumos lleva hoy el comensal (incluye este). */
+  consumosHoy: number
+  /** Modo de consumo con el que se registró ('declaracion' | 'libre'). */
+  modo: ModoConsumo
 }
 
 /** Consumo del día para la lista (hora, comensal, empresa si es legible). */
@@ -34,11 +39,15 @@ export async function registrarConsumo(qrToken: string, registradoPor: string): 
     consumo: Consumo
     comensal_nombre: string
     empresa_nombre: string | null
+    consumos_hoy?: number
+    modo?: ModoConsumo
   }
   return {
     consumo: payload.consumo,
     comensalNombre: payload.comensal_nombre,
     empresaNombre: payload.empresa_nombre ?? null,
+    consumosHoy: payload.consumos_hoy ?? 1,
+    modo: payload.modo ?? 'declaracion',
   }
 }
 

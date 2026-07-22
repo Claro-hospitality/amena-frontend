@@ -10,11 +10,17 @@ export function esUuidValido(texto: string): boolean {
  * de la pantalla de rechazo. "El colaborador no existe" se muestra como "QR no válido".
  */
 export function mapearMotivoRechazo(error: unknown): string {
-  const msg = ((error as { message?: string } | null)?.message ?? '').toLowerCase()
+  const original = (error as { message?: string } | null)?.message ?? ''
+  const msg = original.toLowerCase()
   if (msg.includes('no existe')) return 'QR no válido'
   if (msg.includes('empresa') && msg.includes('inactiva')) return 'Empresa inactiva'
   if (msg.includes('inactivo')) return 'Colaborador inactivo'
   if (msg.includes('ya consumió') || msg.includes('ya consumio')) return 'Ya consumió hoy'
+  // Consumo libre: día no permitido y límite diario alcanzado.
+  if (msg.includes('día permitido') || msg.includes('dia permitido')) return 'Hoy no es día permitido'
+  // El RPC ya trae "(N de M)"; se muestra tal cual, con respaldo si no.
+  if (msg.includes('límite diario') || msg.includes('limite diario'))
+    return original || 'Límite diario alcanzado'
   if (msg.includes('cuota')) return 'Sin cuota para hoy'
   return 'No se pudo registrar'
 }

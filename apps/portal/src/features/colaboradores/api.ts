@@ -1,24 +1,38 @@
 import { supabase } from '@amena/supabase'
+import type { Database } from '@amena/supabase/types'
+
+export type ModoConsumo = Database['public']['Enums']['modo_consumo']
+
+/** Política de consumo de la empresa (solo lectura en el portal). */
+export interface PoliticaEmpresa {
+  modo_consumo: ModoConsumo
+  dias_permitidos: number[]
+  limite_diario: number | null
+}
 
 /**
  * Colaborador (comensal) aplanado para el portal del admin. La identidad
  * (nombre/email/telefono/user_id) vive en `usuarios_portal_empresarial`; `comensales`
- * aporta `id` y `activo`; el QR es el `qr_token` de su credencial activa.
+ * aporta `id`, `activo` y `consumo_libre`; el QR es el `qr_token` de su credencial activa.
  */
 export interface Colaborador {
   /** id del comensal (int8). */
   id: number
-  /** id de usuarios_portal_empresarial (para editar su identidad). */
+  /** id de usuarios_portal_empresarial (para editar su identidad y el consumo libre). */
   usuario_id: number
   /** cuenta auth enlazada; null = aún sin acceso al portal. */
   user_id: string | null
   activo: boolean
+  /** Consumo libre activado para este comensal (solo aplica si la empresa está en modo libre). */
+  consumoLibre: boolean
   nombre: string
   email: string | null
   telefono: string | null
   /** contenido del QR (uuid). null si no tiene credencial activa. */
   qr_token: string | null
   empresa: { nombre: string | null } | null
+  /** Política de consumo de la empresa del colaborador (solo lectura). */
+  politica: PoliticaEmpresa | null
 }
 
 /** Datos editables desde el formulario. */
@@ -27,35 +41,55 @@ export interface DatosColaborador {
   email: string | null
 }
 
+/** ¿La empresa del colaborador está en modo de consumo libre? */
+export function empresaEnModoLibre(colaborador: Colaborador): boolean {
+  return colaborador.politica?.modo_consumo === 'libre'
+}
+
 export const SELECT_COMENSAL =
-  'id, activo, usuario:usuarios_portal_empresarial(id, user_id, nombre, email, telefono, empresa:empresas(nombre:nombre_comercial)), credencial:credenciales_qr(qr_token, activo)'
+  'id, activo, consumo_libre, usuario:usuarios_portal_empresarial(id, user_id, nombre, email, telefono, empresa:empresas(nombre:nombre_comercial, modo_consumo, dias_permitidos, limite_diario)), credencial:credenciales_qr(qr_token, activo)'
 
 export interface FilaComensal {
   id: number
   activo: boolean
+  consumo_libre: boolean
   usuario: {
     id: number
     user_id: string
     nombre: string
     email: string | null
     telefono: string | null
-    empresa: { nombre: string | null } | null
+    empresa: {
+      nombre: string | null
+      modo_consumo: ModoConsumo
+      dias_permitidos: number[]
+      limite_diario: number | null
+    } | null
   } | null
   credencial: { qr_token: string; activo: boolean }[]
 }
 
 export function aplanarComensal(fila: FilaComensal): Colaborador {
   const credActiva = fila.credencial.find((c) => c.activo)
+  const emp = fila.usuario?.empresa ?? null
   return {
     id: fila.id,
     usuario_id: fila.usuario?.id ?? 0,
     user_id: fila.usuario?.user_id ?? null,
     activo: fila.activo,
+    consumoLibre: fila.consumo_libre,
     nombre: fila.usuario?.nombre ?? '',
     email: fila.usuario?.email ?? null,
     telefono: fila.usuario?.telefono ?? null,
     qr_token: credActiva?.qr_token ?? null,
-    empresa: fila.usuario?.empresa ?? null,
+    empresa: emp ? { nombre: emp.nombre } : null,
+    politica: emp
+      ? {
+          modo_consumo: emp.modo_consumo,
+          dias_permitidos: emp.dias_permitidos,
+          limite_diario: emp.limite_diario,
+        }
+      : null,
   }
 }
 
@@ -122,5 +156,18 @@ export async function actualizarColaborador(
 /** Baja/alta lógica del comensal — nunca delete (conserva historial de consumos). */
 export async function cambiarEstadoColaborador(id: number, activo: boolean): Promise<void> {
   const { error } = await supabase.from('comensales').update({ activo }).eq('id', id)
+  if (error) throw error
+}
+
+/**
+ * Activa/desactiva el consumo libre de un comensal vía el RPC `establecer_consumo_libre`.
+ * OJO: `p_usuario_id` es el id de `usuarios_portal_empresarial` (NO el id de comensal).
+ * El backend valida que la empresa esté en modo libre.
+ */
+export async function establecerConsumoLibre(usuarioId: number, activo: boolean): Promise<void> {
+  const { error } = await supabase.rpc('establecer_consumo_libre', {
+    p_usuario_id: usuarioId,
+    p_activo: activo,
+  })
   if (error) throw error
 }

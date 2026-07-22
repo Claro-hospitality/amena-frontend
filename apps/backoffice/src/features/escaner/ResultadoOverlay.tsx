@@ -1,9 +1,18 @@
 import { useEffect } from 'react'
 import { Check, X } from 'lucide-react'
+import { ordinalComida } from '@amena/utils'
 import { reproducirSonidoEscaner } from './sonidoEscaner'
 
 export type Resultado =
-  | { tipo: 'exito'; nombre: string; empresa: string | null; hora: string }
+  | {
+      tipo: 'exito'
+      nombre: string
+      empresa: string | null
+      hora: string
+      /** En modo libre: cuántas comidas lleva hoy (para "Nª comida de hoy"). */
+      consumosHoy?: number
+      modo?: 'declaracion' | 'libre'
+    }
   | { tipo: 'rechazo'; motivo: string; nombre: string | null }
 
 /**
@@ -49,6 +58,11 @@ export function ResultadoOverlay({
         <>
           <p className="text-5xl font-bold leading-tight md:text-6xl">{resultado.nombre}</p>
           {resultado.empresa && <p className="text-2xl opacity-90">{resultado.empresa}</p>}
+          {resultado.modo === 'libre' && resultado.consumosHoy != null && (
+            <p className="text-3xl font-semibold">
+              {ordinalComida(resultado.consumosHoy)} comida de hoy
+            </p>
+          )}
           <p className="text-3xl font-semibold tabular-nums">{resultado.hora}</p>
         </>
       ) : (

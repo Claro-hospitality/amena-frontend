@@ -27,6 +27,7 @@ import { useCierres } from '../cierres/queries'
 import type { Empresa } from './api'
 import { ConfirmarEstadoDialog } from './ConfirmarEstadoDialog'
 import { EmpresaFormDialog } from './EmpresaFormDialog'
+import { PoliticaConsumoSection } from './PoliticaConsumoSection'
 import { useEmpresas, useResumenEmpresa } from './queries'
 import type { ResumenEmpresa } from './resumenApi'
 
@@ -76,6 +77,9 @@ export function EmpresaDetallePage() {
                 ) : (
                   <Badge variant="secondary">Inactiva</Badge>
                 )}
+                {empresa.modo_consumo === 'libre' && (
+                  <Badge className="bg-success text-success-foreground">Consumo libre</Badge>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                 {empresa.razon_social && <span>{empresa.razon_social}</span>}
@@ -110,6 +114,9 @@ export function EmpresaDetallePage() {
 
         {/* Métricas */}
         <ResumenSeccion empresaId={id} />
+
+        {/* Política de consumo (lectura para todos; editable solo super_admin) */}
+        <PoliticaConsumoSection empresa={empresa} puedeGestionar={puedeGestionar} />
 
         {/* Tabs: cada tabla ocupa el alto restante de la pantalla en desktop */}
         <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">

@@ -1,4 +1,6 @@
+import { useId } from 'react'
 import { MoreVertical, Pencil, Power, PowerOff } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
 import {
   DropdownMenu,
@@ -6,8 +8,52 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@amena/ui/components/ui/dropdown-menu'
+import { Label } from '@amena/ui/components/ui/label'
+import { Switch } from '@amena/ui/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
-import type { Colaborador } from './api'
+import { empresaEnModoLibre, type Colaborador } from './api'
+import { useConsumoLibre } from './queries'
+
+/**
+ * Toggle de consumo libre por comensal. Solo se muestra si la empresa está en modo
+ * libre. Llama al RPC con `usuario_id` (id de usuarios_portal_empresarial), no el de
+ * comensal.
+ */
+export function ToggleConsumoLibre({ colaborador }: { colaborador: Colaborador }) {
+  const consumoLibre = useConsumoLibre()
+  const id = useId()
+  if (!empresaEnModoLibre(colaborador)) return null
+
+  const cambiar = (activo: boolean) => {
+    consumoLibre.mutate(
+      { usuarioId: colaborador.usuario_id, activo },
+      {
+        onSuccess: () =>
+          toast.success(
+            activo
+              ? `Consumo libre activado para ${colaborador.nombre}`
+              : `Consumo libre desactivado para ${colaborador.nombre}`
+          ),
+        onError: () => toast.error('No se pudo cambiar el consumo libre. Intenta de nuevo.'),
+      }
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Switch
+        id={id}
+        size="sm"
+        checked={colaborador.consumoLibre}
+        disabled={consumoLibre.isPending}
+        onCheckedChange={cambiar}
+      />
+      <Label htmlFor={id} className="text-xs font-normal text-muted-foreground">
+        Consumo libre
+      </Label>
+    </div>
+  )
+}
 
 /** Menú de acciones secundarias (editar / desactivar-reactivar) de un colaborador. */
 export function AccionesColaborador({

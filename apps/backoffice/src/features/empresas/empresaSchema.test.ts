@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { empresaSchema } from './empresaSchema'
+import { empresaSchema, politicaConsumoSchema } from './empresaSchema'
 
 const base = {
   nombre_comercial: 'Constructora Norte',
@@ -46,5 +46,71 @@ describe('empresaSchema', () => {
   it('valida RFC solo si se llena', () => {
     expect(empresaSchema.safeParse({ ...base, rfc: 'XAXX010101000' }).success).toBe(true) // válido
     expect(empresaSchema.safeParse({ ...base, rfc: 'nope' }).success).toBe(false) // inválido
+  })
+})
+
+describe('politicaConsumoSchema', () => {
+  it('modo declaración: acepta sin días y límite null', () => {
+    const r = politicaConsumoSchema.safeParse({
+      modo_consumo: 'declaracion',
+      dias_permitidos: [],
+      limite_diario: null,
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it('modo libre: acepta días L-V (1..5) y límite entero > 0', () => {
+    const r = politicaConsumoSchema.safeParse({
+      modo_consumo: 'libre',
+      dias_permitidos: [1, 2, 3, 4, 5],
+      limite_diario: 2,
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it('modo libre: null (ilimitado) es válido', () => {
+    const r = politicaConsumoSchema.safeParse({
+      modo_consumo: 'libre',
+      dias_permitidos: [1],
+      limite_diario: null,
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it('rechaza días fuera de 1..5', () => {
+    expect(
+      politicaConsumoSchema.safeParse({
+        modo_consumo: 'libre',
+        dias_permitidos: [6],
+        limite_diario: 1,
+      }).success
+    ).toBe(false)
+    expect(
+      politicaConsumoSchema.safeParse({
+        modo_consumo: 'libre',
+        dias_permitidos: [0],
+        limite_diario: 1,
+      }).success
+    ).toBe(false)
+  })
+
+  it('rechaza límite <= 0', () => {
+    expect(
+      politicaConsumoSchema.safeParse({
+        modo_consumo: 'libre',
+        dias_permitidos: [1],
+        limite_diario: 0,
+      }).success
+    ).toBe(false)
+  })
+
+  it('modo libre exige al menos un día permitido', () => {
+    const r = politicaConsumoSchema.safeParse({
+      modo_consumo: 'libre',
+      dias_permitidos: [],
+      limite_diario: 2,
+    })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.error.flatten().fieldErrors.dias_permitidos?.[0]).toMatch(/al menos/i)
   })
 })

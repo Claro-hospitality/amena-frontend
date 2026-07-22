@@ -50,6 +50,8 @@ export function EscanerPage() {
             nombre: resultado.comensalNombre || 'Comensal',
             empresa: resultado.empresaNombre,
             hora: horaCorta(new Date(resultado.consumo.created_at)),
+            consumosHoy: resultado.consumosHoy,
+            modo: resultado.modo,
           })
           procesando.current = false
         },

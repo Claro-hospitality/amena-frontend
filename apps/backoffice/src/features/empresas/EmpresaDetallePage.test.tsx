@@ -38,6 +38,9 @@ const empresaFake = {
   activo: true,
   created_at: '',
   updated_at: '',
+  modo_consumo: 'declaracion' as const,
+  dias_permitidos: [] as number[],
+  limite_diario: null,
 }
 
 const resumenFake = {
