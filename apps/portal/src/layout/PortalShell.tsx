@@ -1,8 +1,10 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { LogOut, QrCode } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
+import { useIsMobile } from '@amena/ui/hooks/use-mobile'
 import { cn } from '@amena/ui/lib/utils'
 import { Breadcrumbs } from './Breadcrumbs'
 import { useAuth } from '../auth/useAuth'
@@ -101,36 +103,80 @@ function useOcultarAlBajar(umbral = 10) {
   return oculto
 }
 
-/** Barra de navegación tipo píldora, fija abajo. Solo < lg. En móvil se oculta al bajar. */
+/** Barra de navegación tipo píldora, fija abajo (< lg). En móvil se oculta al bajar (spring). */
 function NavInferior({ items }: { items: ItemNav[] }) {
   const oculto = useOcultarAlBajar()
+  const esMovil = useIsMobile()
   return (
-    <nav
+    <motion.nav
       aria-label="Navegación"
-      className={cn(
-        'fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-border bg-card p-1.5 transition-transform duration-300 ease-out lg:hidden',
-        // En móvil se desliza hacia abajo al hacer scroll; en tablet (md+) queda fija.
-        oculto && 'max-md:translate-y-[calc(100%+1rem)]'
-      )}
+      initial={false}
+      // Solo se oculta en móvil; en tablet (≥768) queda fija. Spring = deslizamiento fluido.
+      animate={{ y: esMovil && oculto ? '150%' : '0%' }}
+      transition={{ type: 'spring', stiffness: 220, damping: 30, mass: 0.9 }}
+      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-border bg-card p-1.5 lg:hidden"
     >
-      {items.map((item) => {
-        const Icono = item.icon
-        return (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              cn(
-                'flex flex-1 flex-col items-center gap-0.5 rounded-2xl px-2 py-1.5 text-[11px] font-medium transition-colors',
-                isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
-              )
-            }
+      {items.map((item) => (
+        <ItemPildora key={item.to} item={item} />
+      ))}
+    </motion.nav>
+  )
+}
+
+/** Item de la píldora: burbuja deslizante (layoutId), ripple al tocar y pop al activarse. */
+function ItemPildora({ item }: { item: ItemNav }) {
+  const Icono = item.icon
+  const [ripples, setRipples] = useState<number[]>([])
+  const idRef = useRef(0)
+
+  return (
+    <NavLink
+      to={item.to}
+      onClick={() => setRipples((r) => [...r, (idRef.current += 1)])}
+      className={({ isActive }) =>
+        cn(
+          'relative flex flex-1 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
+          isActive ? 'text-primary' : 'text-muted-foreground'
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {/* Burbuja que se desliza entre tabs (shared layout, spring elástico). */}
+          {isActive && (
+            <motion.span
+              layoutId="portal-bn-bubble"
+              className="absolute inset-0 rounded-full bg-primary/10"
+              transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.9 }}
+            />
+          )}
+
+          {/* Ripple al tocar (onda expansiva). */}
+          <AnimatePresence>
+            {ripples.map((id) => (
+              <motion.span
+                key={id}
+                initial={{ scale: 0, opacity: 0.45 }}
+                animate={{ scale: 2.2, opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45, ease: 'easeOut' }}
+                onAnimationComplete={() => setRipples((r) => r.filter((x) => x !== id))}
+                className="pointer-events-none absolute inset-0 rounded-full bg-primary/40"
+              />
+            ))}
+          </AnimatePresence>
+
+          {/* Pop del ícono + label al activarse. */}
+          <motion.div
+            animate={isActive ? { scale: [0.85, 1.08, 1] } : { scale: 1 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="relative z-10 flex flex-col items-center gap-0.5"
           >
             <Icono className="size-5" aria-hidden />
             <span>{item.label}</span>
-          </NavLink>
-        )
-      })}
-    </nav>
+          </motion.div>
+        </>
+      )}
+    </NavLink>
   )
 }
