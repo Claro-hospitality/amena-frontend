@@ -100,7 +100,7 @@ export function ColaboradorFormDialog({
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="email">Correo (opcional)</FieldLabel>
+                  <FieldLabel htmlFor="email">Correo</FieldLabel>
                   <Input
                     id="email"
                     name="email"
