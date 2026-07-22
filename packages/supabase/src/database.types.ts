@@ -525,6 +525,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      asignar_rol_unico: {
+        Args: {
+          p_rol: Database["public"]["Enums"]["rol_portal"]
+          p_usuario_id: number
+        }
+        Returns: Json
+      }
       auth_user_id_por_email: { Args: { p_email: string }; Returns: string }
       comensales_de_mis_empresas: { Args: never; Returns: number[] }
       cuota_disponible: {
@@ -542,6 +549,18 @@ export type Database = {
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }
+      establecer_comida_comensal: {
+        Args: { p_activo: boolean; p_usuario_id: number }
+        Returns: Json
+      }
+      establecer_rol_portal: {
+        Args: {
+          p_activo: boolean
+          p_rol: Database["public"]["Enums"]["rol_portal"]
+          p_usuario_id: number
+        }
+        Returns: Json
+      }
       generar_cierre_semanal: {
         Args: { p_empresa_id: number; p_semana_inicio: string }
         Returns: Json
@@ -555,6 +574,7 @@ export type Database = {
         Args: { p_qr_token: string; p_registrado_por: string }
         Returns: Json
       }
+      resumen_empresa: { Args: { p_empresa_id: number }; Returns: Json }
       tiene_algun_rol: { Args: never; Returns: boolean }
       usuarios_de_mis_empresas: { Args: never; Returns: number[] }
     }

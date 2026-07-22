@@ -29,16 +29,37 @@ beforeEach(() => {
 describe('validarAccesoPortal (portal)', () => {
   it('concede admin_empresa si administra alguna empresa', async () => {
     stub({ empresas: [1] })
-    expect(await validarAccesoPortal()).toEqual({ concedido: true, tipo: 'admin_empresa' })
+    expect(await validarAccesoPortal()).toEqual({
+      concedido: true,
+      tipo: 'admin_empresa',
+      esComensal: false,
+    })
+  })
+
+  it('admin que además es comensal: entra como admin pero marca esComensal', async () => {
+    stub({ empresas: [1], comensales: [9] })
+    expect(await validarAccesoPortal()).toEqual({
+      concedido: true,
+      tipo: 'admin_empresa',
+      esComensal: true,
+    })
   })
 
   it('concede colaborador si tiene comensal enlazado (y no es admin)', async () => {
     stub({ empresas: [], comensales: [1] })
-    expect(await validarAccesoPortal()).toEqual({ concedido: true, tipo: 'colaborador' })
+    expect(await validarAccesoPortal()).toEqual({
+      concedido: true,
+      tipo: 'colaborador',
+      esComensal: true,
+    })
   })
 
   it('deniega si no es admin ni colaborador', async () => {
     stub({ empresas: [], comensales: [] })
-    expect(await validarAccesoPortal()).toEqual({ concedido: false, tipo: null })
+    expect(await validarAccesoPortal()).toEqual({
+      concedido: false,
+      tipo: null,
+      esComensal: false,
+    })
   })
 })

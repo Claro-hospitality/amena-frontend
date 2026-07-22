@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Building2, Plus, TriangleAlert } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -13,11 +13,10 @@ import {
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
-import { DataTable } from '@amena/ui/components/data-table'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import type { Empresa } from './api'
 import { ConfirmarEstadoDialog } from './ConfirmarEstadoDialog'
-import { crearColumnasEmpresas } from './columns'
+import { EmpresaCard } from './EmpresaCard'
 import { EmpresaFormDialog } from './EmpresaFormDialog'
 import { useEmpresas } from './queries'
 
@@ -25,6 +24,7 @@ type Dialogo = { tipo: 'form'; empresa: Empresa | null } | { tipo: 'estado'; emp
 
 export function EmpresasPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
+  const navigate = useNavigate()
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
   const [busqueda, setBusqueda] = useState('')
   const [dialogo, setDialogo] = useState<Dialogo | null>(null)
@@ -35,17 +35,13 @@ export function EmpresasPage() {
     const q = busqueda.trim().toLowerCase()
     const base = empresas ?? []
     return q
-      ? base.filter((e) => `${e.nombre_comercial ?? ''} ${e.razon_social ?? ''}`.toLowerCase().includes(q))
+      ? base.filter((e) =>
+          `${e.nombre_comercial ?? ''} ${e.razon_social ?? ''}`.toLowerCase().includes(q)
+        )
       : base
   }, [empresas, busqueda])
 
   const hayEmpresas = (empresas ?? []).length > 0
-
-  const columnas = crearColumnasEmpresas({
-    rol,
-    onEditar: (empresa) => setDialogo({ tipo: 'form', empresa }),
-    onCambiarEstado: (empresa) => setDialogo({ tipo: 'estado', empresa }),
-  })
 
   if (rol !== 'super_admin' && rol !== 'finanzas') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -53,7 +49,7 @@ export function EmpresasPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
+      <div className="flex flex-col gap-4">
         {puedeGestionar && (
           <header className="flex items-center justify-end gap-4">
             <Button onClick={() => setDialogo({ tipo: 'form', empresa: null })}>
@@ -64,7 +60,7 @@ export function EmpresasPage() {
         )}
 
         {isLoading ? (
-          <TablaSkeleton />
+          <CardsSkeleton />
         ) : isError ? (
           <EstadoError onReintentar={() => refetch()} />
         ) : !hayEmpresas ? (
@@ -73,21 +69,33 @@ export function EmpresasPage() {
             onCrear={() => setDialogo({ tipo: 'form', empresa: null })}
           />
         ) : (
-          <DataTable
-            columns={columnas}
-            data={filtradas}
-            rowClassName={(empresa) => (empresa.activo ? undefined : 'opacity-60')}
-            toolbar={
-              <Input
-                placeholder="Buscar por nombre…"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="max-w-sm"
-                aria-label="Buscar empresa por nombre"
-              />
-            }
-            emptyMessage="Ninguna empresa coincide con tu búsqueda."
-          />
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Buscar por nombre…"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="max-w-sm"
+              aria-label="Buscar empresa por nombre"
+            />
+            {filtradas.length ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {filtradas.map((empresa) => (
+                  <EmpresaCard
+                    key={empresa.id}
+                    empresa={empresa}
+                    puedeGestionar={puedeGestionar}
+                    onVer={(e) => navigate(`/empresas/${e.id}`)}
+                    onEditar={(e) => setDialogo({ tipo: 'form', empresa: e })}
+                    onCambiarEstado={(e) => setDialogo({ tipo: 'estado', empresa: e })}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Ninguna empresa coincide con tu búsqueda.
+              </p>
+            )}
+          </div>
         )}
       </div>
 
@@ -105,11 +113,11 @@ export function EmpresasPage() {
   )
 }
 
-function TablaSkeleton() {
+function CardsSkeleton() {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Skeleton key={i} className="h-9 w-full" />
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-36 w-full rounded-[min(var(--radius-4xl),24px)]" />
       ))}
     </div>
   )
