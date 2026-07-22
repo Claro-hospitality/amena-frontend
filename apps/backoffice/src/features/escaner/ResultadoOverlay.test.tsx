@@ -20,6 +20,40 @@ describe('ResultadoOverlay', () => {
     expect(screen.getByText('13:05')).toBeInTheDocument()
   })
 
+  it('en modo libre muestra el ordinal "Nª comida de hoy"', () => {
+    render(
+      <ResultadoOverlay
+        resultado={{
+          tipo: 'exito',
+          nombre: 'Juan Pérez',
+          empresa: 'Constructora',
+          hora: '13:05',
+          modo: 'libre',
+          consumosHoy: 2,
+        }}
+        onCerrar={() => {}}
+      />
+    )
+    expect(screen.getByText('2ª comida de hoy')).toBeInTheDocument()
+  })
+
+  it('en modo declaración NO muestra el conteo del día', () => {
+    render(
+      <ResultadoOverlay
+        resultado={{
+          tipo: 'exito',
+          nombre: 'Juan Pérez',
+          empresa: 'Constructora',
+          hora: '13:05',
+          modo: 'declaracion',
+          consumosHoy: 2,
+        }}
+        onCerrar={() => {}}
+      />
+    )
+    expect(screen.queryByText(/comida de hoy/i)).not.toBeInTheDocument()
+  })
+
   it('rechazo muestra el motivo gigante', () => {
     render(
       <ResultadoOverlay

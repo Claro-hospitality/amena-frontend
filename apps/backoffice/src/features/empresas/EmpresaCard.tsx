@@ -69,6 +69,9 @@ export function EmpresaCard({
           <Badge variant="outline">
             {empresa.ciclo_facturacion === 'mensual' ? 'Mensual' : 'Semanal'}
           </Badge>
+          {empresa.modo_consumo === 'libre' && (
+            <Badge className="bg-success text-success-foreground">Consumo libre</Badge>
+          )}
         </div>
 
         {puedeGestionar && (

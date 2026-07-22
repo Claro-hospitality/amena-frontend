@@ -15,9 +15,10 @@ import {
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
+import { resumenPoliticaConsumo } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import type { Colaborador } from './api'
-import { AccionesColaborador, BotonInvitar } from './ColaboradorAcciones'
+import { empresaEnModoLibre, type Colaborador, type PoliticaEmpresa } from './api'
+import { AccionesColaborador, BotonInvitar, ToggleConsumoLibre } from './ColaboradorAcciones'
 import { ColaboradorCard } from './ColaboradorCard'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
 import { ConfirmarEstadoColaborador } from './ConfirmarEstadoColaborador'
@@ -42,6 +43,9 @@ export function ColaboradoresPage() {
   }, [data, busqueda])
 
   const hayColaboradores = (data ?? []).length > 0
+  // Todos los colaboradores del portal pertenecen a la misma empresa: la política es
+  // única. Se toma del primero disponible.
+  const politica = (data ?? [])[0]?.politica ?? null
 
   if (tipo !== 'admin_empresa') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -75,6 +79,8 @@ export function ColaboradoresPage() {
             <span className="sm:hidden">Nuevo</span>
           </Button>
         </header>
+
+        {politica && <PoliticaVigente politica={politica} />}
 
         {isLoading ? (
           <ListaSkeleton />
@@ -180,6 +186,16 @@ function crearColumnasColaboradores({
       ),
     },
     {
+      id: 'consumo_libre',
+      header: 'Consumo libre',
+      cell: ({ row }) =>
+        empresaEnModoLibre(row.original) ? (
+          <ToggleConsumoLibre colaborador={row.original} />
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
       id: 'acciones',
       header: () => <span className="sr-only">Acciones</span>,
       cell: ({ row }) => (
@@ -197,6 +213,25 @@ function crearColumnasColaboradores({
       ),
     },
   ]
+}
+
+/** Resumen (solo lectura) de la política de consumo de la empresa. */
+function PoliticaVigente({ politica }: { politica: PoliticaEmpresa }) {
+  const libre = politica.modo_consumo === 'libre'
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="font-medium">Consumo libre:</span>
+        {libre ? (
+          <span className="text-muted-foreground">
+            Autorizado — {resumenPoliticaConsumo(politica.dias_permitidos, politica.limite_diario)}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">No autorizado</span>
+        )}
+      </div>
+    </div>
+  )
 }
 
 function ListaSkeleton() {

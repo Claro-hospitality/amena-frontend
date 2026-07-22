@@ -26,3 +26,28 @@ export const empresaSchema = z.object({
 })
 
 export type EmpresaFormData = z.infer<typeof empresaSchema>
+
+/**
+ * Política de consumo (sección aparte del detalle de empresa). Valida:
+ * - dias_permitidos ⊆ {1..5} (ISO dow, solo días hábiles), sin duplicados.
+ * - limite_diario: null (ilimitado) o entero > 0.
+ * En modo 'libre' exige al menos un día permitido.
+ */
+export const politicaConsumoSchema = z
+  .object({
+    modo_consumo: z.enum(['declaracion', 'libre']),
+    dias_permitidos: z
+      .array(z.number().int().min(1, 'Día inválido').max(5, 'Día inválido'))
+      .refine((ds) => new Set(ds).size === ds.length, 'Días duplicados'),
+    limite_diario: z
+      .number()
+      .int('El límite debe ser un número entero')
+      .positive('El límite debe ser mayor a 0')
+      .nullable(),
+  })
+  .refine((v) => v.modo_consumo === 'declaracion' || v.dias_permitidos.length > 0, {
+    message: 'En modo libre debes permitir al menos un día',
+    path: ['dias_permitidos'],
+  })
+
+export type PoliticaConsumoData = z.infer<typeof politicaConsumoSchema>

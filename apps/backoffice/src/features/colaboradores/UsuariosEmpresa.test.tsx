@@ -27,6 +27,9 @@ const empresa: Empresa = {
   activo: true,
   created_at: '',
   updated_at: '',
+  modo_consumo: 'declaracion',
+  dias_permitidos: [],
+  limite_diario: null,
 }
 
 function renderizar(puedeGestionar = true) {
