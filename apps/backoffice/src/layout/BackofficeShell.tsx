@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronRight, LogOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -45,10 +45,7 @@ export function BackofficeShell({ rol, children }: { rol: RolBackoffice; childre
       <NavegacionBackoffice rol={rol} />
       <SidebarInset className="min-w-0">
         {/* Colapsar/expandir el menú: botón circular en el borde del sidebar (desktop). */}
-        <SidebarTrigger
-          aria-label="Comprimir o expandir el menú"
-          className="absolute -left-3 top-4 z-30 hidden size-6 rounded-full border border-sidebar-border bg-background text-foreground shadow-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground md:flex"
-        />
+        <BotonColapsarSidebar />
         <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background px-4">
           <SidebarTrigger aria-label="Alternar menú" className="md:hidden" />
           <LogotipoAmena className="h-5 w-auto text-primary md:hidden" />
@@ -65,6 +62,22 @@ export function BackofficeShell({ rol, children }: { rol: RolBackoffice; childre
         </TituloDetalleProvider>
       </SidebarInset>
     </SidebarProvider>
+  )
+}
+
+/** Botón circular en el borde del sidebar (desktop) que colapsa/expande, con chevron según el estado. */
+function BotonColapsarSidebar() {
+  const { state, toggleSidebar } = useSidebar()
+  const Chevron = state === 'collapsed' ? ChevronRight : ChevronLeft
+  return (
+    <button
+      type="button"
+      aria-label="Comprimir o expandir el menú"
+      onClick={toggleSidebar}
+      className="absolute -left-3 top-4 z-30 hidden size-6 items-center justify-center rounded-full border border-sidebar-border bg-background text-foreground shadow-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground md:flex"
+    >
+      <Chevron className="size-4" />
+    </button>
   )
 }
 
