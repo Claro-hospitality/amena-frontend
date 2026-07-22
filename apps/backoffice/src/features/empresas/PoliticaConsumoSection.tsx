@@ -58,14 +58,20 @@ export function PoliticaConsumoSection({
   const actualizar = useActualizarEmpresa()
 
   // Estado local del formulario (UI). La escritura va por TanStack Query al guardar.
-  const [modoLibre, setModoLibre] = useState(empresa.modo_consumo === 'libre')
-  const [dias, setDias] = useState<number[]>([...empresa.dias_permitidos].sort((a, b) => a - b))
+  // Defensivo: un backend sin la migración de política (p. ej. prod aún sin liberar)
+  // devuelve estos campos como undefined; se normalizan para no romper el render.
+  const modoConsumo = empresa.modo_consumo ?? 'declaracion'
+  const diasPermitidos = empresa.dias_permitidos ?? []
+  const limiteDiarioEmpresa = empresa.limite_diario ?? null
+
+  const [modoLibre, setModoLibre] = useState(modoConsumo === 'libre')
+  const [dias, setDias] = useState<number[]>([...diasPermitidos].sort((a, b) => a - b))
   const [opcionLimite, setOpcionLimite] = useState<OpcionLimite>(
-    opcionDesdeLimite(empresa.limite_diario)
+    opcionDesdeLimite(limiteDiarioEmpresa)
   )
   const [limitePersonalizado, setLimitePersonalizado] = useState(
-    empresa.limite_diario != null && ![1, 2].includes(empresa.limite_diario)
-      ? String(empresa.limite_diario)
+    limiteDiarioEmpresa != null && ![1, 2].includes(limiteDiarioEmpresa)
+      ? String(limiteDiarioEmpresa)
       : ''
   )
   const [errorDias, setErrorDias] = useState<string | null>(null)
