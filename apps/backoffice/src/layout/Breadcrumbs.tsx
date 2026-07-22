@@ -10,6 +10,7 @@ import {
 } from '@amena/ui/components/ui/breadcrumb'
 import { construirMigas } from '@amena/utils'
 import { RUTAS_BREADCRUMB } from './rutasBreadcrumb'
+import { useTituloDetalle } from './tituloDetalle'
 
 /**
  * Migas de pan calculadas desde la ruta actual. La última (página actual) se
@@ -19,7 +20,16 @@ import { RUTAS_BREADCRUMB } from './rutasBreadcrumb'
  */
 export function Breadcrumbs() {
   const { pathname } = useLocation()
-  const migas = construirMigas(pathname, RUTAS_BREADCRUMB)
+  const { titulo } = useTituloDetalle()
+  const base = construirMigas(pathname, RUTAS_BREADCRUMB)
+  // Si la ruta tiene un título dinámico (p. ej. nombre de empresa), se agrega como
+  // paso final actual y el anterior pasa a ser un enlace navegable.
+  const migas = titulo
+    ? [
+        ...base.map((m, i) => (i === base.length - 1 ? { ...m, esActual: false } : m)),
+        { label: titulo, to: pathname, esActual: true },
+      ]
+    : base
 
   return (
     <Breadcrumb>

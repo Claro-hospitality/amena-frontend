@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, Pencil, Power, PowerOff, TriangleAlert } from 'lucide-react'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { Building2, Pencil, Power, PowerOff, TriangleAlert } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@amena/ui/components/u
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
+import { useSetTituloDetalle } from '../../layout/tituloDetalle'
 import { UsuariosEmpresa } from '../colaboradores/UsuariosEmpresa'
 import type { CierreConEmpresa } from '../cierres/api'
 import { CierreDetalleDialog } from '../cierres/CierreDetalleDialog'
@@ -36,7 +37,6 @@ const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'E
 export function EmpresaDetallePage() {
   const { rol } = useOutletContext<ContextoAcceso>()
   const { empresaId } = useParams<{ empresaId: string }>()
-  const navigate = useNavigate()
   const id = Number(empresaId)
 
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
@@ -44,6 +44,9 @@ export function EmpresaDetallePage() {
 
   const [dialogo, setDialogo] = useState<Dialogo>(null)
   const [detalleCierre, setDetalleCierre] = useState<CierreConEmpresa | null>(null)
+
+  // El breadcrumb del shell muestra el nombre de la empresa como paso final.
+  useSetTituloDetalle(empresa ? nombreEmpresa(empresa) : null)
 
   if (rol !== 'super_admin' && rol !== 'finanzas') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -64,16 +67,6 @@ export function EmpresaDetallePage() {
       <div className="flex flex-col gap-6 md:min-h-0 md:flex-1">
         {/* Encabezado */}
         <header className="flex flex-col gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ml-2 w-fit text-muted-foreground"
-            onClick={() => navigate('/empresas')}
-          >
-            <ArrowLeft className="size-4" />
-            Empresas
-          </Button>
-
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-3">
@@ -98,11 +91,15 @@ export function EmpresaDetallePage() {
 
             {puedeGestionar && (
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setDialogo({ tipo: 'form' })}>
+                <Button size="sm" onClick={() => setDialogo({ tipo: 'form' })}>
                   <Pencil className="size-4" />
                   Editar
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setDialogo({ tipo: 'estado' })}>
+                <Button
+                  variant={empresa.activo ? 'destructive' : 'default'}
+                  size="sm"
+                  onClick={() => setDialogo({ tipo: 'estado' })}
+                >
                   {empresa.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
                   {empresa.activo ? 'Desactivar' : 'Reactivar'}
                 </Button>
