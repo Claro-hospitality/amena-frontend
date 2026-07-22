@@ -1,6 +1,7 @@
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
+import { CredencialesAcceso } from '@amena/ui/components/ui/credenciales-acceso'
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import {
 } from '@amena/ui/components/ui/dialog'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@amena/ui/components/ui/field'
 import { Input } from '@amena/ui/components/ui/input'
-import type { Colaborador } from './api'
+import type { Colaborador, CredencialesAlta } from './api'
 import { colaboradorSchema } from './colaboradorSchema'
 import { useActualizarColaborador, useCrearColaborador, useMiEmpresaId } from './queries'
 
@@ -32,6 +33,8 @@ export function ColaboradorFormDialog({
   const actualizar = useActualizarColaborador()
   const { data: empresaId } = useMiEmpresaId()
   const esEdicion = Boolean(colaborador)
+  // Tras crear, se muestran las credenciales de acceso (una sola vez) en vez de cerrar.
+  const [credenciales, setCredenciales] = useState<CredencialesAlta | null>(null)
 
   const [estado, accion, pending] = useActionState<EstadoForm, FormData>(
     async (_prev, fd) => {
@@ -41,18 +44,20 @@ export function ColaboradorFormDialog({
         if (colaborador) {
           await actualizar.mutateAsync({ usuarioId: colaborador.usuario_id, datos: parsed.data })
           toast.success('Colaborador actualizado')
+          onClose()
         } else {
           if (!empresaId) {
             toast.error('No se pudo determinar tu empresa. Recarga e intenta de nuevo.')
             return { errors: {} }
           }
-          await crear.mutateAsync({ ...parsed.data, empresa_id: empresaId })
+          const creds = await crear.mutateAsync({ ...parsed.data, empresa_id: empresaId })
           toast.success('Colaborador creado')
+          setCredenciales(creds) // mantiene el dialog abierto para entregar el acceso
         }
-        onClose()
         return { errors: {} }
-      } catch {
-        toast.error('No se pudo guardar el colaborador. Intenta de nuevo.')
+      } catch (e) {
+        // El backend puede rechazar (p. ej. 403 fuera de tu empresa): se muestra su mensaje.
+        toast.error(e instanceof Error ? e.message : 'No se pudo guardar el colaborador.')
         return { errors: {} }
       }
     },
@@ -67,52 +72,58 @@ export function ColaboradorFormDialog({
       }}
     >
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{esEdicion ? 'Editar colaborador' : 'Nuevo colaborador'}</DialogTitle>
-          <DialogDescription>
-            {esEdicion
-              ? 'Actualiza los datos del colaborador.'
-              : 'Al registrarlo se genera su acceso al portal y su credencial QR.'}
-          </DialogDescription>
-        </DialogHeader>
+        {credenciales ? (
+          <CredencialesAcceso credenciales={credenciales} onClose={onClose} />
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>{esEdicion ? 'Editar colaborador' : 'Nuevo colaborador'}</DialogTitle>
+              <DialogDescription>
+                {esEdicion
+                  ? 'Actualiza los datos del colaborador.'
+                  : 'Al registrarlo se genera su acceso al portal y su credencial QR.'}
+              </DialogDescription>
+            </DialogHeader>
 
-        <form action={accion}>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="nombre">Nombre</FieldLabel>
-              <Input
-                id="nombre"
-                name="nombre"
-                defaultValue={colaborador?.nombre}
-                aria-invalid={Boolean(estado.errors.nombre)}
-                autoFocus
-              />
-              {estado.errors.nombre && <FieldError>{estado.errors.nombre[0]}</FieldError>}
-            </Field>
+            <form action={accion}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="nombre">Nombre</FieldLabel>
+                  <Input
+                    id="nombre"
+                    name="nombre"
+                    defaultValue={colaborador?.nombre}
+                    aria-invalid={Boolean(estado.errors.nombre)}
+                    autoFocus
+                  />
+                  {estado.errors.nombre && <FieldError>{estado.errors.nombre[0]}</FieldError>}
+                </Field>
 
-            <Field>
-              <FieldLabel htmlFor="email">Correo (opcional)</FieldLabel>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                defaultValue={colaborador?.email ?? ''}
-                aria-invalid={Boolean(estado.errors.email)}
-                placeholder="colaborador@empresa.com"
-              />
-              {estado.errors.email && <FieldError>{estado.errors.email[0]}</FieldError>}
-            </Field>
-          </FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="email">Correo (opcional)</FieldLabel>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    defaultValue={colaborador?.email ?? ''}
+                    aria-invalid={Boolean(estado.errors.email)}
+                    placeholder="colaborador@empresa.com"
+                  />
+                  {estado.errors.email && <FieldError>{estado.errors.email[0]}</FieldError>}
+                </Field>
+              </FieldGroup>
 
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={pending}>
-              {pending ? 'Guardando…' : 'Guardar'}
-            </Button>
-          </DialogFooter>
-        </form>
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={pending}>
+                  {pending ? 'Guardando…' : 'Guardar'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )

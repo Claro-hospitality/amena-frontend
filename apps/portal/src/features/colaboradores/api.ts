@@ -41,6 +41,17 @@ export interface DatosColaborador {
   email: string | null
 }
 
+/**
+ * Credenciales de acceso resultado del alta (las devuelve `alta-usuario-portal`). Si se creó
+ * una cuenta nueva trae `tempPassword` (se muestra UNA sola vez); si el email ya tenía cuenta,
+ * `yaTeniaCuenta=true` sin `tempPassword` (usa su contraseña actual).
+ */
+export interface CredencialesAlta {
+  email: string
+  yaTeniaCuenta: boolean
+  tempPassword?: string
+}
+
 /** ¿La empresa del colaborador está en modo de consumo libre? */
 export function empresaEnModoLibre(colaborador: Colaborador): boolean {
   return colaborador.politica?.modo_consumo === 'libre'
@@ -118,15 +129,17 @@ export async function obtenerMiEmpresaId(): Promise<number> {
 /**
  * Da de alta un colaborador vía la Edge Function `alta-usuario-portal`: crea su
  * identidad en `usuarios_portal_empresarial`, su fila en `comensales` y su credencial
- * QR. La creación real (service role) es del backend; el front solo invoca.
+ * QR. La creación real (service role) es del backend; el front solo invoca. Devuelve las
+ * credenciales de acceso (contraseña temporal) para entregárselas al colaborador.
  */
 export async function crearColaborador(
   datos: DatosColaborador & { empresa_id: number }
-): Promise<void> {
-  const { error } = await supabase.functions.invoke('alta-usuario-portal', {
+): Promise<CredencialesAlta> {
+  const { data, error } = await supabase.functions.invoke('alta-usuario-portal', {
     body: { ...datos, rol: 'colaborador' },
   })
   if (error) {
+    // FunctionsHttpError (p. ej. 403): el body {error} viene en error.context (el Response).
     let mensaje = 'No se pudo dar de alta al colaborador. Intenta de nuevo.'
     const resp = (error as { context?: Response }).context
     if (resp && typeof resp.json === 'function') {
@@ -139,6 +152,7 @@ export async function crearColaborador(
     }
     throw new Error(mensaje)
   }
+  return data as CredencialesAlta
 }
 
 /** Actualiza nombre/email del colaborador (viven en usuarios_portal_empresarial). */
