@@ -101,13 +101,13 @@ describe('CierresPage', () => {
   it('muestra el estado vacío sin datos', async () => {
     api.listarCierres.mockResolvedValue([])
     renderizar('super_admin')
-    expect(await screen.findByText(/aún no hay cierres/i)).toBeInTheDocument()
+    expect(await screen.findByText(/aún no hay cortes/i)).toBeInTheDocument()
   })
 
   it('muestra el estado de error y permite reintentar', async () => {
     api.listarCierres.mockRejectedValue(new Error('boom'))
     renderizar('super_admin')
-    expect(await screen.findByText(/no se pudieron cargar los cierres/i)).toBeInTheDocument()
+    expect(await screen.findByText(/no se pudieron cargar los cortes/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument()
   })
 

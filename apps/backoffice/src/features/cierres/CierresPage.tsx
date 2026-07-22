@@ -93,7 +93,7 @@ export function CierresPage() {
         const { generados, ya_existentes } = res.resultado
         toast.success(`Corte ejecutado: ${generados} generados · ${ya_existentes} ya existían.`)
       } else {
-        toast.info(res.motivo ?? 'No se generaron cierres.')
+        toast.info(res.motivo ?? 'No se generaron cortes.')
       }
     } catch {
       toast.error('No se pudo ejecutar el corte. Intenta de nuevo.')
@@ -193,7 +193,7 @@ export function CierresPage() {
                 </Field>
               </div>
             }
-            emptyMessage="Ningún cierre coincide con los filtros seleccionados."
+            emptyMessage="Ningún corte coincide con los filtros seleccionados."
           />
         )}
       </div>
@@ -210,7 +210,7 @@ export function CierresPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Ejecutar el corte ahora?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se generarán los cierres de la última semana completa para todas las empresas
+              Se generarán los cortes de la última semana completa para todas las empresas
               activas, sin esperar al día configurado. La operación es idempotente: las semanas
               ya cerradas no se recalculan.
             </AlertDialogDescription>
@@ -242,7 +242,7 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
         <EmptyMedia variant="icon">
           <TriangleAlert className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>No se pudieron cargar los cierres</EmptyTitle>
+        <EmptyTitle>No se pudieron cargar los cortes</EmptyTitle>
         <EmptyDescription>Ocurrió un error al consultar los datos.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -261,11 +261,11 @@ function CierresVacio({ hayFiltros }: { hayFiltros: boolean }) {
         <EmptyMedia variant="icon">
           <ClipboardCheck className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>{hayFiltros ? 'Sin resultados' : 'Aún no hay cierres'}</EmptyTitle>
+        <EmptyTitle>{hayFiltros ? 'Sin resultados' : 'Aún no hay cortes'}</EmptyTitle>
         <EmptyDescription>
           {hayFiltros
-            ? 'Ningún cierre coincide con los filtros seleccionados.'
-            : 'Los cierres aparecerán aquí cuando se ejecute el corte semanal.'}
+            ? 'Ningún corte coincide con los filtros seleccionados.'
+            : 'Los cortes aparecerán aquí cuando se ejecute el corte semanal.'}
         </EmptyDescription>
       </EmptyHeader>
     </Empty>

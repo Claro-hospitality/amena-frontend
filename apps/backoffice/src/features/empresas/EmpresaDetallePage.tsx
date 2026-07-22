@@ -260,7 +260,7 @@ function HistoricoSeccion({
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-        Cierres semanales
+        Cortes semanales
       </h2>
       {isLoading ? (
         <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
@@ -273,7 +273,7 @@ function HistoricoSeccion({
           <CardContent className="flex flex-col items-start gap-3 p-5">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <TriangleAlert className="size-4" />
-              No se pudieron cargar los cierres.
+              No se pudieron cargar los cortes.
             </p>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               Reintentar
@@ -285,7 +285,7 @@ function HistoricoSeccion({
           columns={columnas}
           data={cierresEmpresa}
           fillHeight={false}
-          emptyMessage="Aún no hay cierres para esta empresa."
+          emptyMessage="Aún no hay cortes para esta empresa."
         />
       )}
     </section>

@@ -123,7 +123,7 @@ export default function App() {
           }
         />
         <Route
-          path="cierres"
+          path="cortes"
           element={
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
@@ -132,6 +132,8 @@ export default function App() {
             </RutaErrorBoundary>
           }
         />
+        {/* Compatibilidad: la sección se renombró de "Cierres" a "Cortes". */}
+        <Route path="cierres" element={<Navigate to="/cortes" replace />} />
         <Route
           path="configuracion"
           element={

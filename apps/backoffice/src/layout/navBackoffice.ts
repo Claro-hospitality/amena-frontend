@@ -23,7 +23,7 @@ export interface ItemNav {
 /**
  * Items del sidebar por rol (rutas placeholder por ahora).
  * - super_admin: todo el backoffice.
- * - finanzas: consultas de cierres y facturas.
+ * - finanzas: consultas de cortes y facturas.
  * - mesero: solo el escáner.
  */
 export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
@@ -33,14 +33,14 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/empresas', label: 'Empresas', icon: Building2 },
     { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
     { to: '/menu', label: 'Menú', icon: CalendarDays },
-    { to: '/cierres', label: 'Cierres', icon: ClipboardCheck },
+    { to: '/cortes', label: 'Cortes', icon: ClipboardCheck },
     { to: '/facturas', label: 'Facturas', icon: FileText },
     { to: '/configuracion', label: 'Configuración', icon: Settings },
   ],
   finanzas: [
     { to: '/inicio', label: 'Inicio', icon: Home },
     { to: '/empresas', label: 'Empresas', icon: Building2 },
-    { to: '/cierres', label: 'Cierres', icon: ClipboardCheck },
+    { to: '/cortes', label: 'Cortes', icon: ClipboardCheck },
     { to: '/facturas', label: 'Facturas', icon: FileText },
   ],
   mesero: [{ to: '/escaner', label: 'Escáner', icon: ScanLine }],
