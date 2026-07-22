@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LogOut, QrCode } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
@@ -76,12 +76,42 @@ export function PortalShell({
   )
 }
 
-/** Barra de navegación tipo píldora, fija abajo. Solo < lg. */
+/**
+ * True cuando el usuario hace scroll hacia abajo (para ocultar la píldora en móvil).
+ * Vuelve a false al subir o al estar cerca del tope.
+ */
+function useOcultarAlBajar(umbral = 10) {
+  const [oculto, setOculto] = useState(false)
+  useEffect(() => {
+    let ultimaY = window.scrollY
+    const alScroll = () => {
+      const y = window.scrollY
+      if (y < 40) {
+        setOculto(false)
+        ultimaY = y
+        return
+      }
+      if (Math.abs(y - ultimaY) < umbral) return
+      setOculto(y > ultimaY) // bajando → ocultar; subiendo → mostrar
+      ultimaY = y
+    }
+    window.addEventListener('scroll', alScroll, { passive: true })
+    return () => window.removeEventListener('scroll', alScroll)
+  }, [umbral])
+  return oculto
+}
+
+/** Barra de navegación tipo píldora, fija abajo. Solo < lg. En móvil se oculta al bajar. */
 function NavInferior({ items }: { items: ItemNav[] }) {
+  const oculto = useOcultarAlBajar()
   return (
     <nav
       aria-label="Navegación"
-      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-border bg-card p-1.5 lg:hidden"
+      className={cn(
+        'fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-border bg-card p-1.5 transition-transform duration-300 ease-out lg:hidden',
+        // En móvil se desliza hacia abajo al hacer scroll; en tablet (md+) queda fija.
+        oculto && 'max-md:translate-y-[calc(100%+1rem)]'
+      )}
     >
       {items.map((item) => {
         const Icono = item.icon
