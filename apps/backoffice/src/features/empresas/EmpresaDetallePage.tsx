@@ -14,6 +14,7 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@amena/ui/components/ui/tabs'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
@@ -60,7 +61,7 @@ export function EmpresaDetallePage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 md:min-h-0 md:flex-1">
         {/* Encabezado */}
         <header className="flex flex-col gap-3">
           <Button
@@ -113,11 +114,19 @@ export function EmpresaDetallePage() {
         {/* Métricas */}
         <ResumenSeccion empresaId={id} />
 
-        {/* Usuarios de la empresa (admins + colaboradores) */}
-        <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} />
-
-        {/* Histórico de cierres semanales */}
-        <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} />
+        {/* Tabs: cada tabla ocupa el alto restante de la pantalla en desktop */}
+        <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
+          <TabsList>
+            <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
+            <TabsTrigger value="cortes">Cortes semanales</TabsTrigger>
+          </TabsList>
+          <TabsContent value="usuarios" className="flex min-h-0 flex-col">
+            <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} fillHeight />
+          </TabsContent>
+          <TabsContent value="cortes" className="flex min-h-0 flex-col">
+            <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} fillHeight />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {dialogo?.tipo === 'form' && (
@@ -238,9 +247,12 @@ function MetricaDinero({ etiqueta, valor }: { etiqueta: string; valor: number })
 function HistoricoSeccion({
   empresaId,
   onVerDetalle,
+  fillHeight = false,
 }: {
   empresaId: number
   onVerDetalle: (cierre: CierreConEmpresa) => void
+  /** En tab: ocupa el alto restante y la tabla hace scroll interno. */
+  fillHeight?: boolean
 }) {
   const { data: cierres, isLoading, isError, refetch } = useCierres()
 
@@ -258,10 +270,12 @@ function HistoricoSeccion({
   )
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-        Cortes semanales
-      </h2>
+    <section className={`flex flex-col gap-3 ${fillHeight ? 'min-h-0 flex-1' : ''}`}>
+      {!fillHeight && (
+        <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
+          Cortes semanales
+        </h2>
+      )}
       {isLoading ? (
         <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -284,7 +298,7 @@ function HistoricoSeccion({
         <DataTable
           columns={columnas}
           data={cierresEmpresa}
-          fillHeight={false}
+          fillHeight={fillHeight}
           emptyMessage="Aún no hay cortes para esta empresa."
         />
       )}
