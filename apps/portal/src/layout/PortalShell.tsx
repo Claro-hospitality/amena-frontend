@@ -36,7 +36,7 @@ export function PortalShell({
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="flex items-center gap-4 border-b border-border px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-border bg-background px-4 py-3 sm:px-6">
         <LogotipoAmena className="h-5 w-auto text-primary" />
 
         {/* lg+: navegación en línea */}
