@@ -1,4 +1,4 @@
-import type { ConsumoSemana, ItemDeclaracion } from './api'
+import type { ConsumoSemana, CuotaSemana, ItemDeclaracion } from './api'
 
 /** Selección de la grilla: por comensal, el conjunto de fechas marcadas. */
 export type SeleccionDeclaracion = Record<number, Set<string>>
@@ -24,4 +24,37 @@ export function estaConsumida(
   consumos: ConsumoSemana[]
 ): boolean {
   return consumos.some((c) => c.comensal_id === comensalId && c.fecha === fechaISO)
+}
+
+/** Consumo libre resumido para una fecha: comensal + cuántas comidas registró ese día. */
+export interface ConsumoLibreResumen {
+  comensalId: number
+  nombre: string
+  cantidad: number
+}
+
+/**
+ * Consumos LIBRES de una fecha: los de comensales que consumieron ese día pero NO tienen
+ * cuota (modo consumo libre → no hay declaración). Se agrupan por comensal con su conteo,
+ * para reflejarlos aunque no exista una cuota que los represente.
+ */
+export function consumosLibresDelDia(
+  fechaISO: string,
+  cuotas: CuotaSemana[],
+  consumos: ConsumoSemana[]
+): ConsumoLibreResumen[] {
+  const conCuota = new Set(cuotas.map((q) => q.colaborador.id))
+  const porComensal = new Map<number, ConsumoLibreResumen>()
+  for (const c of consumos) {
+    if (c.fecha !== fechaISO || conCuota.has(c.comensal_id)) continue
+    const previo = porComensal.get(c.comensal_id)
+    if (previo) previo.cantidad += 1
+    else
+      porComensal.set(c.comensal_id, {
+        comensalId: c.comensal_id,
+        nombre: c.colaborador.nombre,
+        cantidad: 1,
+      })
+  }
+  return [...porComensal.values()].sort((a, b) => a.nombre.localeCompare(b.nombre))
 }

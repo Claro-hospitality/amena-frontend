@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import type { ConsumoSemana } from './api'
-import { construirPayload, contarComidas, estaConsumida, type SeleccionDeclaracion } from './logica'
+import type { ConsumoSemana, CuotaSemana } from './api'
+import {
+  construirPayload,
+  consumosLibresDelDia,
+  contarComidas,
+  estaConsumida,
+  type SeleccionDeclaracion,
+} from './logica'
 
 describe('construirPayload', () => {
   it('convierte la selección en array y omite comensales sin fechas', () => {
@@ -36,12 +42,41 @@ describe('contarComidas', () => {
 })
 
 describe('estaConsumida', () => {
-  const consumos: ConsumoSemana[] = [{ comensal_id: 1, fecha: '2026-07-20' }]
+  const consumos: ConsumoSemana[] = [
+    { comensal_id: 1, fecha: '2026-07-20', colaborador: { id: 1, nombre: 'Ana' } },
+  ]
   it('true si hay consumo del comensal esa fecha', () => {
     expect(estaConsumida(1, '2026-07-20', consumos)).toBe(true)
   })
   it('false si no coincide comensal o fecha', () => {
     expect(estaConsumida(1, '2026-07-21', consumos)).toBe(false)
     expect(estaConsumida(2, '2026-07-20', consumos)).toBe(false)
+  })
+})
+
+describe('consumosLibresDelDia', () => {
+  const F = '2026-07-20'
+  const cuotas: CuotaSemana[] = [
+    { id: 1, fecha: F, origen: 'declaracion', colaborador: { id: 1, nombre: 'Ana' } },
+  ]
+
+  it('lista consumos SIN cuota (libre) y agrupa por comensal con su conteo', () => {
+    const consumos: ConsumoSemana[] = [
+      // comensal 1 tiene cuota → NO es libre.
+      { comensal_id: 1, fecha: F, colaborador: { id: 1, nombre: 'Ana' } },
+      // comensal 2 sin cuota, consumió 2 veces ese día → libre, cantidad 2.
+      { comensal_id: 2, fecha: F, colaborador: { id: 2, nombre: 'Beto' } },
+      { comensal_id: 2, fecha: F, colaborador: { id: 2, nombre: 'Beto' } },
+    ]
+    expect(consumosLibresDelDia(F, cuotas, consumos)).toEqual([
+      { comensalId: 2, nombre: 'Beto', cantidad: 2 },
+    ])
+  })
+
+  it('ignora consumos de otra fecha', () => {
+    const consumos: ConsumoSemana[] = [
+      { comensal_id: 3, fecha: '2026-07-21', colaborador: { id: 3, nombre: 'Cita' } },
+    ]
+    expect(consumosLibresDelDia(F, cuotas, consumos)).toEqual([])
   })
 })
