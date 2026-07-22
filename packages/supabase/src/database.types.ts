@@ -542,6 +542,10 @@ export type Database = {
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }
+      establecer_comida_comensal: {
+        Args: { p_activo: boolean; p_usuario_id: number }
+        Returns: Json
+      }
       establecer_rol_portal: {
         Args: {
           p_activo: boolean

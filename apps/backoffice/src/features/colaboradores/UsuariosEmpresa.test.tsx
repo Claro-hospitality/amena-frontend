@@ -8,6 +8,7 @@ const api = vi.hoisted(() => ({
   listarUsuariosEmpresa: vi.fn(),
   altaUsuarioPortal: vi.fn(),
   establecerRolPortal: vi.fn(),
+  establecerComidaComensal: vi.fn(),
   nombreEmpresa: () => '—',
 }))
 vi.mock('./api', () => api)
@@ -39,9 +40,10 @@ function renderizar(puedeGestionar = true) {
 beforeEach(() => {
   vi.clearAllMocks()
   api.establecerRolPortal.mockResolvedValue(undefined)
+  api.establecerComidaComensal.mockResolvedValue(undefined)
   api.listarUsuariosEmpresa.mockResolvedValue([
-    { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false },
-    { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true },
+    { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false, comeActivo: true },
+    { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true, comeActivo: false },
   ])
 })
 
@@ -85,21 +87,45 @@ describe('UsuariosEmpresa', () => {
     await waitFor(() => expect(api.establecerRolPortal).toHaveBeenCalledWith(2, 'admin', true))
   })
 
-  it('editar roles: quitar Colaborador pide confirmación antes del RPC', async () => {
+  it('editar roles: quitar Colaborador aplica directo (sin confirmación, roles = solo vista)', async () => {
     const user = userEvent.setup()
     renderizar(true)
     await screen.findByText('Juan Pérez')
     await user.click(screen.getByRole('button', { name: 'Editar roles de Juan Pérez' }))
     await screen.findByText('Roles de Juan Pérez')
 
-    // Juan es colaborador → apagar el switch abre confirmación, sin llamar aún al RPC.
+    // Los roles son solo de vista: apagar el switch llama al RPC sin diálogo de confirmación.
     await user.click(screen.getByRole('switch', { name: 'Colaborador' }))
-    expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
-    expect(api.establecerRolPortal).not.toHaveBeenCalled()
-
-    await user.click(screen.getByRole('button', { name: 'Quitar' }))
     await waitFor(() =>
       expect(api.establecerRolPortal).toHaveBeenCalledWith(2, 'colaborador', false)
+    )
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  })
+
+  it('comida: activar (comensal inactivo) aplica directo vía el RPC', async () => {
+    const user = userEvent.setup()
+    renderizar(true)
+    await screen.findByText('Juan Pérez') // Juan tiene comeActivo=false
+
+    await user.click(screen.getByRole('button', { name: 'Activar comida de Juan Pérez' }))
+    await waitFor(() =>
+      expect(api.establecerComidaComensal).toHaveBeenCalledWith(2, true)
+    )
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  })
+
+  it('comida: desactivar (comensal activo) confirma antes de llamar al RPC', async () => {
+    const user = userEvent.setup()
+    renderizar(true)
+    await screen.findByText('Adriana Ruiz') // Adriana tiene comeActivo=true
+
+    await user.click(screen.getByRole('button', { name: 'Desactivar comida de Adriana Ruiz' }))
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
+    expect(api.establecerComidaComensal).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Desactivar' }))
+    await waitFor(() =>
+      expect(api.establecerComidaComensal).toHaveBeenCalledWith(1, false)
     )
   })
 })

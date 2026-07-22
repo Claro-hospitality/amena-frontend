@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   altaUsuarioPortal,
+  establecerComidaComensal,
   establecerRolPortal,
   listarColaboradores,
   listarUsuariosEmpresa,
@@ -33,6 +34,19 @@ export function useEstablecerRol() {
       rol: RolPortal
       activo: boolean
     }) => establecerRolPortal(usuarioId, rol, activo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['usuarios'] })
+      qc.invalidateQueries({ queryKey: ['empresa'] })
+    },
+  })
+}
+
+/** Da de baja/alta la comida de un comensal; refresca el listado y el resumen. */
+export function useEstablecerComida() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ usuarioId, activo }: { usuarioId: number; activo: boolean }) =>
+      establecerComidaComensal(usuarioId, activo),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['usuarios'] })
       qc.invalidateQueries({ queryKey: ['empresa'] })
