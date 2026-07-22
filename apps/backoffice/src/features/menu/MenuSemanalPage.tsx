@@ -11,15 +11,27 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
+import { Tabs, TabsList, TabsTrigger } from '@amena/ui/components/ui/tabs'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { toast } from 'sonner'
-import { aISO, deISO, diasHabiles, etiquetaDia, lunesDeSemana } from '@amena/utils'
+import {
+  aISO,
+  deISO,
+  diasHabiles,
+  etiquetaDia,
+  etiquetaMes,
+  lunesDeSemana,
+  rangoSemanaLegible,
+} from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { CopiarSemanaDialog } from './CopiarSemanaDialog'
 import { DiaColumna } from './DiaColumna'
-import { NavegadorSemana } from './NavegadorSemana'
-import { useAgregarPlatillo, useMenuSemana, useQuitarMenuDia } from './queries'
+import { semanasDelMes } from './logica'
+import { useAgregarPlatillo, useMenuRango, useMenuSemana, useQuitarMenuDia } from './queries'
+import { VistaMes } from './VistaMes'
 import { usePlatillos } from '../platillos/queries'
+
+type Vista = 'semana' | 'mes'
 
 function moverLunes(lunesISO: string, deltaSemanas: number): string {
   const lunes = deISO(lunesISO)
@@ -27,16 +39,35 @@ function moverLunes(lunesISO: string, deltaSemanas: number): string {
   return aISO(lunes)
 }
 
+function moverMes(mesISO: string, deltaMeses: number): string {
+  const d = deISO(mesISO)
+  d.setMonth(d.getMonth() + deltaMeses, 1)
+  return aISO(d)
+}
+
 export function MenuSemanalPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
+  const [vista, setVista] = useState<Vista>('semana')
   const [lunesISO, setLunesISO] = useState(() => aISO(lunesDeSemana(new Date())))
+  const [mesISO, setMesISO] = useState(() => {
+    const hoy = new Date()
+    return aISO(new Date(hoy.getFullYear(), hoy.getMonth(), 1))
+  })
   const [diaMovil, setDiaMovil] = useState(0)
   const [copiando, setCopiando] = useState(false)
 
-  const { data: menu, isLoading, isError, refetch } = useMenuSemana(lunesISO)
+  const esMes = vista === 'mes'
+  const semanas = semanasDelMes(deISO(mesISO))
+  const desdeMes = aISO(semanas[0])
+  const hastaMes = aISO(diasHabiles(semanas[semanas.length - 1])[4])
+
+  const semanaQuery = useMenuSemana(lunesISO, !esMes)
+  const mesQuery = useMenuRango(desdeMes, hastaMes, esMes)
+  const activa = esMes ? mesQuery : semanaQuery
+
   const { data: catalogo } = usePlatillos()
-  const agregar = useAgregarPlatillo(lunesISO)
-  const quitar = useQuitarMenuDia(lunesISO)
+  const agregar = useAgregarPlatillo()
+  const quitar = useQuitarMenuDia()
 
   if (rol !== 'super_admin') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -44,8 +75,9 @@ export function MenuSemanalPage() {
 
   const dias = diasHabiles(deISO(lunesISO))
   const activos = (catalogo ?? []).filter((p) => p.activo)
-  const asignadosDe = (fechaISO: string) => (menu ?? []).filter((m) => m.fecha === fechaISO)
-  const semanaVacia = (menu ?? []).length === 0
+  const menu = activa.data ?? []
+  const asignadosDe = (fechaISO: string) => menu.filter((m) => m.fecha === fechaISO)
+  const semanaVacia = !esMes && menu.length === 0
 
   const irSemana = (delta: number) => {
     setLunesISO((prev) => moverLunes(prev, delta))
@@ -64,18 +96,76 @@ export function MenuSemanalPage() {
   return (
     <TooltipProvider>
       <div className="flex flex-col gap-4">
-        <header className="flex sm:justify-end">
-          <NavegadorSemana
-            lunesISO={lunesISO}
-            onAnterior={() => irSemana(-1)}
-            onSiguiente={() => irSemana(1)}
-          />
+        {/* Filtro de vista + navegador del periodo */}
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <Tabs value={vista} onValueChange={(v) => setVista(v as Vista)}>
+            <TabsList>
+              <TabsTrigger value="semana">Semana</TabsTrigger>
+              <TabsTrigger value="mes">Mes</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div className="flex items-center gap-2">
+            {esMes ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => setMesISO((m) => moverMes(m, -1))}
+                  aria-label="Mes anterior"
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+                <span className="min-w-40 text-center text-sm font-medium capitalize">
+                  {etiquetaMes(deISO(mesISO))}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => setMesISO((m) => moverMes(m, 1))}
+                  aria-label="Mes siguiente"
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => irSemana(-1)}
+                  aria-label="Semana anterior"
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+                <span className="min-w-36 text-center text-sm font-medium">
+                  {rangoSemanaLegible(deISO(lunesISO))}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => irSemana(1)}
+                  aria-label="Semana siguiente"
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         </header>
 
-        {isLoading ? (
+        {activa.isLoading ? (
           <SemanaSkeleton />
-        ) : isError ? (
-          <EstadoError onReintentar={() => refetch()} />
+        ) : activa.isError ? (
+          <EstadoError onReintentar={() => activa.refetch()} />
+        ) : esMes ? (
+          <VistaMes
+            semanas={semanas}
+            menu={menu}
+            activos={activos}
+            onAgregar={onAgregar}
+            onQuitar={onQuitar}
+          />
         ) : (
           <>
             {semanaVacia && (
@@ -127,7 +217,9 @@ export function MenuSemanalPage() {
                   <ChevronLeft className="size-4" />
                   Anterior
                 </Button>
-                <span className="text-sm font-medium capitalize">{etiquetaDia(dias[diaMovil])}</span>
+                <span className="text-sm font-medium capitalize">
+                  {etiquetaDia(dias[diaMovil])}
+                </span>
                 <Button
                   variant="outline"
                   size="sm"
@@ -173,7 +265,7 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
           <TriangleAlert className="size-6" />
         </EmptyMedia>
         <EmptyTitle>No se pudo cargar el menú</EmptyTitle>
-        <EmptyDescription>Ocurrió un error al consultar la semana.</EmptyDescription>
+        <EmptyDescription>Ocurrió un error al consultar el menú.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button variant="outline" onClick={onReintentar}>

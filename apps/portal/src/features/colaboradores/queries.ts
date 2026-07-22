@@ -3,6 +3,7 @@ import {
   actualizarColaborador,
   cambiarEstadoColaborador,
   crearColaborador,
+  establecerConsumoLibre,
   listarColaboradores,
   obtenerMiEmpresaId,
   type DatosColaborador,
@@ -40,6 +41,19 @@ export function useCambiarEstadoColaborador() {
   return useMutation({
     mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
       cambiarEstadoColaborador(id, activo),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
+  })
+}
+
+/**
+ * Activa/desactiva el consumo libre de un comensal. `usuarioId` es el id de
+ * `usuarios_portal_empresarial` (colaborador.usuario_id), NO el id de comensal.
+ */
+export function useConsumoLibre() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ usuarioId, activo }: { usuarioId: number; activo: boolean }) =>
+      establecerConsumoLibre(usuarioId, activo),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
 }

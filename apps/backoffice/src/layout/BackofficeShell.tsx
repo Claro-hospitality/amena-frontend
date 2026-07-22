@@ -1,17 +1,18 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronRight, LogOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
+import { Button } from '@amena/ui/components/ui/button'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@amena/ui/components/ui/collapsible'
 import { Breadcrumbs } from './Breadcrumbs'
+import { TituloDetalleProvider } from './TituloDetalleProvider'
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -38,25 +39,49 @@ import { navDesarrollo, navPorRol, type ItemNav } from './navBackoffice'
  * Usa los tokens `--sidebar-*` del tema (los consume el componente).
  */
 export function BackofficeShell({ rol, children }: { rol: RolBackoffice; children: ReactNode }) {
+  const { cerrarSesion } = useAuth()
   return (
     <SidebarProvider>
       <NavegacionBackoffice rol={rol} />
       <SidebarInset className="min-w-0">
+        {/* Colapsar/expandir el menú: botón circular en el borde del sidebar (desktop). */}
+        <BotonColapsarSidebar />
         <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background px-4">
-          <SidebarTrigger aria-label="Alternar menú" />
+          <SidebarTrigger aria-label="Alternar menú" className="md:hidden" />
           <LogotipoAmena className="h-5 w-auto text-primary md:hidden" />
+          <Button variant="ghost" size="sm" className="ml-auto" onClick={() => cerrarSesion()}>
+            <LogOut className="size-4" />
+            <span className="hidden sm:inline">Cerrar sesión</span>
+          </Button>
         </header>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pb-4 pt-3 md:px-6 md:pb-6">
-          <Breadcrumbs />
-          {children}
-        </div>
+        <TituloDetalleProvider>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pb-4 pt-3 md:px-6 md:pb-6">
+            <Breadcrumbs />
+            {children}
+          </div>
+        </TituloDetalleProvider>
       </SidebarInset>
     </SidebarProvider>
   )
 }
 
+/** Botón circular en el borde del sidebar (desktop) que colapsa/expande, con chevron según el estado. */
+function BotonColapsarSidebar() {
+  const { state, toggleSidebar } = useSidebar()
+  const Chevron = state === 'collapsed' ? ChevronRight : ChevronLeft
+  return (
+    <button
+      type="button"
+      aria-label="Comprimir o expandir el menú"
+      onClick={toggleSidebar}
+      className="absolute -left-3 top-4 z-30 hidden size-6 items-center justify-center rounded-full border border-sidebar-border bg-background text-foreground shadow-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground md:flex"
+    >
+      <Chevron className="size-4" />
+    </button>
+  )
+}
+
 function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
-  const { cerrarSesion } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const { pathname } = useLocation()
 
@@ -89,7 +114,7 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <LogotipoAmena className="mx-2 my-1 h-5 w-auto text-sidebar-primary group-data-[collapsible=icon]:hidden" />
+        <LogotipoAmena className="mx-2 my-1 h-8 w-auto text-sidebar-primary group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -143,16 +168,6 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
           </SidebarGroup>
         )}
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Cerrar sesión" onClick={() => cerrarSesion()}>
-              <LogOut />
-              <span>Cerrar sesión</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

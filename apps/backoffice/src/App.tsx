@@ -132,6 +132,8 @@ export default function App() {
             </RutaErrorBoundary>
           }
         />
+        {/* Compatibilidad: la sección se llamó "Cortes"; redirige links viejos a /cierres. */}
+        <Route path="cortes" element={<Navigate to="/cierres" replace />} />
         <Route
           path="configuracion"
           element={

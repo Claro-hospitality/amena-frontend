@@ -5,6 +5,7 @@ import {
   crearEmpresa,
   listarEmpresas,
   type DatosEmpresa,
+  type DatosEmpresaBase,
 } from './api'
 import { obtenerResumenEmpresa } from './resumenApi'
 
@@ -25,7 +26,7 @@ export function useResumenEmpresa(empresaId: number) {
 export function useCrearEmpresa() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (datos: DatosEmpresa) => crearEmpresa(datos),
+    mutationFn: (datos: DatosEmpresaBase) => crearEmpresa(datos),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_EMPRESAS }),
   })
 }
@@ -33,8 +34,12 @@ export function useCrearEmpresa() {
 export function useActualizarEmpresa() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, datos }: { id: number; datos: DatosEmpresa }) => actualizarEmpresa(id, datos),
-    onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_EMPRESAS }),
+    mutationFn: ({ id, datos }: { id: number; datos: Partial<DatosEmpresa> }) =>
+      actualizarEmpresa(id, datos),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: CLAVE_EMPRESAS })
+      qc.invalidateQueries({ queryKey: ['empresa'] })
+    },
   })
 }
 

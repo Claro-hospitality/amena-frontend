@@ -20,9 +20,15 @@ describe('mapearMotivoRechazo', () => {
     ['La empresa del colaborador está inactiva', 'Empresa inactiva'],
     ['El colaborador no tiene cuota disponible para hoy', 'Sin cuota para hoy'],
     ['El colaborador ya consumió hoy', 'Ya consumió hoy'],
+    ['Hoy no es un día permitido para consumo libre', 'Hoy no es día permitido'],
   ]
   it.each(casos)('%s → %s', (mensaje, esperado) => {
     expect(mapearMotivoRechazo({ message: mensaje })).toBe(esperado)
+  })
+  it('límite diario devuelve el mensaje del RPC con el conteo (N de M)', () => {
+    expect(mapearMotivoRechazo({ message: 'Límite diario alcanzado (2 de 2)' })).toBe(
+      'Límite diario alcanzado (2 de 2)'
+    )
   })
   it('desconocido → mensaje genérico', () => {
     expect(mapearMotivoRechazo({ message: 'boom' })).toBe('No se pudo registrar')

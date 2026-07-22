@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, Pencil, Power, PowerOff, TriangleAlert } from 'lucide-react'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { Building2, Pencil, Power, PowerOff, TriangleAlert } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
@@ -14,9 +14,11 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@amena/ui/components/ui/tabs'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
+import { useSetTituloDetalle } from '../../layout/tituloDetalle'
 import { UsuariosEmpresa } from '../colaboradores/UsuariosEmpresa'
 import type { CierreConEmpresa } from '../cierres/api'
 import { CierreDetalleDialog } from '../cierres/CierreDetalleDialog'
@@ -25,6 +27,7 @@ import { useCierres } from '../cierres/queries'
 import type { Empresa } from './api'
 import { ConfirmarEstadoDialog } from './ConfirmarEstadoDialog'
 import { EmpresaFormDialog } from './EmpresaFormDialog'
+import { PoliticaConsumoSection } from './PoliticaConsumoSection'
 import { useEmpresas, useResumenEmpresa } from './queries'
 import type { ResumenEmpresa } from './resumenApi'
 
@@ -35,7 +38,6 @@ const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'E
 export function EmpresaDetallePage() {
   const { rol } = useOutletContext<ContextoAcceso>()
   const { empresaId } = useParams<{ empresaId: string }>()
-  const navigate = useNavigate()
   const id = Number(empresaId)
 
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
@@ -43,6 +45,9 @@ export function EmpresaDetallePage() {
 
   const [dialogo, setDialogo] = useState<Dialogo>(null)
   const [detalleCierre, setDetalleCierre] = useState<CierreConEmpresa | null>(null)
+
+  // El breadcrumb del shell muestra el nombre de la empresa como paso final.
+  useSetTituloDetalle(empresa ? nombreEmpresa(empresa) : null)
 
   if (rol !== 'super_admin' && rol !== 'finanzas') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -60,19 +65,9 @@ export function EmpresaDetallePage() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 md:min-h-0 md:flex-1">
         {/* Encabezado */}
         <header className="flex flex-col gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ml-2 w-fit text-muted-foreground"
-            onClick={() => navigate('/empresas')}
-          >
-            <ArrowLeft className="size-4" />
-            Empresas
-          </Button>
-
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-3">
@@ -81,6 +76,9 @@ export function EmpresaDetallePage() {
                   <Badge className="bg-success text-success-foreground">Activa</Badge>
                 ) : (
                   <Badge variant="secondary">Inactiva</Badge>
+                )}
+                {empresa.modo_consumo === 'libre' && (
+                  <Badge className="bg-success text-success-foreground">Consumo libre</Badge>
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
@@ -97,11 +95,15 @@ export function EmpresaDetallePage() {
 
             {puedeGestionar && (
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setDialogo({ tipo: 'form' })}>
+                <Button size="sm" onClick={() => setDialogo({ tipo: 'form' })}>
                   <Pencil className="size-4" />
                   Editar
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setDialogo({ tipo: 'estado' })}>
+                <Button
+                  variant={empresa.activo ? 'destructive' : 'default'}
+                  size="sm"
+                  onClick={() => setDialogo({ tipo: 'estado' })}
+                >
                   {empresa.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
                   {empresa.activo ? 'Desactivar' : 'Reactivar'}
                 </Button>
@@ -113,11 +115,22 @@ export function EmpresaDetallePage() {
         {/* Métricas */}
         <ResumenSeccion empresaId={id} />
 
-        {/* Usuarios de la empresa (admins + colaboradores) */}
-        <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} />
+        {/* Política de consumo (lectura para todos; editable solo super_admin) */}
+        <PoliticaConsumoSection empresa={empresa} puedeGestionar={puedeGestionar} />
 
-        {/* Histórico de cierres semanales */}
-        <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} />
+        {/* Tabs: cada tabla ocupa el alto restante de la pantalla en desktop */}
+        <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
+          <TabsList>
+            <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
+            <TabsTrigger value="cierres">Cierres semanales</TabsTrigger>
+          </TabsList>
+          <TabsContent value="usuarios" className="flex min-h-0 flex-col">
+            <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} fillHeight />
+          </TabsContent>
+          <TabsContent value="cierres" className="flex min-h-0 flex-col">
+            <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} fillHeight />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {dialogo?.tipo === 'form' && (
@@ -238,9 +251,12 @@ function MetricaDinero({ etiqueta, valor }: { etiqueta: string; valor: number })
 function HistoricoSeccion({
   empresaId,
   onVerDetalle,
+  fillHeight = false,
 }: {
   empresaId: number
   onVerDetalle: (cierre: CierreConEmpresa) => void
+  /** En tab: ocupa el alto restante y la tabla hace scroll interno. */
+  fillHeight?: boolean
 }) {
   const { data: cierres, isLoading, isError, refetch } = useCierres()
 
@@ -258,10 +274,12 @@ function HistoricoSeccion({
   )
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-        Cierres semanales
-      </h2>
+    <section className={`flex flex-col gap-3 ${fillHeight ? 'min-h-0 flex-1' : ''}`}>
+      {!fillHeight && (
+        <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
+          Cierres semanales
+        </h2>
+      )}
       {isLoading ? (
         <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -284,7 +302,7 @@ function HistoricoSeccion({
         <DataTable
           columns={columnas}
           data={cierresEmpresa}
-          fillHeight={false}
+          fillHeight={fillHeight}
           emptyMessage="Aún no hay cierres para esta empresa."
         />
       )}

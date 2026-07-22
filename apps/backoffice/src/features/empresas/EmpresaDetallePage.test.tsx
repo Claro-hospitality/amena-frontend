@@ -14,7 +14,7 @@ vi.mock('./api', () => empresasApi)
 const resumenApi = vi.hoisted(() => ({ obtenerResumenEmpresa: vi.fn() }))
 vi.mock('./resumenApi', () => resumenApi)
 
-const cierresApi = vi.hoisted(() => ({ listarCierres: vi.fn(), ejecutarCorteManual: vi.fn() }))
+const cierresApi = vi.hoisted(() => ({ listarCierres: vi.fn(), ejecutarCierreManual: vi.fn() }))
 vi.mock('../cierres/api', () => cierresApi)
 
 const colaboradoresApi = vi.hoisted(() => ({
@@ -38,6 +38,9 @@ const empresaFake = {
   activo: true,
   created_at: '',
   updated_at: '',
+  modo_consumo: 'declaracion' as const,
+  dias_permitidos: [] as number[],
+  limite_diario: null,
 }
 
 const resumenFake = {
@@ -88,9 +91,11 @@ describe('EmpresaDetallePage', () => {
 
   it('lista todos los usuarios de la empresa (admins + colaboradores)', async () => {
     renderizar('super_admin')
+    // Tabs de Usuarios y Cierres semanales; la de Usuarios está activa por defecto.
+    expect(await screen.findByRole('tab', { name: 'Usuarios' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Cierres semanales' })).toBeInTheDocument()
     expect(await screen.findByText('Juan Pérez')).toBeInTheDocument()
     expect(screen.getByText('Adriana Ruiz')).toBeInTheDocument() // admin también aparece
-    expect(screen.getByRole('heading', { name: 'Usuarios' })).toBeInTheDocument()
   })
 
   it('super_admin ve las acciones de editar/estado; finanzas no', async () => {

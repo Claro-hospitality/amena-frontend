@@ -34,7 +34,20 @@ export function BrandingPage() {
   )
 }
 
-const TOKENS_COLOR = [
+type TokenColor = { nombre: string; clase?: string; hex?: string; codigo?: string }
+
+// Los 3 colores PRINCIPALES de la identidad de marca (Amena Brand Book), con su hex REAL
+// (escala de marca: --color-naranja/salvia/crema). Se muestran con su hex exacto.
+const COLORES_MARCA: TokenColor[] = [
+  { nombre: 'Naranja Acento', hex: '#F68D2E', codigo: 'naranja-500' },
+  { nombre: 'Verde Salvia', hex: '#92A271', codigo: 'salvia-500' },
+  { nombre: 'Crema Base', hex: '#F4EFE3', codigo: 'crema-100' },
+]
+
+// Tokens semánticos del sistema (lo que consumen los componentes). Derivan de la paleta;
+// algunos son tintes claros del color de marca (p. ej. secondary = salvia claro), NO el
+// color de marca puro.
+const TOKENS_SISTEMA: TokenColor[] = [
   { nombre: 'primary', clase: 'bg-primary' },
   { nombre: 'secondary', clase: 'bg-secondary' },
   { nombre: 'accent', clase: 'bg-accent' },
@@ -49,26 +62,49 @@ const TOKENS_COLOR = [
   { nombre: 'foreground', clase: 'bg-foreground' },
 ]
 
+function GrillaTokens({ tokens }: { tokens: TokenColor[] }) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {tokens.map((t) => (
+        <div key={t.nombre} className="flex items-center gap-3">
+          <div
+            className={`size-10 shrink-0 rounded-lg border border-border ${t.clase ?? ''}`}
+            style={t.hex ? { backgroundColor: t.hex } : undefined}
+          />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{t.nombre}</p>
+            <code className="font-mono text-xs text-muted-foreground">
+              {t.hex ? `${t.hex} · ${t.codigo}` : `bg-${t.nombre}`}
+            </code>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function TokensColor() {
   return (
     <Seccion titulo="Tokens de color">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {TOKENS_COLOR.map((t) => (
-          <div key={t.nombre} className="flex items-center gap-3">
-            <div className={`size-10 shrink-0 rounded-lg border border-border ${t.clase}`} />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{t.nombre}</p>
-              <code className="font-mono text-xs text-muted-foreground">bg-{t.nombre}</code>
-            </div>
-          </div>
-        ))}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium">Colores principales de la marca</p>
+          <GrillaTokens tokens={COLORES_MARCA} />
+        </div>
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium">Tokens del sistema</p>
+          <GrillaTokens tokens={TOKENS_SISTEMA} />
+        </div>
       </div>
       <p className="mt-4 text-xs text-muted-foreground">
+        Los <span className="font-medium text-foreground">colores de marca</span> son la fuente;
+        los tokens del sistema derivan de ellos (algunos son tintes, p. ej.{' '}
+        <span className="font-medium text-foreground">secondary</span> es un salvia claro).
         Estados: <span className="font-medium text-foreground">success</span> (validado/pagado),{' '}
         <span className="font-medium text-foreground">warning</span> (advertencias),{' '}
         <span className="font-medium text-foreground">destructive</span> (errores),{' '}
-        <span className="font-medium text-foreground">info</span> (información). Usar el token,
-        nunca el hex.
+        <span className="font-medium text-foreground">info</span> (información). En componentes,
+        usar siempre el token, nunca el hex.
       </p>
     </Seccion>
   )

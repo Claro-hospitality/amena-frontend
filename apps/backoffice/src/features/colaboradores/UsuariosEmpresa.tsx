@@ -143,10 +143,13 @@ function columnaAcciones(
 export function UsuariosEmpresa({
   empresa,
   puedeGestionar = true,
+  fillHeight = false,
 }: {
   empresa: Empresa
   /** Solo super_admin puede dar de alta; finanzas ve el listado en modo lectura. */
   puedeGestionar?: boolean
+  /** En tab: ocupa el alto restante y la tabla hace scroll interno (sin título propio). */
+  fillHeight?: boolean
 }) {
   const { data, isLoading, isError, refetch } = useUsuariosEmpresa(empresa.id)
   const establecerComida = useEstablecerComida()
@@ -193,18 +196,24 @@ export function UsuariosEmpresa({
   const hayUsuarios = (data ?? []).length > 0
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-          Usuarios
-        </h2>
-        {hayUsuarios && puedeGestionar && (
-          <Button size="sm" onClick={() => setAltaAbierta(true)}>
-            <Plus className="size-4" />
-            Nuevo usuario
-          </Button>
-        )}
-      </div>
+    <section className={`flex flex-col gap-3 ${fillHeight ? 'min-h-0 flex-1' : ''}`}>
+      {(!fillHeight || (hayUsuarios && puedeGestionar)) && (
+        <div className="flex items-center justify-between gap-4">
+          {fillHeight ? (
+            <span />
+          ) : (
+            <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
+              Usuarios
+            </h2>
+          )}
+          {hayUsuarios && puedeGestionar && (
+            <Button size="sm" onClick={() => setAltaAbierta(true)}>
+              <Plus className="size-4" />
+              Nuevo usuario
+            </Button>
+          )}
+        </div>
+      )}
 
       {isLoading ? (
         <TablaSkeleton />
@@ -216,7 +225,7 @@ export function UsuariosEmpresa({
         <DataTable
           columns={columnas}
           data={filtrados}
-          fillHeight={false}
+          fillHeight={fillHeight}
           rowClassName={(u) => (u.activo ? undefined : 'opacity-60')}
           toolbar={
             <Input

@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const api = vi.hoisted(() => ({
   listarCierres: vi.fn(),
-  ejecutarCorteManual: vi.fn(),
+  ejecutarCierreManual: vi.fn(),
 }))
 vi.mock('./api', () => api)
 
@@ -55,7 +55,7 @@ function renderizar(rol: RolBackoffice) {
 beforeEach(() => {
   vi.clearAllMocks()
   api.listarCierres.mockResolvedValue([cierreConstructora, cierreEstudio])
-  api.ejecutarCorteManual.mockResolvedValue({
+  api.ejecutarCierreManual.mockResolvedValue({
     corrio: true,
     resultado: { semana_inicio: '2026-07-13', generados: 2, ya_existentes: 1, empresas: [] },
   })
@@ -72,17 +72,17 @@ describe('CierresPage', () => {
     expect(within(tabla).getAllByText(/jul 2026/).length).toBeGreaterThan(0)
   })
 
-  it('super_admin ve el botón de ejecutar corte', async () => {
+  it('super_admin ve el botón de ejecutar cierre', async () => {
     renderizar('super_admin')
     await screen.findByRole('table')
-    expect(screen.getByRole('button', { name: 'Ejecutar corte ahora' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ejecutar cierre ahora' })).toBeInTheDocument()
   })
 
-  it('finanzas ve el listado sin el botón de corte', async () => {
+  it('finanzas ve el listado sin el botón de cierre', async () => {
     renderizar('finanzas')
     await screen.findByRole('table')
     expect(
-      screen.queryByRole('button', { name: 'Ejecutar corte ahora' })
+      screen.queryByRole('button', { name: 'Ejecutar cierre ahora' })
     ).not.toBeInTheDocument()
   })
 
@@ -94,7 +94,7 @@ describe('CierresPage', () => {
   it('muestra skeleton mientras carga (sin tabla)', () => {
     api.listarCierres.mockReturnValue(new Promise(() => {}))
     renderizar('super_admin')
-    expect(screen.getByRole('button', { name: /ejecutar corte/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ejecutar cierre/i })).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
@@ -126,16 +126,16 @@ describe('CierresPage', () => {
     expect(within(tablaFiltrada).getByText('Estudio Creativo Sur')).toBeInTheDocument()
   })
 
-  it('ejecuta el corte manual tras confirmar', async () => {
+  it('ejecuta el cierre manual tras confirmar', async () => {
     const user = userEvent.setup()
     renderizar('super_admin')
     await screen.findByRole('table')
 
-    await user.click(screen.getByRole('button', { name: 'Ejecutar corte ahora' }))
+    await user.click(screen.getByRole('button', { name: 'Ejecutar cierre ahora' }))
     const dialogo = await screen.findByRole('alertdialog')
-    await user.click(within(dialogo).getByRole('button', { name: 'Ejecutar corte' }))
+    await user.click(within(dialogo).getByRole('button', { name: 'Ejecutar cierre' }))
 
-    await waitFor(() => expect(api.ejecutarCorteManual).toHaveBeenCalled())
+    await waitFor(() => expect(api.ejecutarCierreManual).toHaveBeenCalled())
   })
 
   it('abre el detalle de un cierre', async () => {

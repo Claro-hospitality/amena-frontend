@@ -38,7 +38,7 @@ import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import type { CierreConEmpresa } from './api'
 import { CierreDetalleDialog } from './CierreDetalleDialog'
 import { crearColumnasCierres } from './columns'
-import { useCierres, useEjecutarCorte } from './queries'
+import { useCierres, useEjecutarCierre } from './queries'
 
 export function CierresPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
@@ -46,9 +46,9 @@ export function CierresPage() {
   const [empresaSel, setEmpresaSel] = useState('')
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
-  const [confirmarCorte, setConfirmarCorte] = useState(false)
+  const [confirmarCierre, setConfirmarCierre] = useState(false)
   const [detalle, setDetalle] = useState<CierreConEmpresa | null>(null)
-  const ejecutar = useEjecutarCorte()
+  const ejecutar = useEjecutarCierre()
 
   const esSuperAdmin = rol === 'super_admin'
 
@@ -85,18 +85,18 @@ export function CierresPage() {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
-  async function confirmarCorteAhora() {
-    setConfirmarCorte(false)
+  async function confirmarCierreAhora() {
+    setConfirmarCierre(false)
     try {
       const res = await ejecutar.mutateAsync()
       if (res.corrio && res.resultado) {
         const { generados, ya_existentes } = res.resultado
-        toast.success(`Corte ejecutado: ${generados} generados · ${ya_existentes} ya existían.`)
+        toast.success(`Cierre ejecutado: ${generados} generados · ${ya_existentes} ya existían.`)
       } else {
         toast.info(res.motivo ?? 'No se generaron cierres.')
       }
     } catch {
-      toast.error('No se pudo ejecutar el corte. Intenta de nuevo.')
+      toast.error('No se pudo ejecutar el cierre. Intenta de nuevo.')
     }
   }
 
@@ -105,9 +105,9 @@ export function CierresPage() {
       <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
         {esSuperAdmin && (
           <header className="flex items-center justify-end gap-4">
-            <Button onClick={() => setConfirmarCorte(true)} disabled={ejecutar.isPending}>
+            <Button onClick={() => setConfirmarCierre(true)} disabled={ejecutar.isPending}>
               {ejecutar.isPending ? <Spinner className="size-4" /> : <Play className="size-4" />}
-              Ejecutar corte ahora
+              Ejecutar cierre ahora
             </Button>
           </header>
         )}
@@ -201,14 +201,14 @@ export function CierresPage() {
       {detalle && <CierreDetalleDialog cierre={detalle} onClose={() => setDetalle(null)} />}
 
       <AlertDialog
-        open={confirmarCorte}
+        open={confirmarCierre}
         onOpenChange={(abierto) => {
-          if (!abierto) setConfirmarCorte(false)
+          if (!abierto) setConfirmarCierre(false)
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Ejecutar el corte ahora?</AlertDialogTitle>
+            <AlertDialogTitle>¿Ejecutar el cierre ahora?</AlertDialogTitle>
             <AlertDialogDescription>
               Se generarán los cierres de la última semana completa para todas las empresas
               activas, sin esperar al día configurado. La operación es idempotente: las semanas
@@ -217,7 +217,7 @@ export function CierresPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarCorteAhora}>Ejecutar corte</AlertDialogAction>
+            <AlertDialogAction onClick={confirmarCierreAhora}>Ejecutar cierre</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -265,7 +265,7 @@ function CierresVacio({ hayFiltros }: { hayFiltros: boolean }) {
         <EmptyDescription>
           {hayFiltros
             ? 'Ningún cierre coincide con los filtros seleccionados.'
-            : 'Los cierres aparecerán aquí cuando se ejecute el corte semanal.'}
+            : 'Los cierres aparecerán aquí cuando se ejecute el cierre semanal.'}
         </EmptyDescription>
       </EmptyHeader>
     </Empty>
