@@ -66,8 +66,10 @@ export async function listarColaboradores(): Promise<Colaborador[]> {
 }
 
 /**
- * Un usuario del portal de una empresa (admin y/o colaborador) para el listado
- * del detalle de empresa. `esColaborador` se deriva del rol o de tener comensal.
+ * Un usuario del portal de una empresa para el listado del detalle de empresa.
+ * Los roles (`esAdmin`/`esColaborador`) son SOLO de vista: definen qué ve en el
+ * portal, no si come. Quien come es un comensal: `comeActivo` refleja si su
+ * comensal está activo (puede consumir + QR vigente).
  */
 export interface UsuarioEmpresa {
   id: number
@@ -76,18 +78,23 @@ export interface UsuarioEmpresa {
   activo: boolean
   esAdmin: boolean
   esColaborador: boolean
+  /** True si su comensal está activo (consume + QR vigente). */
+  comeActivo: boolean
 }
 
 /**
- * Lista TODOS los usuarios del portal de una empresa (admins + colaboradores) con
- * su rol. Filtra por `empresa_id` en `usuarios_portal_empresarial`; embebe sus
- * roles y si tiene comensal. RLS: super_admin ve todo; finanzas ve los usuarios y
- * comensales pero no los roles (por eso `esAdmin` puede quedar en false para finanzas).
+ * Lista TODOS los usuarios del portal de una empresa con su rol (solo vista) y el
+ * estado de comida de su comensal. Filtra por `empresa_id` en
+ * `usuarios_portal_empresarial`; embebe sus roles y su comensal. RLS: super_admin ve
+ * todo; finanzas ve los usuarios y comensales pero no los roles (por eso `esAdmin`
+ * puede quedar en false para finanzas).
  */
 export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioEmpresa[]> {
   const { data, error } = await supabase
     .from('usuarios_portal_empresarial')
-    .select('id, nombre, email, activo, roles:roles_portal_empresarial(rol, activo), comensal:comensales(id)')
+    .select(
+      'id, nombre, email, activo, roles:roles_portal_empresarial(rol, activo), comensal:comensales(id, activo)'
+    )
     .eq('empresa_id', empresaId)
     .order('nombre')
   if (error) throw error
@@ -99,15 +106,16 @@ export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioE
       email: u.email ?? null,
       activo: u.activo,
       esAdmin: roles.some((r) => r.rol === 'admin'),
-      esColaborador: roles.some((r) => r.rol === 'colaborador') || u.comensal != null,
+      esColaborador: roles.some((r) => r.rol === 'colaborador'),
+      comeActivo: u.comensal?.activo ?? false,
     }
   })
 }
 
 /**
  * Agrega o quita un rol (admin/colaborador) a un usuario del portal vía el RPC
- * `establecer_rol_portal`. colaborador ON crea/reactiva su comensal + QR; OFF hace
- * baja lógica del comensal (deja de consumir, historial intacto).
+ * `establecer_rol_portal`. Los roles son SOLO de vista (qué ve en el portal); NO
+ * tocan al comensal ni su capacidad de comer.
  */
 export async function establecerRolPortal(
   usuarioId: number,
@@ -117,6 +125,19 @@ export async function establecerRolPortal(
   const { error } = await supabase.rpc('establecer_rol_portal', {
     p_usuario_id: usuarioId,
     p_rol: rol,
+    p_activo: activo,
+  })
+  if (error) throw error
+}
+
+/**
+ * Baja/alta lógica del comensal vía el RPC `establecer_comida_comensal`. Al
+ * desactivar: deja de consumir y su QR queda inactivo (el historial se conserva).
+ * Al activar: reasegura su QR. Guard del backend: super_admin o admin de la empresa.
+ */
+export async function establecerComidaComensal(usuarioId: number, activo: boolean): Promise<void> {
+  const { error } = await supabase.rpc('establecer_comida_comensal', {
+    p_usuario_id: usuarioId,
     p_activo: activo,
   })
   if (error) throw error

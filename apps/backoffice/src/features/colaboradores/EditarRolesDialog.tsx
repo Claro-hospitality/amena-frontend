@@ -1,15 +1,5 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@amena/ui/components/ui/alert-dialog'
 import { Button } from '@amena/ui/components/ui/button'
 import {
   Dialog,
@@ -25,9 +15,9 @@ import type { RolPortal, UsuarioEmpresa } from './api'
 import { useEstablecerRol } from './queries'
 
 /**
- * Edita los roles (admin/colaborador) de un usuario del portal. Aplica cada cambio
- * al vuelo vía el RPC. Quitar "colaborador" pide confirmación porque desactiva su
- * credencial/QR (deja de consumir; su historial se conserva).
+ * Edita los roles (admin/colaborador) de un usuario del portal. Los roles son SOLO
+ * de vista: definen qué ve en el portal, no si come. Cada cambio aplica directo vía
+ * el RPC (sin confirmación); la capacidad de comer se gestiona aparte (comensal).
  */
 export function EditarRolesDialog({
   usuario,
@@ -39,7 +29,6 @@ export function EditarRolesDialog({
   const establecer = useEstablecerRol()
   const [admin, setAdmin] = useState(usuario.esAdmin)
   const [colaborador, setColaborador] = useState(usuario.esColaborador)
-  const [confirmarQuitar, setConfirmarQuitar] = useState(false)
 
   const aplicar = (rol: RolPortal, activo: boolean, revertir: () => void) => {
     establecer.mutate(
@@ -63,98 +52,59 @@ export function EditarRolesDialog({
   }
 
   const alternarColaborador = (v: boolean) => {
-    if (!v) {
-      setConfirmarQuitar(true) // quitar colaborador → confirmar (desactiva su comensal/QR)
-      return
-    }
-    setColaborador(true)
-    aplicar('colaborador', true, () => setColaborador(false))
-  }
-
-  const confirmarQuitarColaborador = () => {
-    setConfirmarQuitar(false)
-    setColaborador(false)
-    aplicar('colaborador', false, () => setColaborador(true))
+    setColaborador(v)
+    aplicar('colaborador', v, () => setColaborador(!v))
   }
 
   return (
-    <>
-      <Dialog
-        open
-        onOpenChange={(abierto) => {
-          if (!abierto) onClose()
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Roles de {usuario.nombre}</DialogTitle>
-            <DialogDescription>Activa o desactiva sus roles en la empresa.</DialogDescription>
-          </DialogHeader>
+    <Dialog
+      open
+      onOpenChange={(abierto) => {
+        if (!abierto) onClose()
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Roles de {usuario.nombre}</DialogTitle>
+          <DialogDescription>
+            Los roles definen qué ve en el portal. No afectan si puede comer.
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="flex flex-col gap-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex flex-col gap-0.5">
-                <Label htmlFor="rol-admin">Administrador</Label>
-                <p className="text-xs text-muted-foreground">
-                  Gestiona la empresa y sus usuarios en el portal.
-                </p>
-              </div>
-              <Switch
-                id="rol-admin"
-                checked={admin}
-                onCheckedChange={alternarAdmin}
-                disabled={establecer.isPending}
-              />
+        <div className="flex flex-col gap-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-0.5">
+              <Label htmlFor="rol-admin">Administrador</Label>
+              <p className="text-xs text-muted-foreground">Ve el panel de la empresa.</p>
             </div>
-
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex flex-col gap-0.5">
-                <Label htmlFor="rol-colaborador">Colaborador</Label>
-                <p className="text-xs text-muted-foreground">
-                  Puede consumir (genera su QR). Quitarlo desactiva su credencial; su historial se
-                  conserva.
-                </p>
-              </div>
-              <Switch
-                id="rol-colaborador"
-                checked={colaborador}
-                onCheckedChange={alternarColaborador}
-                disabled={establecer.isPending}
-              />
-            </div>
+            <Switch
+              id="rol-admin"
+              checked={admin}
+              onCheckedChange={alternarAdmin}
+              disabled={establecer.isPending}
+            />
           </div>
 
-          <DialogFooter className="mt-6">
-            <Button onClick={onClose}>Listo</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-0.5">
+              <Label htmlFor="rol-colaborador">Colaborador</Label>
+              <p className="text-xs text-muted-foreground">
+                Ve su credencial, menú e historial.
+              </p>
+            </div>
+            <Switch
+              id="rol-colaborador"
+              checked={colaborador}
+              onCheckedChange={alternarColaborador}
+              disabled={establecer.isPending}
+            />
+          </div>
+        </div>
 
-      <AlertDialog
-        open={confirmarQuitar}
-        onOpenChange={(abierto) => {
-          if (!abierto) setConfirmarQuitar(false)
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Quitar el rol colaborador de {usuario.nombre}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se desactivará su credencial (QR) y dejará de poder consumir. Su historial de
-              consumos y cuotas se conserva; puedes reactivarlo cuando quieras.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmarQuitarColaborador}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Quitar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+        <DialogFooter className="mt-6">
+          <Button onClick={onClose}>Listo</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
