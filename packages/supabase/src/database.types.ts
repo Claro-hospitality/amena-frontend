@@ -624,6 +624,42 @@ export type Database = {
       }
       generar_cierres_pendientes: { Args: { p_fecha: string }; Returns: Json }
       get_config: { Args: { p_clave: string }; Returns: Json }
+      listar_consumos: {
+        Args: {
+          p_desde: string
+          p_empresa_id?: number
+          p_hasta: string
+          p_limit?: number
+          p_offset?: number
+          p_q?: string
+          p_registrado_por?: string
+        }
+        Returns: {
+          comensal_id: number
+          comensal_nombre: string
+          created_at: string
+          empresa_id: number
+          empresa_nombre: string
+          fecha: string
+          id: number
+          mesero_nombre: string
+          origen: string
+          precio_comida: number
+          registrado_por: string
+          total_filtrado: number
+        }[]
+      }
+      listar_consumos_dia: {
+        Args: never
+        Returns: {
+          comensal_nombre: string
+          created_at: string
+          empresa_nombre: string
+          id: number
+          mesero_nombre: string
+          registrado_por: string
+        }[]
+      }
       listar_usuarios_backoffice: {
         Args: never
         Returns: {
@@ -641,6 +677,16 @@ export type Database = {
       mis_empresas_comensal: { Args: never; Returns: number[] }
       registrar_consumo: {
         Args: { p_qr_token: string; p_registrado_por: string }
+        Returns: Json
+      }
+      resumen_consumos: {
+        Args: {
+          p_desde: string
+          p_empresa_id?: number
+          p_hasta: string
+          p_q?: string
+          p_registrado_por?: string
+        }
         Returns: Json
       }
       resumen_empresa: { Args: { p_empresa_id: number }; Returns: Json }

@@ -16,12 +16,16 @@ export interface ResultadoConsumo {
   modo: ModoConsumo
 }
 
-/** Consumo del día para la lista (hora, comensal, empresa si es legible). */
+/** Consumo del día para la lista: hora, comensal, empresa y quién lo registró. */
 export interface ConsumoHoy {
   id: number
   created_at: string
-  comensal: { usuario: { nombre: string } | null } | null
-  empresa: { nombre: string } | null
+  comensal_nombre: string
+  empresa_nombre: string | null
+  /** uuid del mesero que registró (para el resumen del turno). */
+  registrado_por: string
+  /** nombre del mesero que registró (útil con varios dispositivos). */
+  mesero_nombre: string
 }
 
 /**
@@ -61,15 +65,13 @@ export async function contarConsumosHoy(): Promise<number> {
   return count ?? 0
 }
 
-/** Consumos de hoy en orden inverso (para resolver disputas). */
+/**
+ * Consumos de hoy en orden inverso (para resolver disputas), con el nombre de quién los
+ * registró. Vía RPC `listar_consumos_dia` (SECURITY DEFINER: resuelve el nombre del mesero,
+ * que no es legible con un select normal).
+ */
 export async function listarConsumosHoy(): Promise<ConsumoHoy[]> {
-  const { data, error } = await supabase
-    .from('consumos')
-    .select(
-      'id, created_at, comensal:comensales(usuario:usuarios_portal_empresarial(nombre)), empresa:empresas(nombre:nombre_comercial)'
-    )
-    .eq('fecha', aISO(new Date()))
-    .order('created_at', { ascending: false })
+  const { data, error } = await supabase.rpc('listar_consumos_dia')
   if (error) throw error
   return (data ?? []) as ConsumoHoy[]
 }
