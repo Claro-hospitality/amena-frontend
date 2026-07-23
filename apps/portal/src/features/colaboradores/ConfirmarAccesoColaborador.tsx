@@ -54,8 +54,8 @@ export function ConfirmarAccesoColaborador({
           </AlertDialogTitle>
           <AlertDialogDescription>
             {desactivando
-              ? 'No podrá iniciar sesión en el portal. Podrás reactivarlo o eliminarlo después.'
-              : 'Volverá a poder iniciar sesión en el portal.'}
+              ? 'No podrá iniciar sesión ni consumir: se apagan también sus comidas y su QR. Podrás reactivarlo o eliminarlo después.'
+              : 'Volverá a poder iniciar sesión y a consumir (se reactivan sus comidas y su QR).'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
