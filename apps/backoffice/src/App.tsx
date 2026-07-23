@@ -51,8 +51,8 @@ const BrandingPage = lazy(() =>
 const UsuariosPage = lazy(() =>
   import('./features/usuarios/UsuariosPage').then((m) => ({ default: m.UsuariosPage }))
 )
-const MiCuentaPage = lazy(() =>
-  import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
+const MiPerfilPage = lazy(() =>
+  import('./features/cuenta/MiPerfilPage').then((m) => ({ default: m.MiPerfilPage }))
 )
 
 function CargandoRuta() {
@@ -177,11 +177,11 @@ export default function App() {
           }
         />
         <Route
-          path="mi-cuenta"
+          path="mi-perfil"
           element={
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
-                <MiCuentaPage />
+                <MiPerfilPage />
               </Suspense>
             </RutaErrorBoundary>
           }

@@ -130,7 +130,7 @@ export function UsuariosPage() {
                 icon={KeyRound}
                 onClick={() => setResetTarget(u)}
                 disabled={esYo}
-                motivo="Para tu propia contraseña usa Mi cuenta"
+                motivo="Para tu propia contraseña usa Mi perfil"
               />
             </div>
           )

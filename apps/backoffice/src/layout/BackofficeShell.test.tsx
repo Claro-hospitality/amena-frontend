@@ -1,8 +1,15 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('../auth/useAuth', () => ({ useAuth: () => ({ cerrarSesion: vi.fn() }) }))
+vi.mock('../auth/useAuth', () => ({
+  useAuth: () => ({ cerrarSesion: vi.fn(), session: { user: { email: 'admin@amena.social' } } }),
+}))
+// El avatar del navbar consulta el perfil (nombre/rol); se mockea para no tocar Supabase.
+vi.mock('../features/cuenta/queries', () => ({
+  useMiPerfil: () => ({ data: { nombre: 'Cristian Soria', rol: 'super_admin' } }),
+}))
 
 import type { RolBackoffice } from '../auth/validarAccesoPortal'
 import { BackofficeShell } from './BackofficeShell'
@@ -25,7 +32,15 @@ describe('BackofficeShell', () => {
     for (const label of ['Empresas', 'Platillos', 'Menú', 'Cierres semanales', 'Facturas']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
-    expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /menú de usuario/i })).toBeInTheDocument()
+  })
+
+  it('el menú de usuario despliega "Mi perfil" y "Cerrar sesión"', async () => {
+    const user = userEvent.setup()
+    renderShell('super_admin')
+    await user.click(screen.getByRole('button', { name: /menú de usuario/i }))
+    expect(await screen.findByRole('menuitem', { name: /mi perfil/i })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: /cerrar sesión/i })).toBeInTheDocument()
   })
 
   it('finanzas solo ve sus secciones (sin Platillos, Menú ni Colaboradores)', () => {

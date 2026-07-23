@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, LogOut, UserCog } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
-import { Button } from '@amena/ui/components/ui/button'
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,9 +27,9 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@amena/ui/components/ui/sidebar'
-import { useAuth } from '../auth/useAuth'
 import type { RolBackoffice } from '../auth/validarAccesoPortal'
 import { navDesarrollo, navPorRol, type ItemNav } from './navBackoffice'
+import { UsuarioMenu } from './UsuarioMenu'
 
 /**
  * Shell del backoffice sobre el sidebar del kit (@amena/ui):
@@ -39,7 +38,6 @@ import { navDesarrollo, navPorRol, type ItemNav } from './navBackoffice'
  * Usa los tokens `--sidebar-*` del tema (los consume el componente).
  */
 export function BackofficeShell({ rol, children }: { rol: RolBackoffice; children: ReactNode }) {
-  const { cerrarSesion } = useAuth()
   return (
     // El color del sidebar (naranja difuminado) se define en sidebar-theme.css (:root),
     // así aplica también al drawer móvil que se renderiza en un portal.
@@ -51,15 +49,8 @@ export function BackofficeShell({ rol, children }: { rol: RolBackoffice; childre
         <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background px-4">
           <SidebarTrigger aria-label="Alternar menú" className="md:hidden" />
           <LogotipoAmena className="h-5 w-auto text-primary md:hidden" />
-          <div className="ml-auto flex items-center gap-1">
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link to="/mi-cuenta" />}>
-              <UserCog className="size-4" />
-              <span className="hidden sm:inline">Mi cuenta</span>
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => cerrarSesion()}>
-              <LogOut className="size-4" />
-              <span className="hidden sm:inline">Cerrar sesión</span>
-            </Button>
+          <div className="ml-auto flex items-center">
+            <UsuarioMenu />
           </div>
         </header>
         <TituloDetalleProvider>
