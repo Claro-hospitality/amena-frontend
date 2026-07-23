@@ -145,8 +145,8 @@ export function ColaboradorFormDialog({
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={pending}>
-                  {pending ? 'Guardando…' : 'Guardar'}
+                <Button type="submit" loading={pending}>
+                  Guardar
                 </Button>
               </DialogFooter>
             </form>

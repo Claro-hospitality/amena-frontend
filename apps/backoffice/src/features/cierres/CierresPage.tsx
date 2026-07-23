@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from '@amena/ui/components/ui/select'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
-import { Spinner } from '@amena/ui/components/ui/spinner'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { deISO, rangoSemanaLegible } from '@amena/utils'
 import { DataTable } from '@amena/ui/components/data-table'
@@ -105,8 +104,8 @@ export function CierresPage() {
       <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
         {esSuperAdmin && (
           <header className="flex items-center justify-end gap-4">
-            <Button onClick={() => setConfirmarCierre(true)} disabled={ejecutar.isPending}>
-              {ejecutar.isPending ? <Spinner className="size-4" /> : <Play className="size-4" />}
+            <Button onClick={() => setConfirmarCierre(true)} loading={ejecutar.isPending}>
+              <Play className="size-4" />
               Ejecutar cierre ahora
             </Button>
           </header>

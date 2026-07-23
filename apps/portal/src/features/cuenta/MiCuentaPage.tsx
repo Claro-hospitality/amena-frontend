@@ -83,8 +83,8 @@ export function MiCuentaPage() {
                 />
                 {error && <FieldError>{error}</FieldError>}
               </Field>
-              <Button type="submit" disabled={enviando}>
-                {enviando ? 'Guardando…' : 'Actualizar contraseña'}
+              <Button type="submit" loading={enviando}>
+                Actualizar contraseña
               </Button>
             </FieldGroup>
           </form>

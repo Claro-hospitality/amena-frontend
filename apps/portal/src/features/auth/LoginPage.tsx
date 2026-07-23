@@ -73,8 +73,8 @@ export function LoginPage() {
                 {error}
               </p>
             )}
-            <Button type="submit" disabled={enviando}>
-              {enviando ? 'Entrando…' : 'Entrar'}
+            <Button type="submit" loading={enviando}>
+              Entrar
             </Button>
           </form>
         </CardContent>

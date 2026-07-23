@@ -82,8 +82,8 @@ export function CambiarPasswordForm({
           />
           {error && <FieldError>{error}</FieldError>}
         </Field>
-        <Button type="submit" disabled={enviando}>
-          {enviando ? 'Guardando…' : textoBoton}
+        <Button type="submit" loading={enviando}>
+          {textoBoton}
         </Button>
       </FieldGroup>
     </form>

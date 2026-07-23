@@ -126,8 +126,8 @@ export function AgregarExtraDialog({
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={guardar} disabled={!colaborador || !fecha || declarar.isPending}>
-            {declarar.isPending ? 'Agregando…' : 'Agregar extra'}
+          <Button onClick={guardar} disabled={!colaborador || !fecha} loading={declarar.isPending}>
+            Agregar extra
           </Button>
         </DialogFooter>
       </DialogContent>

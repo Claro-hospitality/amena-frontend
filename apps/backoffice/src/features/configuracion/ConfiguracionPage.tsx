@@ -125,9 +125,10 @@ function FormDiaCierre({ diaActual }: { diaActual: DiaSemana }) {
       <div>
         <Button
           onClick={() => setConfirmando(true)}
-          disabled={sinCambios || actualizar.isPending}
+          disabled={sinCambios}
+          loading={actualizar.isPending}
         >
-          {actualizar.isPending ? 'Guardando…' : 'Guardar'}
+          Guardar
         </Button>
       </div>
 

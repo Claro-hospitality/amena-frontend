@@ -87,8 +87,8 @@ export function CambiarPasswordObligatorio() {
                 {error}
               </p>
             )}
-            <Button type="submit" disabled={enviando}>
-              {enviando ? 'Guardando…' : 'Guardar contraseña'}
+            <Button type="submit" loading={enviando}>
+              Guardar contraseña
             </Button>
           </form>
         </CardContent>
