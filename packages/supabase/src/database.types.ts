@@ -605,6 +605,17 @@ export type Database = {
       }
       generar_cierres_pendientes: { Args: { p_fecha: string }; Returns: Json }
       get_config: { Args: { p_clave: string }; Returns: Json }
+      listar_usuarios_backoffice: {
+        Args: never
+        Returns: {
+          activo: boolean
+          debe_cambiar_password: boolean
+          email: string
+          nombre: string
+          rol: Database["public"]["Enums"]["rol_backoffice"]
+          user_id: string
+        }[]
+      }
       mi_perfil_backoffice: { Args: never; Returns: Json }
       mis_comensales: { Args: never; Returns: number[] }
       mis_empresas_admin: { Args: never; Returns: number[] }
