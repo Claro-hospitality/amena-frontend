@@ -40,7 +40,7 @@ export function Breadcrumbs() {
       <BreadcrumbList className="gap-1.5 sm:gap-2">
         {migas.map((miga, i) => (
           <Fragment key={miga.to}>
-            <BreadcrumbItem className={miga.esActual ? undefined : 'hidden sm:flex'}>
+            <BreadcrumbItem className={miga.esActual ? undefined : 'hidden lg:flex'}>
               {miga.esActual ? (
                 <BreadcrumbPage className="text-xl font-semibold tracking-tight text-foreground">
                   {miga.label}
@@ -53,7 +53,7 @@ export function Breadcrumbs() {
               )}
             </BreadcrumbItem>
             {i < migas.length - 1 && (
-              <BreadcrumbSeparator className="hidden text-muted-foreground/50 sm:block" />
+              <BreadcrumbSeparator className="hidden text-muted-foreground/50 lg:block" />
             )}
           </Fragment>
         ))}
