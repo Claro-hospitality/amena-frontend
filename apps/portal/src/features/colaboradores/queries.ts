@@ -3,7 +3,9 @@ import {
   actualizarColaborador,
   cambiarEstadoColaborador,
   crearColaborador,
+  eliminarColaborador,
   establecerConsumoLibre,
+  establecerEstadoAcceso,
   listarColaboradores,
   obtenerMiEmpresaId,
   resetearPasswordColaborador,
@@ -65,5 +67,24 @@ export function useConsumoLibre() {
 export function useResetearPasswordColaborador() {
   return useMutation({
     mutationFn: (usuarioId: number) => resetearPasswordColaborador(usuarioId),
+  })
+}
+
+/** Activa/desactiva el ACCESO (login) del colaborador. `usuarioId` = colaborador.usuario_id. */
+export function useEstablecerEstadoAcceso() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ usuarioId, activo }: { usuarioId: number; activo: boolean }) =>
+      establecerEstadoAcceso(usuarioId, activo),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
+  })
+}
+
+/** Borrado lógico del colaborador (requiere acceso desactivado). `usuarioId` = colaborador.usuario_id. */
+export function useEliminarColaborador() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (usuarioId: number) => eliminarColaborador(usuarioId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
 }

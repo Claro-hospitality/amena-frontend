@@ -103,6 +103,7 @@ export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioE
       'id, nombre, email, activo, roles:roles_portal_empresarial(rol, activo), comensal:comensales(id, activo)'
     )
     .eq('empresa_id', empresaId)
+    .is('eliminado_en', null)
     .order('nombre')
   if (error) throw error
   return (data ?? []).map((u) => {
@@ -164,6 +165,28 @@ export async function establecerComidaComensal(usuarioId: number, activo: boolea
     p_usuario_id: usuarioId,
     p_activo: activo,
   })
+  if (error) throw error
+}
+
+/**
+ * Activa/desactiva el ACCESO (login) de un usuario del portal vía el RPC
+ * `establecer_estado_portal` (usuarios_portal_empresarial.activo). Desactivar = ya no puede
+ * entrar al portal (reversible). Distinto del toggle de comida.
+ */
+export async function establecerEstadoPortal(usuarioId: number, activo: boolean): Promise<void> {
+  const { error } = await supabase.rpc('establecer_estado_portal', {
+    p_usuario_id: usuarioId,
+    p_activo: activo,
+  })
+  if (error) throw error
+}
+
+/**
+ * Borrado lógico de un usuario del portal vía `eliminar_usuario_portal`: lo oculta de la
+ * lista y apaga su comensal y roles. Requiere que el acceso ya esté desactivado.
+ */
+export async function eliminarUsuarioPortal(usuarioId: number): Promise<void> {
+  const { error } = await supabase.rpc('eliminar_usuario_portal', { p_usuario_id: usuarioId })
   if (error) throw error
 }
 

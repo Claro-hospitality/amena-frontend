@@ -21,6 +21,10 @@ import { empresaEnModoLibre, type Colaborador, type PoliticaEmpresa } from './ap
 import { AccionesColaborador, BotonInvitar, ToggleConsumoLibre } from './ColaboradorAcciones'
 import { ColaboradorCard } from './ColaboradorCard'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
+import {
+  ConfirmarAccesoColaborador,
+  ConfirmarEliminarColaborador,
+} from './ConfirmarAccesoColaborador'
 import { ConfirmarEstadoColaborador } from './ConfirmarEstadoColaborador'
 import { CredencialDialog } from './CredencialDialog'
 import { RestablecerPasswordColaborador } from './RestablecerPasswordColaborador'
@@ -31,6 +35,8 @@ type Dialogo =
   | { tipo: 'credencial'; colaborador: Colaborador }
   | { tipo: 'estado'; colaborador: Colaborador }
   | { tipo: 'reset'; colaborador: Colaborador }
+  | { tipo: 'acceso'; colaborador: Colaborador }
+  | { tipo: 'eliminar'; colaborador: Colaborador }
 
 export function ColaboradoresPage() {
   const { tipo } = useOutletContext<ContextoAcceso>()
@@ -57,6 +63,8 @@ export function ColaboradoresPage() {
   const editar = (colaborador: Colaborador) => setDialogo({ tipo: 'form', colaborador })
   const cambiarEstado = (colaborador: Colaborador) => setDialogo({ tipo: 'estado', colaborador })
   const restablecer = (colaborador: Colaborador) => setDialogo({ tipo: 'reset', colaborador })
+  const toggleAcceso = (colaborador: Colaborador) => setDialogo({ tipo: 'acceso', colaborador })
+  const eliminar = (colaborador: Colaborador) => setDialogo({ tipo: 'eliminar', colaborador })
   const nuevo = () => setDialogo({ tipo: 'form', colaborador: null })
   const cerrar = () => setDialogo(null)
 
@@ -65,6 +73,8 @@ export function ColaboradoresPage() {
     onEditar: editar,
     onCambiarEstado: cambiarEstado,
     onResetear: restablecer,
+    onToggleAcceso: toggleAcceso,
+    onEliminar: eliminar,
   })
 
   const buscador = (
@@ -114,6 +124,8 @@ export function ColaboradoresPage() {
                     onEditar={editar}
                     onCambiarEstado={cambiarEstado}
                     onResetear={restablecer}
+                    onToggleAcceso={toggleAcceso}
+                    onEliminar={eliminar}
                   />
                 ))
               )}
@@ -149,6 +161,12 @@ export function ColaboradoresPage() {
       {dialogo?.tipo === 'reset' && (
         <RestablecerPasswordColaborador colaborador={dialogo.colaborador} onClose={cerrar} />
       )}
+      {dialogo?.tipo === 'acceso' && (
+        <ConfirmarAccesoColaborador colaborador={dialogo.colaborador} onClose={cerrar} />
+      )}
+      {dialogo?.tipo === 'eliminar' && (
+        <ConfirmarEliminarColaborador colaborador={dialogo.colaborador} onClose={cerrar} />
+      )}
     </TooltipProvider>
   )
 }
@@ -158,11 +176,15 @@ function crearColumnasColaboradores({
   onEditar,
   onCambiarEstado,
   onResetear,
+  onToggleAcceso,
+  onEliminar,
 }: {
   onVerQR: (c: Colaborador) => void
   onEditar: (c: Colaborador) => void
   onCambiarEstado: (c: Colaborador) => void
   onResetear: (c: Colaborador) => void
+  onToggleAcceso: (c: Colaborador) => void
+  onEliminar: (c: Colaborador) => void
 }): ColumnDef<Colaborador>[] {
   return [
     {
@@ -192,9 +214,13 @@ function crearColumnasColaboradores({
       header: 'Acceso',
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
-          <Badge variant="outline">
-            {row.original.user_id != null ? 'Con acceso' : 'Sin acceso'}
-          </Badge>
+          {row.original.user_id == null ? (
+            <Badge variant="outline">Sin acceso</Badge>
+          ) : row.original.accesoActivo ? (
+            <Badge variant="outline">Con acceso</Badge>
+          ) : (
+            <Badge variant="secondary">Desactivado</Badge>
+          )}
           <BotonInvitar colaborador={row.original} />
         </div>
       ),
@@ -223,6 +249,8 @@ function crearColumnasColaboradores({
             onEditar={onEditar}
             onCambiarEstado={onCambiarEstado}
             onResetear={onResetear}
+            onToggleAcceso={onToggleAcceso}
+            onEliminar={onEliminar}
           />
         </div>
       ),

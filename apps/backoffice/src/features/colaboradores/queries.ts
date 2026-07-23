@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   altaUsuarioPortal,
   asignarRolUnico,
+  eliminarUsuarioPortal,
   establecerComidaComensal,
+  establecerEstadoPortal,
   establecerRolPortal,
   listarColaboradores,
   listarUsuariosEmpresa,
@@ -85,5 +87,31 @@ export function useAltaUsuario() {
 export function useResetearPassword() {
   return useMutation({
     mutationFn: (usuarioId: number) => resetearPasswordUsuario(usuarioId),
+  })
+}
+
+/** Activa/desactiva el ACCESO (login) de un usuario del portal; refresca listado y resumen. */
+export function useEstablecerEstadoPortal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ usuarioId, activo }: { usuarioId: number; activo: boolean }) =>
+      establecerEstadoPortal(usuarioId, activo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['usuarios'] })
+      qc.invalidateQueries({ queryKey: ['empresa'] })
+    },
+  })
+}
+
+/** Borrado lógico de un usuario del portal (requiere acceso desactivado); refresca listados. */
+export function useEliminarUsuarioPortal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (usuarioId: number) => eliminarUsuarioPortal(usuarioId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['usuarios'] })
+      qc.invalidateQueries({ queryKey: ['empresa'] })
+      qc.invalidateQueries({ queryKey: ['colaboradores'] })
+    },
   })
 }

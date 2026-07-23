@@ -1,5 +1,16 @@
 import { useMemo, useState } from 'react'
-import { KeyRound, Pencil, Plus, TriangleAlert, Users, Utensils, UtensilsCrossed } from 'lucide-react'
+import {
+  KeyRound,
+  Pencil,
+  Plus,
+  Power,
+  PowerOff,
+  Trash2,
+  TriangleAlert,
+  Users,
+  Utensils,
+  UtensilsCrossed,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -34,7 +45,13 @@ import type { Empresa } from '../empresas/api'
 import type { UsuarioEmpresa } from './api'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
 import { EditarRolesDialog } from './EditarRolesDialog'
-import { useEstablecerComida, useResetearPassword, useUsuariosEmpresa } from './queries'
+import {
+  useEliminarUsuarioPortal,
+  useEstablecerComida,
+  useEstablecerEstadoPortal,
+  useResetearPassword,
+  useUsuariosEmpresa,
+} from './queries'
 
 const columnasBase: ColumnDef<UsuarioEmpresa>[] = [
   {
@@ -74,6 +91,18 @@ const columnasBase: ColumnDef<UsuarioEmpresa>[] = [
         </Badge>
       ),
   },
+  {
+    id: 'acceso',
+    header: 'Acceso',
+    cell: ({ row }) =>
+      row.original.activo ? (
+        <Badge className="bg-success text-success-foreground">Activo</Badge>
+      ) : (
+        <Badge variant="outline" className="text-muted-foreground">
+          Desactivado
+        </Badge>
+      ),
+  },
 ]
 
 /**
@@ -86,6 +115,8 @@ function columnaAcciones(
   onActivarComida: (u: UsuarioEmpresa) => void,
   onDesactivarComida: (u: UsuarioEmpresa) => void,
   onResetear: (u: UsuarioEmpresa) => void,
+  onToggleAcceso: (u: UsuarioEmpresa) => void,
+  onEliminar: (u: UsuarioEmpresa) => void,
   comidaPendiente: boolean
 ): ColumnDef<UsuarioEmpresa> {
   return {
@@ -151,6 +182,39 @@ function columnaAcciones(
             />
             <TooltipContent>Restablecer contraseña</TooltipContent>
           </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => onToggleAcceso(u)}
+                  aria-label={u.activo ? `Desactivar acceso de ${u.nombre}` : `Activar acceso de ${u.nombre}`}
+                >
+                  {u.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
+                </Button>
+              }
+            />
+            <TooltipContent>{u.activo ? 'Desactivar acceso' : 'Activar acceso'}</TooltipContent>
+          </Tooltip>
+          {/* Eliminar (borrado lógico) solo cuando el acceso ya está desactivado. */}
+          {!u.activo && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => onEliminar(u)}
+                    aria-label={`Eliminar a ${u.nombre}`}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                }
+              />
+              <TooltipContent>Eliminar</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       )
     },
@@ -175,12 +239,30 @@ export function UsuariosEmpresa({
   const { data, isLoading, isError, refetch } = useUsuariosEmpresa(empresa.id)
   const establecerComida = useEstablecerComida()
   const resetear = useResetearPassword()
+  const cambiarAcceso = useEstablecerEstadoPortal()
+  const eliminarPortal = useEliminarUsuarioPortal()
   const [busqueda, setBusqueda] = useState('')
   const [altaAbierta, setAltaAbierta] = useState(false)
   const [editando, setEditando] = useState<UsuarioEmpresa | null>(null)
   const [desactivandoComida, setDesactivandoComida] = useState<UsuarioEmpresa | null>(null)
+  const [desactivandoAcceso, setDesactivandoAcceso] = useState<UsuarioEmpresa | null>(null)
+  const [eliminando, setEliminando] = useState<UsuarioEmpresa | null>(null)
   const [reseteando, setReseteando] = useState<UsuarioEmpresa | null>(null)
   const [credsReset, setCredsReset] = useState<DatosCredencialAcceso | null>(null)
+
+  const toggleAcceso = (u: UsuarioEmpresa) => {
+    if (u.activo) {
+      setDesactivandoAcceso(u) // desactivar acceso pide confirmación
+    } else {
+      cambiarAcceso.mutate(
+        { usuarioId: u.id, activo: true },
+        {
+          onSuccess: () => toast.success(`Acceso reactivado para ${u.nombre}`),
+          onError: () => toast.error('No se pudo cambiar el acceso. Intenta de nuevo.'),
+        }
+      )
+    }
+  }
 
   const confirmarReset = () => {
     if (!reseteando) return
@@ -221,6 +303,8 @@ export function UsuariosEmpresa({
               (u) => cambiarComida(u, true),
               setDesactivandoComida,
               setReseteando,
+              toggleAcceso,
+              setEliminando,
               establecerComida.isPending
             ),
           ]
@@ -312,6 +396,80 @@ export function UsuariosEmpresa({
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Desactivar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmar desactivar acceso */}
+      <AlertDialog
+        open={desactivandoAcceso != null}
+        onOpenChange={(abierto) => {
+          if (!abierto) setDesactivandoAcceso(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Desactivar el acceso de {desactivandoAcceso?.nombre}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              No podrá iniciar sesión en el portal (reversible). El historial se conserva.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              loading={cambiarAcceso.isPending}
+              onClick={() => {
+                const u = desactivandoAcceso
+                if (!u) return
+                cambiarAcceso.mutate(
+                  { usuarioId: u.id, activo: false },
+                  {
+                    onSuccess: () => toast.success(`Acceso desactivado para ${u.nombre}`),
+                    onError: () => toast.error('No se pudo desactivar el acceso. Intenta de nuevo.'),
+                  }
+                )
+                setDesactivandoAcceso(null)
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Desactivar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmar eliminar (borrado lógico) */}
+      <AlertDialog
+        open={eliminando != null}
+        onOpenChange={(abierto) => {
+          if (!abierto) setEliminando(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar a {eliminando?.nombre}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará de la lista (borrado lógico) y se apagará su comida/QR. El historial se
+              conserva; no se puede deshacer desde aquí.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              loading={eliminarPortal.isPending}
+              onClick={() => {
+                const u = eliminando
+                if (!u) return
+                eliminarPortal.mutate(u.id, {
+                  onSuccess: () => toast.success(`${u.nombre} eliminado`),
+                  onError: () => toast.error('No se pudo eliminar. Intenta de nuevo.'),
+                })
+                setEliminando(null)
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

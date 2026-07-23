@@ -78,3 +78,9 @@ export async function establecerEstado(userId: string, activo: boolean): Promise
   })
   if (error) throw new Error(error.message)
 }
+
+/** Borrado lógico (solo si el usuario ya está desactivado). Lo oculta de la lista. */
+export async function eliminarUsuario(userId: string): Promise<void> {
+  const { error } = await supabase.rpc('eliminar_usuario_backoffice', { p_user_id: userId })
+  if (error) throw new Error(error.message)
+}

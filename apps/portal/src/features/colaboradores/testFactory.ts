@@ -7,6 +7,7 @@ export function crearColaboradorFake(overrides: Partial<Colaborador> = {}): Cola
     usuario_id: 5,
     user_id: null,
     activo: true,
+    accesoActivo: true,
     consumoLibre: false,
     nombre: 'María López',
     email: 'maria@empresa.com',

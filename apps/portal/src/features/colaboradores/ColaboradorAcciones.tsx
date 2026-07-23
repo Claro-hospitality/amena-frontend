@@ -1,5 +1,14 @@
 import { useId } from 'react'
-import { KeyRound, MoreVertical, Pencil, Power, PowerOff } from 'lucide-react'
+import {
+  KeyRound,
+  MoreVertical,
+  Pencil,
+  Power,
+  PowerOff,
+  ShieldCheck,
+  ShieldOff,
+  Trash2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -55,17 +64,26 @@ export function ToggleConsumoLibre({ colaborador }: { colaborador: Colaborador }
   )
 }
 
-/** Menú de acciones secundarias (editar / restablecer contraseña / desactivar-reactivar). */
+/**
+ * Menú de acciones secundarias. Dos ejes independientes:
+ * - **Comida** (`activo` = comensal.activo): desactivar/reactivar consumo + QR.
+ * - **Acceso** (`accesoActivo` = usuarios_portal_empresarial.activo): habilita/deshabilita el
+ *   login al portal. **Eliminar** (borrado lógico) solo aparece con el acceso ya desactivado.
+ */
 export function AccionesColaborador({
   colaborador,
   onEditar,
   onCambiarEstado,
   onResetear,
+  onToggleAcceso,
+  onEliminar,
 }: {
   colaborador: Colaborador
   onEditar: (colaborador: Colaborador) => void
   onCambiarEstado: (colaborador: Colaborador) => void
   onResetear: (colaborador: Colaborador) => void
+  onToggleAcceso: (colaborador: Colaborador) => void
+  onEliminar: (colaborador: Colaborador) => void
 }) {
   return (
     <DropdownMenu>
@@ -95,8 +113,26 @@ export function AccionesColaborador({
         )}
         <DropdownMenuItem onClick={() => onCambiarEstado(colaborador)}>
           {colaborador.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
-          {colaborador.activo ? 'Desactivar' : 'Reactivar'}
+          {colaborador.activo ? 'Desactivar comida' : 'Activar comida'}
         </DropdownMenuItem>
+        {/* Acceso (login) solo aplica a quien ya tiene cuenta. */}
+        {colaborador.user_id != null && (
+          <DropdownMenuItem onClick={() => onToggleAcceso(colaborador)}>
+            {colaborador.accesoActivo ? (
+              <ShieldOff className="size-4" />
+            ) : (
+              <ShieldCheck className="size-4" />
+            )}
+            {colaborador.accesoActivo ? 'Desactivar acceso' : 'Activar acceso'}
+          </DropdownMenuItem>
+        )}
+        {/* Borrado lógico: solo tras desactivar el acceso. */}
+        {colaborador.user_id != null && !colaborador.accesoActivo && (
+          <DropdownMenuItem variant="destructive" onClick={() => onEliminar(colaborador)}>
+            <Trash2 className="size-4" />
+            Eliminar
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
