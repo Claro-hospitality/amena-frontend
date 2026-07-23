@@ -37,7 +37,7 @@ import { badgeOrigen, presetsRango, type RangoPreset } from './logica'
 import { useConsumos, useEmpresas, useResumenConsumos } from './queries'
 
 const CHART_CONFIG: ChartConfig = {
-  comidas: { label: 'Comidas', color: 'var(--primary)' },
+  comidas: { label: 'Comidas', color: 'var(--secondary-foreground)' },
 }
 
 const columnas: ColumnDef<ConsumoRow>[] = [
@@ -181,7 +181,7 @@ export function ConsumosPage() {
           ))}
         </ToggleGroup>
 
-        <Field className="w-full max-w-52 sm:w-auto">
+        <Field className="w-full max-w-52 gap-1 sm:w-auto">
           <FieldLabel htmlFor="filtro-empresa">Empresa</FieldLabel>
           <Select value={empresaSel} onValueChange={(v) => cambiarEmpresa(v as string)}>
             <SelectTrigger id="filtro-empresa" className="w-full" aria-label="Filtrar por empresa">
@@ -204,7 +204,7 @@ export function ConsumosPage() {
           </Select>
         </Field>
 
-        <Field className="w-full max-w-52 sm:w-auto">
+        <Field className="w-full max-w-52 gap-1 sm:w-auto">
           <FieldLabel htmlFor="filtro-mesero">Mesero</FieldLabel>
           <Select value={meseroSel} onValueChange={(v) => cambiarMesero(v as string)}>
             <SelectTrigger id="filtro-mesero" className="w-full" aria-label="Filtrar por mesero">
@@ -234,9 +234,9 @@ export function ConsumosPage() {
         <EstadoError onReintentar={() => { lista.refetch(); resumenQ.refetch() }} />
       ) : (
         <>
-          {/* Métricas del período: un solo card destacado en color secundario. */}
-          <Card className="border-0 bg-secondary text-secondary-foreground shadow-sm">
-            <CardContent className="grid grid-cols-1 divide-y divide-secondary-foreground/15 p-0 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {/* Métricas del período: compactas, en una sola línea. */}
+          <Card className="shadow-none">
+            <CardContent className="flex flex-wrap items-center gap-x-8 gap-y-2 px-5 py-3">
               <Metrica etiqueta="Comidas" valor={String(resumen?.total ?? 0)} />
               <Metrica etiqueta="Comensales" valor={String(resumen?.comensales_unicos ?? 0)} />
               <Metrica etiqueta="Gasto total" valor={formatearMoneda(resumen?.gasto ?? 0)} />
@@ -279,7 +279,9 @@ export function ConsumosPage() {
                     {meseros.map((m) => (
                       <li key={m.registrado_por} className="flex items-center justify-between py-2">
                         <span className="truncate">{m.nombre}</span>
-                        <span className="font-mono tabular-nums text-muted-foreground">{m.comidas}</span>
+                        <span className="rounded-full bg-secondary px-2.5 py-0.5 font-mono text-sm font-semibold tabular-nums text-secondary-foreground">
+                          {m.comidas}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -359,9 +361,9 @@ function Paginacion({
 
 function Metrica({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
-    <div className="flex flex-col gap-1 px-6 py-5">
-      <span className="font-mono text-3xl font-bold tabular-nums">{valor}</span>
-      <span className="text-sm font-medium text-secondary-foreground/70">{etiqueta}</span>
+    <div className="flex items-baseline gap-2">
+      <span className="font-mono text-xl font-semibold tabular-nums">{valor}</span>
+      <span className="text-xs text-muted-foreground">{etiqueta}</span>
     </div>
   )
 }
