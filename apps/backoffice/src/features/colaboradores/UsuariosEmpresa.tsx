@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Pencil, Plus, TriangleAlert, Users, Utensils, UtensilsCrossed } from 'lucide-react'
+import { KeyRound, Pencil, Plus, TriangleAlert, Users, Utensils, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -13,7 +13,12 @@ import {
 } from '@amena/ui/components/ui/alert-dialog'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
+import {
+  CredencialesAcceso,
+  type DatosCredencialAcceso,
+} from '@amena/ui/components/ui/credenciales-acceso'
 import { DataTable, type ColumnDef } from '@amena/ui/components/data-table'
+import { Dialog, DialogContent } from '@amena/ui/components/ui/dialog'
 import {
   Empty,
   EmptyContent,
@@ -29,7 +34,7 @@ import type { Empresa } from '../empresas/api'
 import type { UsuarioEmpresa } from './api'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
 import { EditarRolesDialog } from './EditarRolesDialog'
-import { useEstablecerComida, useUsuariosEmpresa } from './queries'
+import { useEstablecerComida, useResetearPassword, useUsuariosEmpresa } from './queries'
 
 const columnasBase: ColumnDef<UsuarioEmpresa>[] = [
   {
@@ -80,6 +85,7 @@ function columnaAcciones(
   onEditar: (u: UsuarioEmpresa) => void,
   onActivarComida: (u: UsuarioEmpresa) => void,
   onDesactivarComida: (u: UsuarioEmpresa) => void,
+  onResetear: (u: UsuarioEmpresa) => void,
   comidaPendiente: boolean
 ): ColumnDef<UsuarioEmpresa> {
   return {
@@ -130,6 +136,21 @@ function columnaAcciones(
             />
             <TooltipContent>Editar roles</TooltipContent>
           </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => onResetear(u)}
+                  aria-label={`Restablecer contraseña de ${u.nombre}`}
+                >
+                  <KeyRound className="size-4" />
+                </Button>
+              }
+            />
+            <TooltipContent>Restablecer contraseña</TooltipContent>
+          </Tooltip>
         </div>
       )
     },
@@ -153,10 +174,24 @@ export function UsuariosEmpresa({
 }) {
   const { data, isLoading, isError, refetch } = useUsuariosEmpresa(empresa.id)
   const establecerComida = useEstablecerComida()
+  const resetear = useResetearPassword()
   const [busqueda, setBusqueda] = useState('')
   const [altaAbierta, setAltaAbierta] = useState(false)
   const [editando, setEditando] = useState<UsuarioEmpresa | null>(null)
   const [desactivandoComida, setDesactivandoComida] = useState<UsuarioEmpresa | null>(null)
+  const [reseteando, setReseteando] = useState<UsuarioEmpresa | null>(null)
+  const [credsReset, setCredsReset] = useState<DatosCredencialAcceso | null>(null)
+
+  const confirmarReset = () => {
+    if (!reseteando) return
+    resetear.mutate(reseteando.id, {
+      onSuccess: (creds) => {
+        setReseteando(null)
+        setCredsReset(creds)
+      },
+      onError: () => toast.error('No se pudo restablecer la contraseña. Intenta de nuevo.'),
+    })
+  }
 
   const cambiarComida = (u: UsuarioEmpresa, activo: boolean) => {
     establecerComida.mutate(
@@ -185,6 +220,7 @@ export function UsuariosEmpresa({
               setEditando,
               (u) => cambiarComida(u, true),
               setDesactivandoComida,
+              setReseteando,
               establecerComida.isPending
             ),
           ]
@@ -280,6 +316,46 @@ export function UsuariosEmpresa({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirmar restablecer contraseña */}
+      <AlertDialog
+        open={reseteando != null}
+        onOpenChange={(abierto) => {
+          if (!abierto) setReseteando(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Restablecer la contraseña de {reseteando?.nombre}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Se generará una contraseña temporal que verás una sola vez para entregársela; al
+              iniciar sesión deberá cambiarla. Su contraseña actual dejará de funcionar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmarReset} loading={resetear.isPending}>
+              Restablecer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Credenciales tras restablecer (contraseña temporal, una sola vez) */}
+      <Dialog
+        open={credsReset != null}
+        onOpenChange={(abierto) => {
+          if (!abierto) setCredsReset(null)
+        }}
+      >
+        <DialogContent>
+          {credsReset && (
+            <CredencialesAcceso credenciales={credsReset} onClose={() => setCredsReset(null)} />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }

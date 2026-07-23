@@ -6,6 +6,7 @@ import {
   establecerConsumoLibre,
   listarColaboradores,
   obtenerMiEmpresaId,
+  resetearPasswordColaborador,
   type DatosColaborador,
   type RolAlta,
 } from './api'
@@ -57,5 +58,12 @@ export function useConsumoLibre() {
     mutationFn: ({ usuarioId, activo }: { usuarioId: number; activo: boolean }) =>
       establecerConsumoLibre(usuarioId, activo),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
+  })
+}
+
+/** Restablece la contraseña de un colaborador; devuelve la temporal (una sola vez). */
+export function useResetearPasswordColaborador() {
+  return useMutation({
+    mutationFn: (usuarioId: number) => resetearPasswordColaborador(usuarioId),
   })
 }

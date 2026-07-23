@@ -11,6 +11,7 @@ const api = vi.hoisted(() => ({
   actualizarColaborador: vi.fn(),
   cambiarEstadoColaborador: vi.fn(),
   establecerConsumoLibre: vi.fn(),
+  resetearPasswordColaborador: vi.fn(),
   empresaEnModoLibre: (c: { politica?: { modo_consumo?: string } | null }) =>
     c.politica?.modo_consumo === 'libre',
 }))
@@ -92,6 +93,30 @@ describe('ColaboradoresPage', () => {
     expect(screen.getByText(/L-V, máx 2\/día/i)).toBeInTheDocument()
     // Toggle visible (móvil + tabla renderizan ambos; basta con que exista).
     expect(screen.getAllByRole('switch', { name: /consumo libre/i }).length).toBeGreaterThan(0)
+  })
+
+  it('restablecer contraseña: confirma, llama a la función y muestra la temporal', async () => {
+    const user = userEvent.setup()
+    api.resetearPasswordColaborador.mockResolvedValue({
+      email: 'maria@x.com',
+      yaTeniaCuenta: false,
+      tempPassword: 'Temp0ral-Fuerte!',
+    })
+    api.listarColaboradores.mockResolvedValue([
+      crearColaboradorFake({ usuario_id: 5, user_id: 'u1' }),
+    ])
+    renderizar('admin_empresa')
+    await screen.findAllByText('María López')
+
+    // Abre el menú de acciones (hay uno por vista; basta el primero) y elige restablecer.
+    await user.click(screen.getAllByRole('button', { name: /acciones de maría lópez/i })[0])
+    await user.click(await screen.findByRole('menuitem', { name: /restablecer contraseña/i }))
+
+    // Confirmación → aplicar.
+    expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Restablecer' }))
+    expect(api.resetearPasswordColaborador).toHaveBeenCalledWith(5)
+    expect(await screen.findByText('Temp0ral-Fuerte!')).toBeInTheDocument()
   })
 
   it('activar el toggle llama establecer_consumo_libre con el usuario_id (no el id de comensal)', async () => {
