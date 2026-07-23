@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { badgeOrigen, presetsRango } from './logica'
 
 describe('presetsRango', () => {
-  it('calcula Hoy, Ayer, Últimos 7 días y Este mes', () => {
-    const p = presetsRango(new Date(2026, 6, 24)) // 24 jul 2026 (local)
-    expect(p.map((x) => x.clave)).toEqual(['hoy', 'ayer', 'semana', 'mes'])
+  it('calcula Hoy, Esta semana (lunes→hoy) y Este mes', () => {
+    const p = presetsRango(new Date(2026, 6, 24)) // vie 24 jul 2026 (lunes de esa semana: 20 jul)
+    expect(p.map((x) => x.clave)).toEqual(['hoy', 'semana', 'mes'])
+    expect(p.map((x) => x.etiqueta)).toEqual(['Hoy', 'Esta semana', 'Este mes'])
     expect(p[0]).toMatchObject({ desde: '2026-07-24', hasta: '2026-07-24' })
-    expect(p[1]).toMatchObject({ desde: '2026-07-23', hasta: '2026-07-23' })
-    expect(p[2]).toMatchObject({ desde: '2026-07-18', hasta: '2026-07-24' })
-    expect(p[3]).toMatchObject({ desde: '2026-07-01', hasta: '2026-07-24' })
+    expect(p[1]).toMatchObject({ desde: '2026-07-20', hasta: '2026-07-24' })
+    expect(p[2]).toMatchObject({ desde: '2026-07-01', hasta: '2026-07-24' })
   })
 })
 

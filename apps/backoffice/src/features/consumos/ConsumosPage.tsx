@@ -226,17 +226,6 @@ export function ConsumosPage() {
             </SelectContent>
           </Select>
         </Field>
-
-        <Field className="w-full max-w-64 sm:w-auto lg:ml-auto">
-          <FieldLabel htmlFor="filtro-q">Buscar comensal</FieldLabel>
-          <Input
-            id="filtro-q"
-            placeholder="Nombre del comensal…"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            aria-label="Buscar por nombre de comensal"
-          />
-        </Field>
       </div>
 
       {isLoading ? (
@@ -245,12 +234,14 @@ export function ConsumosPage() {
         <EstadoError onReintentar={() => { lista.refetch(); resumenQ.refetch() }} />
       ) : (
         <>
-          {/* Métricas del período */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Metrica etiqueta="Comidas" valor={String(resumen?.total ?? 0)} />
-            <Metrica etiqueta="Comensales" valor={String(resumen?.comensales_unicos ?? 0)} />
-            <Metrica etiqueta="Gasto total" valor={formatearMoneda(resumen?.gasto ?? 0)} />
-          </div>
+          {/* Métricas del período: un solo card destacado en color secundario. */}
+          <Card className="border-0 bg-secondary text-secondary-foreground shadow-sm">
+            <CardContent className="grid grid-cols-1 divide-y divide-secondary-foreground/15 p-0 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              <Metrica etiqueta="Comidas" valor={String(resumen?.total ?? 0)} />
+              <Metrica etiqueta="Comensales" valor={String(resumen?.comensales_unicos ?? 0)} />
+              <Metrica etiqueta="Gasto total" valor={formatearMoneda(resumen?.gasto ?? 0)} />
+            </CardContent>
+          </Card>
 
           <div className="grid gap-4 lg:grid-cols-2">
             {/* Gráfica: quién comió más */}
@@ -297,23 +288,35 @@ export function ConsumosPage() {
             </Card>
           </div>
 
-          {/* Detalle paginado */}
-          {total === 0 ? (
+          {/* Detalle paginado. El estado vacío solo se muestra si NO hay búsqueda activa;
+              con búsqueda, la tabla se mantiene (con su toolbar) para poder editar el término. */}
+          {total === 0 && !busqueda.trim() ? (
             <ConsumosVacio />
           ) : (
             <div className="flex flex-col gap-3">
               <DataTable
                 columns={columnas}
                 data={rows}
-                emptyMessage="Ningún consumo coincide con los filtros."
+                emptyMessage="Ningún consumo coincide con la búsqueda."
+                toolbar={
+                  <Input
+                    placeholder="Buscar comensal…"
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    className="max-w-sm"
+                    aria-label="Buscar por nombre de comensal"
+                  />
+                }
               />
-              <Paginacion
-                page={page}
-                totalPaginas={totalPaginas}
-                total={total}
-                onPrev={() => setPage((p) => Math.max(0, p - 1))}
-                onNext={() => setPage((p) => Math.min(totalPaginas - 1, p + 1))}
-              />
+              {total > 0 && (
+                <Paginacion
+                  page={page}
+                  totalPaginas={totalPaginas}
+                  total={total}
+                  onPrev={() => setPage((p) => Math.max(0, p - 1))}
+                  onNext={() => setPage((p) => Math.min(totalPaginas - 1, p + 1))}
+                />
+              )}
             </div>
           )}
         </>
@@ -356,12 +359,10 @@ function Paginacion({
 
 function Metrica({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
-    <Card className="shadow-none">
-      <CardContent className="flex flex-col gap-1 p-5">
-        <span className="font-mono text-2xl font-semibold tabular-nums">{valor}</span>
-        <span className="text-xs text-muted-foreground">{etiqueta}</span>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-1 px-6 py-5">
+      <span className="font-mono text-3xl font-bold tabular-nums">{valor}</span>
+      <span className="text-sm font-medium text-secondary-foreground/70">{etiqueta}</span>
+    </div>
   )
 }
 

@@ -1,9 +1,9 @@
-import { aISO } from '@amena/utils'
+import { aISO, lunesDeSemana } from '@amena/utils'
 import type { OrigenConsumo } from './api'
 
 /** Un preset de rango de fechas para el filtro. */
 export interface RangoPreset {
-  clave: 'hoy' | 'ayer' | 'semana' | 'mes'
+  clave: 'hoy' | 'semana' | 'mes'
   etiqueta: string
   desde: string
   hasta: string
@@ -11,20 +11,14 @@ export interface RangoPreset {
 
 /**
  * Presets de rango calculados a partir de `hoy` (inyectable para tests):
- * Hoy, Ayer, Últimos 7 días y Este mes. Fechas en 'YYYY-MM-DD'.
+ * Hoy, Esta semana (lunes→hoy) y Este mes (día 1→hoy). Fechas en 'YYYY-MM-DD'.
  */
 export function presetsRango(hoy: Date): RangoPreset[] {
   const hoyISO = aISO(hoy)
-  const ayer = new Date(hoy)
-  ayer.setDate(ayer.getDate() - 1)
-  const ayerISO = aISO(ayer)
-  const hace7 = new Date(hoy)
-  hace7.setDate(hace7.getDate() - 6)
   const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
   return [
     { clave: 'hoy', etiqueta: 'Hoy', desde: hoyISO, hasta: hoyISO },
-    { clave: 'ayer', etiqueta: 'Ayer', desde: ayerISO, hasta: ayerISO },
-    { clave: 'semana', etiqueta: 'Últimos 7 días', desde: aISO(hace7), hasta: hoyISO },
+    { clave: 'semana', etiqueta: 'Esta semana', desde: aISO(lunesDeSemana(hoy)), hasta: hoyISO },
     { clave: 'mes', etiqueta: 'Este mes', desde: aISO(inicioMes), hasta: hoyISO },
   ]
 }
