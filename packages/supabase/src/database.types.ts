@@ -575,6 +575,7 @@ export type Database = {
         }
         Returns: Json
       }
+      es_capitan_meseros: { Args: never; Returns: boolean }
       es_consulta: { Args: never; Returns: boolean }
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
@@ -634,7 +635,12 @@ export type Database = {
       estado_factura: "pendiente" | "pagada" | "cancelada"
       modo_consumo: "declaracion" | "libre"
       origen_cuota: "declaracion" | "extra"
-      rol_backoffice: "super_admin" | "mesero" | "finanzas" | "consulta"
+      rol_backoffice:
+        | "super_admin"
+        | "mesero"
+        | "finanzas"
+        | "consulta"
+        | "capitan_meseros"
       rol_portal: "admin" | "colaborador"
     }
     CompositeTypes: {
@@ -771,7 +777,13 @@ export const Constants = {
       estado_factura: ["pendiente", "pagada", "cancelada"],
       modo_consumo: ["declaracion", "libre"],
       origen_cuota: ["declaracion", "extra"],
-      rol_backoffice: ["super_admin", "mesero", "finanzas", "consulta"],
+      rol_backoffice: [
+        "super_admin",
+        "mesero",
+        "finanzas",
+        "consulta",
+        "capitan_meseros",
+      ],
       rol_portal: ["admin", "colaborador"],
     },
   },
