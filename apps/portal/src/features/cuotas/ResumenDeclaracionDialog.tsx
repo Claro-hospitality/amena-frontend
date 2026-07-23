@@ -40,8 +40,8 @@ export function ResumenDeclaracionDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirmar} disabled={enviando}>
-            {enviando ? 'Declarando…' : 'Declarar'}
+          <AlertDialogAction onClick={onConfirmar} loading={enviando}>
+            Declarar
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

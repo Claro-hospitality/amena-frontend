@@ -23,12 +23,14 @@ import { ColaboradorCard } from './ColaboradorCard'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
 import { ConfirmarEstadoColaborador } from './ConfirmarEstadoColaborador'
 import { CredencialDialog } from './CredencialDialog'
+import { RestablecerPasswordColaborador } from './RestablecerPasswordColaborador'
 import { useColaboradores } from './queries'
 
 type Dialogo =
   | { tipo: 'form'; colaborador: Colaborador | null }
   | { tipo: 'credencial'; colaborador: Colaborador }
   | { tipo: 'estado'; colaborador: Colaborador }
+  | { tipo: 'reset'; colaborador: Colaborador }
 
 export function ColaboradoresPage() {
   const { tipo } = useOutletContext<ContextoAcceso>()
@@ -54,10 +56,16 @@ export function ColaboradoresPage() {
   const verQR = (colaborador: Colaborador) => setDialogo({ tipo: 'credencial', colaborador })
   const editar = (colaborador: Colaborador) => setDialogo({ tipo: 'form', colaborador })
   const cambiarEstado = (colaborador: Colaborador) => setDialogo({ tipo: 'estado', colaborador })
+  const restablecer = (colaborador: Colaborador) => setDialogo({ tipo: 'reset', colaborador })
   const nuevo = () => setDialogo({ tipo: 'form', colaborador: null })
   const cerrar = () => setDialogo(null)
 
-  const columnas = crearColumnasColaboradores({ onVerQR: verQR, onEditar: editar, onCambiarEstado: cambiarEstado })
+  const columnas = crearColumnasColaboradores({
+    onVerQR: verQR,
+    onEditar: editar,
+    onCambiarEstado: cambiarEstado,
+    onResetear: restablecer,
+  })
 
   const buscador = (
     <Input
@@ -105,6 +113,7 @@ export function ColaboradoresPage() {
                     onVerQR={verQR}
                     onEditar={editar}
                     onCambiarEstado={cambiarEstado}
+                    onResetear={restablecer}
                   />
                 ))
               )}
@@ -137,6 +146,9 @@ export function ColaboradoresPage() {
       {dialogo?.tipo === 'estado' && (
         <ConfirmarEstadoColaborador colaborador={dialogo.colaborador} onClose={cerrar} />
       )}
+      {dialogo?.tipo === 'reset' && (
+        <RestablecerPasswordColaborador colaborador={dialogo.colaborador} onClose={cerrar} />
+      )}
     </TooltipProvider>
   )
 }
@@ -145,10 +157,12 @@ function crearColumnasColaboradores({
   onVerQR,
   onEditar,
   onCambiarEstado,
+  onResetear,
 }: {
   onVerQR: (c: Colaborador) => void
   onEditar: (c: Colaborador) => void
   onCambiarEstado: (c: Colaborador) => void
+  onResetear: (c: Colaborador) => void
 }): ColumnDef<Colaborador>[] {
   return [
     {
@@ -208,6 +222,7 @@ function crearColumnasColaboradores({
             colaborador={row.original}
             onEditar={onEditar}
             onCambiarEstado={onCambiarEstado}
+            onResetear={onResetear}
           />
         </div>
       ),

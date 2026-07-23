@@ -82,6 +82,7 @@ const [state, action, pending] = useActionState(async (_prev, fd) => {
 Toda pantalla o feature debe resolver estos estados — no son opcionales:
 
 - **Carga**: `skeleton` con la forma del contenido real (no spinners genéricos a pantalla completa; `spinner` solo para acciones puntuales en botones). Para carga a nivel ruta, preferir `React.lazy` + `Suspense`.
+  - **Botones en carga — estándar obligatorio:** usa la prop **`loading`** del `Button` de `@amena/ui`, NUNCA cambies el texto a "Cargando…"/"Guardando…". `loading` muestra un **spinner (circle progress)**, deshabilita el botón y oculta cualquier ícono propio mientras dura; la etiqueta se mantiene fija. El patrón es `<Button loading={pending}>Guardar</Button>` (con `useMutation`/`useActionState`, `loading={mutation.isPending}` o el `pending` del form). Si el botón tiene además otra condición de deshabilitado, combínalas: `disabled={sinCambios} loading={isPending}`. Aplica también a `AlertDialogAction` (es un `Button`). Todo botón de acción asíncrona (crear, guardar, enviar, declarar, ejecutar…) debe usarlo.
 - **Vacío**: componente `empty` con mensaje útil y, si aplica, la acción para crear el primer elemento ("Aún no hay colaboradores — Agregar colaborador").
 - **Error**: distinguir dos tipos:
   - *Esperados* (validación, 4xx, permisos): mensaje claro en español con qué hacer; errores de mutación via toast (`sonner`), errores de carga con estado en pantalla y opción de reintentar (`refetch`).

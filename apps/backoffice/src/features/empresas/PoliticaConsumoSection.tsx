@@ -241,8 +241,12 @@ export function PoliticaConsumoSection({
             )}
 
             <div className="flex justify-end">
-              <Button onClick={intentarGuardar} disabled={sinCambios || actualizar.isPending}>
-                {actualizar.isPending ? 'Guardando…' : 'Guardar política'}
+              <Button
+                onClick={intentarGuardar}
+                disabled={sinCambios}
+                loading={actualizar.isPending}
+              >
+                Guardar política
               </Button>
             </div>
           </div>

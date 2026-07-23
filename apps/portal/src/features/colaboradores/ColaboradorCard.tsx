@@ -11,11 +11,13 @@ export function ColaboradorCard({
   onVerQR,
   onEditar,
   onCambiarEstado,
+  onResetear,
 }: {
   colaborador: Colaborador
   onVerQR: (colaborador: Colaborador) => void
   onEditar: (colaborador: Colaborador) => void
   onCambiarEstado: (colaborador: Colaborador) => void
+  onResetear: (colaborador: Colaborador) => void
 }) {
   const conAcceso = colaborador.user_id != null
 
@@ -59,6 +61,7 @@ export function ColaboradorCard({
             colaborador={colaborador}
             onEditar={onEditar}
             onCambiarEstado={onCambiarEstado}
+            onResetear={onResetear}
           />
         </div>
       </CardContent>

@@ -121,8 +121,8 @@ export function UsuarioFormDialog({ onClose }: { onClose: () => void }) {
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={pending}>
-                  {pending ? 'Creando…' : 'Crear y generar acceso'}
+                <Button type="submit" loading={pending}>
+                  Crear y generar acceso
                 </Button>
               </DialogFooter>
             </form>

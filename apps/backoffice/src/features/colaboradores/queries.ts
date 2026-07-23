@@ -6,6 +6,7 @@ import {
   establecerRolPortal,
   listarColaboradores,
   listarUsuariosEmpresa,
+  resetearPasswordUsuario,
   type DatosAlta,
   type RolPortal,
 } from './api'
@@ -77,5 +78,12 @@ export function useAltaUsuario() {
       qc.invalidateQueries({ queryKey: ['usuarios'] })
       qc.invalidateQueries({ queryKey: ['empresa'] })
     },
+  })
+}
+
+/** Restablece la contraseña de un usuario del portal; devuelve la temporal (una vez). */
+export function useResetearPassword() {
+  return useMutation({
+    mutationFn: (usuarioId: number) => resetearPasswordUsuario(usuarioId),
   })
 }

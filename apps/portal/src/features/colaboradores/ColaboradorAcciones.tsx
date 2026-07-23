@@ -1,5 +1,5 @@
 import { useId } from 'react'
-import { MoreVertical, Pencil, Power, PowerOff } from 'lucide-react'
+import { KeyRound, MoreVertical, Pencil, Power, PowerOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -55,15 +55,17 @@ export function ToggleConsumoLibre({ colaborador }: { colaborador: Colaborador }
   )
 }
 
-/** Menú de acciones secundarias (editar / desactivar-reactivar) de un colaborador. */
+/** Menú de acciones secundarias (editar / restablecer contraseña / desactivar-reactivar). */
 export function AccionesColaborador({
   colaborador,
   onEditar,
   onCambiarEstado,
+  onResetear,
 }: {
   colaborador: Colaborador
   onEditar: (colaborador: Colaborador) => void
   onCambiarEstado: (colaborador: Colaborador) => void
+  onResetear: (colaborador: Colaborador) => void
 }) {
   return (
     <DropdownMenu>
@@ -84,6 +86,13 @@ export function AccionesColaborador({
           <Pencil className="size-4" />
           Editar
         </DropdownMenuItem>
+        {/* Solo tiene sentido si la persona ya tiene cuenta de acceso. */}
+        {colaborador.user_id != null && (
+          <DropdownMenuItem onClick={() => onResetear(colaborador)}>
+            <KeyRound className="size-4" />
+            Restablecer contraseña
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => onCambiarEstado(colaborador)}>
           {colaborador.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
           {colaborador.activo ? 'Desactivar' : 'Reactivar'}
