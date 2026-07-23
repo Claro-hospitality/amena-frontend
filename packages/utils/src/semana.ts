@@ -11,6 +11,22 @@ export function diasHabiles(lunes: Date): Date[] {
   return Array.from({ length: 5 }, (_, i) => addDays(lunes, i))
 }
 
+/** Los 7 días (lunes a domingo) a partir del lunes dado — para la cuadrícula mensual. */
+export function diasDeSemana(lunes: Date): Date[] {
+  return Array.from({ length: 7 }, (_, i) => addDays(lunes, i))
+}
+
+/** Número de día del mes como texto, p. ej. 13. */
+export function diaDelMes(fecha: Date): string {
+  return format(fecha, 'd', { locale: es })
+}
+
+/** ¿La fecha cae en fin de semana (sáb o dom)? El servicio de comidas es solo lun–vie. */
+export function esFinDeSemana(fecha: Date): boolean {
+  const dow = fecha.getDay()
+  return dow === 0 || dow === 6
+}
+
 /** Rango legible de la semana, p. ej. "13–17 jul 2026". */
 export function rangoSemanaLegible(lunes: Date): string {
   const viernes = addDays(lunes, 4)

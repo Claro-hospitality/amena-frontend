@@ -98,10 +98,17 @@ describe('EmpresaDetallePage', () => {
     expect(screen.getByText('Adriana Ruiz')).toBeInTheDocument() // admin también aparece
   })
 
-  it('super_admin ve las acciones de editar/estado; finanzas no', async () => {
+  it('super_admin ve "Configurar empresa"; finanzas no', async () => {
+    renderizar('super_admin')
+    expect(
+      await screen.findByRole('button', { name: 'Configurar empresa' })
+    ).toBeInTheDocument()
+  })
+
+  it('finanzas no ve las acciones de gestión', async () => {
     renderizar('finanzas')
     await screen.findByRole('heading', { name: 'Constructora Norte' })
-    expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Configurar empresa' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Nuevo usuario' })).not.toBeInTheDocument()
   })
 

@@ -12,6 +12,11 @@ import { InicioPage } from './features/inicio/InicioPage'
 const EmpresasPage = lazy(() =>
   import('./features/empresas/EmpresasPage').then((m) => ({ default: m.EmpresasPage }))
 )
+const ConfigurarEmpresaPage = lazy(() =>
+  import('./features/empresas/ConfigurarEmpresaPage').then((m) => ({
+    default: m.ConfigurarEmpresaPage,
+  }))
+)
 const EmpresaDetallePage = lazy(() =>
   import('./features/empresas/EmpresaDetallePage').then((m) => ({
     default: m.EmpresaDetallePage,
@@ -98,6 +103,16 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <EmpresaDetallePage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="empresas/:empresaId/configurar"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ConfigurarEmpresaPage />
               </Suspense>
             </RutaErrorBoundary>
           }

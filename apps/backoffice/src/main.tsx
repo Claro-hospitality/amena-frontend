@@ -1,4 +1,5 @@
 import '@amena/ui/src/theme.css'
+import './sidebar-theme.css'
 import { Toaster } from '@amena/ui/components/ui/sonner'
 import * as Sentry from '@sentry/react'
 import { QueryClientProvider } from '@tanstack/react-query'

@@ -1,14 +1,21 @@
 import { createContext, useContext, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
+/** Una miga dinámica que el breadcrumb agrega tras las rutas estáticas. */
+export interface MigaDetalle {
+  label: string
+  to: string
+}
 
 export interface TituloDetalle {
-  /** Etiqueta dinámica del último segmento de la ruta (p. ej. nombre de la empresa). */
-  titulo: string | null
-  setTitulo: (t: string | null) => void
+  /** Migas dinámicas (p. ej. nombre de empresa, o [Empresa, Configurar]). */
+  migas: MigaDetalle[]
+  setMigas: (m: MigaDetalle[]) => void
 }
 
 export const TituloDetalleContext = createContext<TituloDetalle>({
-  titulo: null,
-  setTitulo: () => {},
+  migas: [],
+  setMigas: () => {},
 })
 
 export function useTituloDetalle() {
@@ -16,13 +23,27 @@ export function useTituloDetalle() {
 }
 
 /**
- * Fija el título dinámico de la ruta actual (breadcrumb) mientras el componente
- * está montado; lo limpia al desmontar. Ej.: el detalle de empresa fija su nombre.
+ * Fija una sola miga final (p. ej. el nombre de la empresa en su detalle) mientras el
+ * componente está montado; la limpia al desmontar.
  */
 export function useSetTituloDetalle(valor: string | null) {
-  const { setTitulo } = useTituloDetalle()
+  const { setMigas } = useTituloDetalle()
+  const { pathname } = useLocation()
   useEffect(() => {
-    setTitulo(valor)
-    return () => setTitulo(null)
-  }, [setTitulo, valor])
+    setMigas(valor ? [{ label: valor, to: pathname }] : [])
+    return () => setMigas([])
+  }, [setMigas, valor, pathname])
+}
+
+/**
+ * Fija una traza de migas dinámicas (p. ej. [Empresa → detalle, Configurar → actual])
+ * mientras el componente está montado; la limpia al desmontar.
+ */
+export function useSetMigasDetalle(migas: MigaDetalle[]) {
+  const { setMigas } = useTituloDetalle()
+  const clave = JSON.stringify(migas)
+  useEffect(() => {
+    setMigas(JSON.parse(clave) as MigaDetalle[])
+    return () => setMigas([])
+  }, [setMigas, clave])
 }

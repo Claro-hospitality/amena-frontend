@@ -51,9 +51,12 @@ function opcionDesdeLimite(limite: number | null): OpcionLimite {
 export function PoliticaConsumoSection({
   empresa,
   puedeGestionar,
+  sinTarjeta = false,
 }: {
   empresa: Empresa
   puedeGestionar: boolean
+  /** Sin tarjeta ni encabezado propios (para embeberla dentro de un diálogo). */
+  sinTarjeta?: boolean
 }) {
   const actualizar = useActualizarEmpresa()
 
@@ -133,9 +136,9 @@ export function PoliticaConsumoSection({
       ? `Consumo libre autorizado: ${resumenPoliticaConsumo(empresa.dias_permitidos, empresa.limite_diario)}`
       : 'Consumo por declaración previa (sin consumo libre).'
 
-  return (
-    <Card className="shadow-none">
-      <CardContent className="flex flex-col gap-5 p-5">
+  const cuerpo = (
+    <>
+      {!sinTarjeta && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold tracking-tight">Política de consumo</h2>
@@ -144,9 +147,10 @@ export function PoliticaConsumoSection({
             )}
           </div>
         </div>
+      )}
 
-        {/* Resumen de la política vigente (siempre visible). */}
-        <p className="text-sm text-muted-foreground">{resumenLectura}</p>
+      {/* Resumen de la política vigente (siempre visible). */}
+      <p className="text-sm text-muted-foreground">{resumenLectura}</p>
 
         {puedeGestionar && (
           <div className="flex flex-col gap-5 border-t border-border pt-5">
@@ -185,7 +189,7 @@ export function PoliticaConsumoSection({
                         key={d}
                         value={String(d)}
                         aria-label={NOMBRE_DIA[d]}
-                        className="min-w-11"
+                        className="min-w-11 aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 aria-pressed:hover:text-primary-foreground"
                       >
                         {ETIQUETA_DIA[d]}
                       </ToggleGroupItem>
@@ -243,7 +247,18 @@ export function PoliticaConsumoSection({
             </div>
           </div>
         )}
-      </CardContent>
+    </>
+  )
+
+  return (
+    <>
+      {sinTarjeta ? (
+        <div className="flex flex-col gap-5">{cuerpo}</div>
+      ) : (
+        <Card className="shadow-none">
+          <CardContent className="flex flex-col gap-5 p-5">{cuerpo}</CardContent>
+        </Card>
+      )}
 
       <AlertDialog
         open={confirmando}
@@ -265,6 +280,6 @@ export function PoliticaConsumoSection({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </>
   )
 }

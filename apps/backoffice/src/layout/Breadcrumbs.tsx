@@ -20,14 +20,18 @@ import { useTituloDetalle } from './tituloDetalle'
  */
 export function Breadcrumbs() {
   const { pathname } = useLocation()
-  const { titulo } = useTituloDetalle()
+  const { migas: migasDinamicas } = useTituloDetalle()
   const base = construirMigas(pathname, RUTAS_BREADCRUMB)
-  // Si la ruta tiene un título dinámico (p. ej. nombre de empresa), se agrega como
-  // paso final actual y el anterior pasa a ser un enlace navegable.
-  const migas = titulo
+  // Si la ruta aporta migas dinámicas (p. ej. nombre de empresa, o [Empresa, Configurar]),
+  // se agregan tras las estáticas y la última pasa a ser el paso actual.
+  const migas = migasDinamicas.length
     ? [
-        ...base.map((m, i) => (i === base.length - 1 ? { ...m, esActual: false } : m)),
-        { label: titulo, to: pathname, esActual: true },
+        ...base.map((m) => ({ ...m, esActual: false })),
+        ...migasDinamicas.map((m, i) => ({
+          label: m.label,
+          to: m.to,
+          esActual: i === migasDinamicas.length - 1,
+        })),
       ]
     : base
 
@@ -36,7 +40,7 @@ export function Breadcrumbs() {
       <BreadcrumbList className="gap-1.5 sm:gap-2">
         {migas.map((miga, i) => (
           <Fragment key={miga.to}>
-            <BreadcrumbItem>
+            <BreadcrumbItem className={miga.esActual ? undefined : 'hidden sm:flex'}>
               {miga.esActual ? (
                 <BreadcrumbPage className="text-xl font-semibold tracking-tight text-foreground">
                   {miga.label}
@@ -49,7 +53,7 @@ export function Breadcrumbs() {
               )}
             </BreadcrumbItem>
             {i < migas.length - 1 && (
-              <BreadcrumbSeparator className="text-muted-foreground/50" />
+              <BreadcrumbSeparator className="hidden text-muted-foreground/50 sm:block" />
             )}
           </Fragment>
         ))}

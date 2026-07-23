@@ -41,6 +41,8 @@ import { navDesarrollo, navPorRol, type ItemNav } from './navBackoffice'
 export function BackofficeShell({ rol, children }: { rol: RolBackoffice; children: ReactNode }) {
   const { cerrarSesion } = useAuth()
   return (
+    // El color del sidebar (naranja difuminado) se define en sidebar-theme.css (:root),
+    // así aplica también al drawer móvil que se renderiza en un portal.
     <SidebarProvider>
       <NavegacionBackoffice rol={rol} />
       <SidebarInset className="min-w-0">
