@@ -20,7 +20,7 @@ import {
 } from '@amena/ui/components/ui/select'
 import type { Empresa } from './api'
 import { empresaSchema } from './empresaSchema'
-import { MoneyInput } from './MoneyInput'
+import { MoneyInput } from '@amena/ui/components/money-input'
 import { useActualizarEmpresa, useCrearEmpresa } from './queries'
 
 type Errores = Partial<Record<keyof typeof empresaSchema.shape, string[]>>
@@ -115,7 +115,7 @@ export function EmpresaFormDialog({
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="rfc">RFC (opcional)</FieldLabel>
+              <FieldLabel htmlFor="rfc">RFC</FieldLabel>
               <Input
                 id="rfc"
                 name="rfc"

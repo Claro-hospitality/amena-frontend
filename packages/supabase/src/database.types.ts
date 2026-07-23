@@ -465,7 +465,10 @@ export type Database = {
         Row: {
           activo: boolean
           created_at: string
+          debe_cambiar_password: boolean
           nombre: string
+          password_reseteada_en: string | null
+          password_reseteada_por: string | null
           rol: Database["public"]["Enums"]["rol_backoffice"]
           updated_at: string
           user_id: string
@@ -473,7 +476,10 @@ export type Database = {
         Insert: {
           activo?: boolean
           created_at?: string
+          debe_cambiar_password?: boolean
           nombre: string
+          password_reseteada_en?: string | null
+          password_reseteada_por?: string | null
           rol: Database["public"]["Enums"]["rol_backoffice"]
           updated_at?: string
           user_id: string
@@ -481,7 +487,10 @@ export type Database = {
         Update: {
           activo?: boolean
           created_at?: string
+          debe_cambiar_password?: boolean
           nombre?: string
+          password_reseteada_en?: string | null
+          password_reseteada_por?: string | null
           rol?: Database["public"]["Enums"]["rol_backoffice"]
           updated_at?: string
           user_id?: string
@@ -545,7 +554,15 @@ export type Database = {
         Returns: Json
       }
       auth_user_id_por_email: { Args: { p_email: string }; Returns: string }
+      cambiar_rol_backoffice: {
+        Args: {
+          p_rol: Database["public"]["Enums"]["rol_backoffice"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       comensales_de_mis_empresas: { Args: never; Returns: number[] }
+      confirmar_cambio_password_backoffice: { Args: never; Returns: undefined }
       cuota_disponible: {
         Args: { p_comensal_id: number; p_fecha: string }
         Returns: boolean
@@ -558,6 +575,7 @@ export type Database = {
         }
         Returns: Json
       }
+      es_consulta: { Args: never; Returns: boolean }
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }
@@ -568,6 +586,10 @@ export type Database = {
       establecer_consumo_libre: {
         Args: { p_activo: boolean; p_usuario_id: number }
         Returns: Json
+      }
+      establecer_estado_backoffice: {
+        Args: { p_activo: boolean; p_user_id: string }
+        Returns: undefined
       }
       establecer_rol_portal: {
         Args: {
@@ -583,6 +605,18 @@ export type Database = {
       }
       generar_cierres_pendientes: { Args: { p_fecha: string }; Returns: Json }
       get_config: { Args: { p_clave: string }; Returns: Json }
+      listar_usuarios_backoffice: {
+        Args: never
+        Returns: {
+          activo: boolean
+          debe_cambiar_password: boolean
+          email: string
+          nombre: string
+          rol: Database["public"]["Enums"]["rol_backoffice"]
+          user_id: string
+        }[]
+      }
+      mi_perfil_backoffice: { Args: never; Returns: Json }
       mis_comensales: { Args: never; Returns: number[] }
       mis_empresas_admin: { Args: never; Returns: number[] }
       mis_empresas_comensal: { Args: never; Returns: number[] }
@@ -600,7 +634,7 @@ export type Database = {
       estado_factura: "pendiente" | "pagada" | "cancelada"
       modo_consumo: "declaracion" | "libre"
       origen_cuota: "declaracion" | "extra"
-      rol_backoffice: "super_admin" | "mesero" | "finanzas"
+      rol_backoffice: "super_admin" | "mesero" | "finanzas" | "consulta"
       rol_portal: "admin" | "colaborador"
     }
     CompositeTypes: {
@@ -737,7 +771,7 @@ export const Constants = {
       estado_factura: ["pendiente", "pagada", "cancelada"],
       modo_consumo: ["declaracion", "libre"],
       origen_cuota: ["declaracion", "extra"],
-      rol_backoffice: ["super_admin", "mesero", "finanzas"],
+      rol_backoffice: ["super_admin", "mesero", "finanzas", "consulta"],
       rol_portal: ["admin", "colaborador"],
     },
   },

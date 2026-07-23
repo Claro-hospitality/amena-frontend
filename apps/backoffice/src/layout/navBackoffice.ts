@@ -8,6 +8,7 @@ import {
   Palette,
   ScanLine,
   Settings,
+  Users,
   UtensilsCrossed,
   Wrench,
   type LucideIcon,
@@ -35,6 +36,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/menu', label: 'Menú', icon: CalendarDays },
     { to: '/cierres', label: 'Cierres semanales', icon: ClipboardCheck },
     { to: '/facturas', label: 'Facturas', icon: FileText },
+    { to: '/usuarios', label: 'Usuarios', icon: Users },
     { to: '/configuracion', label: 'Configuración', icon: Settings },
   ],
   finanzas: [
@@ -44,6 +46,15 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/facturas', label: 'Facturas', icon: FileText },
   ],
   mesero: [{ to: '/escaner', label: 'Escáner', icon: ScanLine }],
+  // Consulta: solo lectura de todo lo operativo. Sin escáner, sin configuración, sin usuarios.
+  consulta: [
+    { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/empresas', label: 'Empresas', icon: Building2 },
+    { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
+    { to: '/menu', label: 'Menú', icon: CalendarDays },
+    { to: '/cierres', label: 'Cierres semanales', icon: ClipboardCheck },
+    { to: '/facturas', label: 'Facturas', icon: FileText },
+  ],
 }
 
 /** Grupo de navegación colapsable (un item padre con sub-items). */

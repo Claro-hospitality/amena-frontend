@@ -12,6 +12,13 @@ import {
 } from '@amena/ui/components/ui/dialog'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@amena/ui/components/ui/field'
 import { Input } from '@amena/ui/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@amena/ui/components/ui/select'
 import type { Colaborador, CredencialesAlta } from './api'
 import { colaboradorSchema } from './colaboradorSchema'
 import { useActualizarColaborador, useCrearColaborador, useMiEmpresaId } from './queries'
@@ -41,8 +48,10 @@ export function ColaboradorFormDialog({
       const parsed = colaboradorSchema.safeParse(Object.fromEntries(fd))
       if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
       try {
+        // El rol solo aplica al crear; en edición no se toca (y no es columna editable).
+        const { rol, ...datos } = parsed.data
         if (colaborador) {
-          await actualizar.mutateAsync({ usuarioId: colaborador.usuario_id, datos: parsed.data })
+          await actualizar.mutateAsync({ usuarioId: colaborador.usuario_id, datos })
           toast.success('Colaborador actualizado')
           onClose()
         } else {
@@ -50,8 +59,8 @@ export function ColaboradorFormDialog({
             toast.error('No se pudo determinar tu empresa. Recarga e intenta de nuevo.')
             return { errors: {} }
           }
-          const creds = await crear.mutateAsync({ ...parsed.data, empresa_id: empresaId })
-          toast.success('Colaborador creado')
+          const creds = await crear.mutateAsync({ ...datos, rol, empresa_id: empresaId })
+          toast.success(rol === 'admin' ? 'Administrador creado' : 'Colaborador creado')
           setCredenciales(creds) // mantiene el dialog abierto para entregar el acceso
         }
         return { errors: {} }
@@ -77,16 +86,35 @@ export function ColaboradorFormDialog({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>{esEdicion ? 'Editar colaborador' : 'Nuevo colaborador'}</DialogTitle>
+              <DialogTitle>
+                {esEdicion ? 'Editar colaborador' : 'Nueva persona del portal'}
+              </DialogTitle>
               <DialogDescription>
                 {esEdicion
                   ? 'Actualiza los datos del colaborador.'
-                  : 'Al registrarlo se genera su acceso al portal y su credencial QR.'}
+                  : 'Se crea su acceso al portal con una contraseña temporal. Los colaboradores además reciben su credencial QR.'}
               </DialogDescription>
             </DialogHeader>
 
             <form action={accion}>
               <FieldGroup>
+                {!esEdicion && (
+                  <Field>
+                    <FieldLabel htmlFor="rol">Rol</FieldLabel>
+                    <Select name="rol" defaultValue="colaborador">
+                      <SelectTrigger id="rol" className="w-full">
+                        <SelectValue placeholder="Selecciona un rol">
+                          {(v) => (v === 'admin' ? 'Administrador de empresa' : 'Colaborador')}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="colaborador">Colaborador</SelectItem>
+                        <SelectItem value="admin">Administrador de empresa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+
                 <Field>
                   <FieldLabel htmlFor="nombre">Nombre</FieldLabel>
                   <Input
@@ -100,7 +128,7 @@ export function ColaboradorFormDialog({
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="email">Correo (opcional)</FieldLabel>
+                  <FieldLabel htmlFor="email">Correo</FieldLabel>
                   <Input
                     id="email"
                     name="email"

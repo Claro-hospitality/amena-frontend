@@ -12,6 +12,11 @@ import { InicioPage } from './features/inicio/InicioPage'
 const EmpresasPage = lazy(() =>
   import('./features/empresas/EmpresasPage').then((m) => ({ default: m.EmpresasPage }))
 )
+const ConfigurarEmpresaPage = lazy(() =>
+  import('./features/empresas/ConfigurarEmpresaPage').then((m) => ({
+    default: m.ConfigurarEmpresaPage,
+  }))
+)
 const EmpresaDetallePage = lazy(() =>
   import('./features/empresas/EmpresaDetallePage').then((m) => ({
     default: m.EmpresaDetallePage,
@@ -42,6 +47,12 @@ const ComponentesPage = lazy(() =>
 )
 const BrandingPage = lazy(() =>
   import('./features/desarrollo/BrandingPage').then((m) => ({ default: m.BrandingPage }))
+)
+const UsuariosPage = lazy(() =>
+  import('./features/usuarios/UsuariosPage').then((m) => ({ default: m.UsuariosPage }))
+)
+const MiCuentaPage = lazy(() =>
+  import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
 )
 
 function CargandoRuta() {
@@ -103,6 +114,16 @@ export default function App() {
           }
         />
         <Route
+          path="empresas/:empresaId/configurar"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ConfigurarEmpresaPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
           path="platillos"
           element={
             <RutaErrorBoundary>
@@ -145,6 +166,26 @@ export default function App() {
           }
         />
         <Route path="facturas" element={<Placeholder titulo="Facturas" />} />
+        <Route
+          path="usuarios"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <UsuariosPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="mi-cuenta"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <MiCuentaPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
 
         {/* Sección de desarrollo: solo en dev (import.meta.env.DEV), nunca en prod. */}
         {import.meta.env.DEV && (

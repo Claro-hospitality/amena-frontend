@@ -1,11 +1,11 @@
 import { useState, type ReactNode } from 'react'
-import { TituloDetalleContext } from './tituloDetalle'
+import { TituloDetalleContext, type MigaDetalle } from './tituloDetalle'
 
-/** Provee el título dinámico que el breadcrumb del shell muestra como paso final. */
+/** Provee las migas dinámicas que el breadcrumb del shell agrega tras las rutas estáticas. */
 export function TituloDetalleProvider({ children }: { children: ReactNode }) {
-  const [titulo, setTitulo] = useState<string | null>(null)
+  const [migas, setMigas] = useState<MigaDetalle[]>([])
   return (
-    <TituloDetalleContext.Provider value={{ titulo, setTitulo }}>
+    <TituloDetalleContext.Provider value={{ migas, setMigas }}>
       {children}
     </TituloDetalleContext.Provider>
   )

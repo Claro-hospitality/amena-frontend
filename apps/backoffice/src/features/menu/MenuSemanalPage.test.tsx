@@ -2,10 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { aISO, diasHabiles, lunesDeSemana } from '@amena/utils'
+import { aISO, esFinDeSemana } from '@amena/utils'
 
 const menuApi = vi.hoisted(() => ({
   listarMenuSemana: vi.fn(),
+  listarMenuRango: vi.fn(),
   agregarPlatilloADia: vi.fn(),
   quitarMenuDia: vi.fn(),
   copiarSemanaAnterior: vi.fn(),
@@ -18,7 +19,15 @@ vi.mock('../platillos/api', () => platApi)
 import type { RolBackoffice } from '../../auth/validarAccesoPortal'
 import { MenuSemanalPage } from './MenuSemanalPage'
 
-const semanaActual = diasHabiles(lunesDeSemana(new Date())).map(aISO)
+// Primer día hábil del mes actual — el calendario siempre lo muestra dentro del rango.
+const diaHabil = (() => {
+  const hoy = new Date()
+  const d = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+  while (esFinDeSemana(d)) d.setDate(d.getDate() + 1)
+  return d
+})()
+const fechaObjetivo = aISO(diaHabil)
+
 const platilloFake = {
   id: 1,
   nombre: 'Milanesa con puré',
@@ -50,27 +59,16 @@ beforeEach(() => {
 })
 
 describe('MenuSemanalPage', () => {
-  it('semana vacía: ofrece copiar la semana anterior', async () => {
-    menuApi.listarMenuSemana.mockResolvedValue([])
-    renderizar('super_admin')
-    expect(
-      await screen.findByRole('button', { name: /copiar semana anterior/i })
-    ).toBeInTheDocument()
-  })
-
-  it('con platillos: muestra el asignado y ya no ofrece copiar', async () => {
-    menuApi.listarMenuSemana.mockResolvedValue([
-      { id: 1, fecha: semanaActual[0], platillo: platilloFake },
+  it('muestra el calendario del mes con los platillos asignados', async () => {
+    menuApi.listarMenuRango.mockResolvedValue([
+      { id: 1, fecha: fechaObjetivo, platillo: platilloFake },
     ])
     renderizar('super_admin')
     expect((await screen.findAllByText('Milanesa con puré')).length).toBeGreaterThan(0)
-    expect(
-      screen.queryByRole('button', { name: /copiar semana anterior/i })
-    ).not.toBeInTheDocument()
   })
 
   it('rol sin permiso: no ve el módulo', () => {
-    menuApi.listarMenuSemana.mockResolvedValue([])
+    menuApi.listarMenuRango.mockResolvedValue([])
     renderizar('finanzas')
     expect(screen.getByText(/no tienes acceso/i)).toBeInTheDocument()
   })

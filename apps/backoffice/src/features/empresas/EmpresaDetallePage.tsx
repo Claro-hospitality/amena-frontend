@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Link, useOutletContext, useParams } from 'react-router-dom'
-import { Building2, Pencil, Power, PowerOff, TriangleAlert } from 'lucide-react'
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import { Building2, Settings, TriangleAlert } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
@@ -25,13 +25,8 @@ import { CierreDetalleDialog } from '../cierres/CierreDetalleDialog'
 import { crearColumnasCierres } from '../cierres/columns'
 import { useCierres } from '../cierres/queries'
 import type { Empresa } from './api'
-import { ConfirmarEstadoDialog } from './ConfirmarEstadoDialog'
-import { EmpresaFormDialog } from './EmpresaFormDialog'
-import { PoliticaConsumoSection } from './PoliticaConsumoSection'
 import { useEmpresas, useResumenEmpresa } from './queries'
 import type { ResumenEmpresa } from './resumenApi'
-
-type Dialogo = { tipo: 'form' } | { tipo: 'estado' } | null
 
 const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'Empresa'
 
@@ -40,16 +35,16 @@ export function EmpresaDetallePage() {
   const { empresaId } = useParams<{ empresaId: string }>()
   const id = Number(empresaId)
 
+  const navigate = useNavigate()
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
   const empresa = empresas?.find((e) => e.id === id)
 
-  const [dialogo, setDialogo] = useState<Dialogo>(null)
   const [detalleCierre, setDetalleCierre] = useState<CierreConEmpresa | null>(null)
 
   // El breadcrumb del shell muestra el nombre de la empresa como paso final.
   useSetTituloDetalle(empresa ? nombreEmpresa(empresa) : null)
 
-  if (rol !== 'super_admin' && rol !== 'finanzas') {
+  if (rol !== 'super_admin' && rol !== 'finanzas' && rol !== 'consulta') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
@@ -94,18 +89,10 @@ export function EmpresaDetallePage() {
             </div>
 
             {puedeGestionar && (
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => setDialogo({ tipo: 'form' })}>
-                  <Pencil className="size-4" />
-                  Editar
-                </Button>
-                <Button
-                  variant={empresa.activo ? 'destructive' : 'default'}
-                  size="sm"
-                  onClick={() => setDialogo({ tipo: 'estado' })}
-                >
-                  {empresa.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
-                  {empresa.activo ? 'Desactivar' : 'Reactivar'}
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => navigate(`/empresas/${id}/configurar`)}>
+                  <Settings className="size-4" />
+                  Configurar empresa
                 </Button>
               </div>
             )}
@@ -114,9 +101,6 @@ export function EmpresaDetallePage() {
 
         {/* Métricas */}
         <ResumenSeccion empresaId={id} />
-
-        {/* Política de consumo (lectura para todos; editable solo super_admin) */}
-        <PoliticaConsumoSection empresa={empresa} puedeGestionar={puedeGestionar} />
 
         {/* Tabs: cada tabla ocupa el alto restante de la pantalla en desktop */}
         <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
@@ -133,12 +117,6 @@ export function EmpresaDetallePage() {
         </Tabs>
       </div>
 
-      {dialogo?.tipo === 'form' && (
-        <EmpresaFormDialog empresa={empresa} onClose={() => setDialogo(null)} />
-      )}
-      {dialogo?.tipo === 'estado' && (
-        <ConfirmarEstadoDialog empresa={empresa} onClose={() => setDialogo(null)} />
-      )}
       {detalleCierre && (
         <CierreDetalleDialog cierre={detalleCierre} onClose={() => setDetalleCierre(null)} />
       )}

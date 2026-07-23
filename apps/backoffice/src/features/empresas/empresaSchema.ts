@@ -13,11 +13,9 @@ export const empresaSchema = z.object({
   rfc: z
     .string()
     .trim()
-    .transform((v) => (v === '' ? null : v.toUpperCase()))
-    .refine(
-      (v) => v === null || RFC_MX.test(v),
-      'RFC inválido (formato mexicano de 12 o 13 caracteres)'
-    ),
+    .min(1, 'El RFC es requerido')
+    .transform((v) => v.toUpperCase())
+    .refine((v) => RFC_MX.test(v), 'RFC inválido (formato mexicano de 12 o 13 caracteres)'),
   precio_comida: z.preprocess(
     (v) => (typeof v === 'string' ? parsearMoneda(v) : v),
     z.number({ error: 'El precio es requerido' }).positive('El precio debe ser mayor a 0')

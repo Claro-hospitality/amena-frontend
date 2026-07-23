@@ -1,10 +1,12 @@
 import { supabase } from '@amena/supabase'
 
-export type RolBackoffice = 'super_admin' | 'mesero' | 'finanzas'
+export type RolBackoffice = 'super_admin' | 'mesero' | 'finanzas' | 'consulta'
 
 export interface ResultadoAcceso {
   concedido: boolean
   rol: RolBackoffice | null
+  /** El usuario debe cambiar su contraseña antes de poder usar el backoffice. */
+  debeCambiarPassword: boolean
 }
 
 /** Contexto que RutaProtegida pasa a las rutas hijas vía <Outlet>. */
@@ -12,24 +14,27 @@ export interface ContextoAcceso {
   rol: RolBackoffice
 }
 
+interface PerfilBackoffice {
+  rol: RolBackoffice
+  nombre: string
+  debe_cambiar_password: boolean
+}
+
 /**
- * Valida si el usuario autenticado puede entrar al BACKOFFICE y con qué rol.
- *
- * Usa los helpers SECURITY DEFINER del backend (es_super_admin / es_finanzas /
- * es_mesero), que resuelven el rol con auth.uid() saltándose RLS. No se consulta
- * usuarios_backoffice directamente porque su RLS solo deja leer a super_admin.
+ * Valida si el usuario autenticado puede entrar al BACKOFFICE, con qué rol, y si debe
+ * cambiar su contraseña. Usa el RPC SECURITY DEFINER `mi_perfil_backoffice`, que resuelve
+ * el perfil con auth.uid() saltándose RLS (la RLS de usuarios_backoffice solo deja leer a
+ * super_admin). Devuelve null si el usuario no es interno → acceso denegado.
  */
 export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
-  const [superAdmin, finanzas, mesero] = await Promise.all([
-    supabase.rpc('es_super_admin'),
-    supabase.rpc('es_finanzas'),
-    supabase.rpc('es_mesero'),
-  ])
-
-  if (superAdmin.data) return { concedido: true, rol: 'super_admin' }
-  if (finanzas.data) return { concedido: true, rol: 'finanzas' }
-  if (mesero.data) return { concedido: true, rol: 'mesero' }
-  return { concedido: false, rol: null }
+  const { data, error } = await supabase.rpc('mi_perfil_backoffice')
+  if (error || !data) return { concedido: false, rol: null, debeCambiarPassword: false }
+  const perfil = data as unknown as PerfilBackoffice
+  return {
+    concedido: true,
+    rol: perfil.rol,
+    debeCambiarPassword: Boolean(perfil.debe_cambiar_password),
+  }
 }
 
 /** Ruta inicial (home) según el rol: el mesero solo escanea. */

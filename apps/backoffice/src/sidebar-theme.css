@@ -1,0 +1,11 @@
+/*
+ * Backoffice: sidebar con el color --muted para separarlo del crema del contenido.
+ * Se sobrescriben los tokens --sidebar-* a nivel de :root para que también los herede
+ * el drawer móvil, que se renderiza en un portal (fuera del SidebarProvider).
+ * No se toca el theme.css compartido; esto vive solo en la app backoffice.
+ */
+:root {
+  --sidebar: var(--muted);
+  --sidebar-accent: var(--border);
+  --sidebar-border: var(--border);
+}

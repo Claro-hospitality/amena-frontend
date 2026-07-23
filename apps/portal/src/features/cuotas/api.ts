@@ -12,10 +12,11 @@ export interface CuotaSemana {
   colaborador: { id: number; nombre: string }
 }
 
-/** Consumo (par comensal+fecha) para cruzar con las cuotas. */
+/** Consumo (comensal+fecha) para cruzar con las cuotas y para listar los consumos libres. */
 export interface ConsumoSemana {
   comensal_id: number
   fecha: string
+  colaborador: { id: number; nombre: string }
 }
 
 /** Un renglón de la declaración: un comensal y las fechas que tendrá comida. */
@@ -62,16 +63,29 @@ interface FilaCuota {
   comensal: { id: number; usuario: { nombre: string } | null } | null
 }
 
-/** Consumos [lun..vie] de la empresa del admin (RLS filtra la empresa). */
+interface FilaConsumo {
+  comensal_id: number
+  fecha: string
+  comensal: { id: number; usuario: { nombre: string } | null } | null
+}
+
+/**
+ * Consumos [lun..vie] de la empresa del admin (RLS filtra la empresa). Incluye el nombre
+ * del comensal para poder listar los consumos LIBRES (que no tienen cuota asociada).
+ */
 export async function listarConsumosSemana(lunesISO: string): Promise<ConsumoSemana[]> {
   const { desde, hasta } = rangoSemana(lunesISO)
   const { data, error } = await supabase
     .from('consumos')
-    .select('comensal_id, fecha')
+    .select('comensal_id, fecha, comensal:comensales(id, usuario:usuarios_portal_empresarial(nombre))')
     .gte('fecha', desde)
     .lte('fecha', hasta)
   if (error) throw error
-  return (data ?? []) as ConsumoSemana[]
+  return ((data ?? []) as FilaConsumo[]).map((c) => ({
+    comensal_id: c.comensal_id,
+    fecha: c.fecha,
+    colaborador: { id: c.comensal?.id ?? c.comensal_id, nombre: c.comensal?.usuario?.nombre ?? '' },
+  }))
 }
 
 /**

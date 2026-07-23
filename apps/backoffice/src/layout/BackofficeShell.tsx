@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LogOut, UserCog } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -41,6 +41,8 @@ import { navDesarrollo, navPorRol, type ItemNav } from './navBackoffice'
 export function BackofficeShell({ rol, children }: { rol: RolBackoffice; children: ReactNode }) {
   const { cerrarSesion } = useAuth()
   return (
+    // El color del sidebar (naranja difuminado) se define en sidebar-theme.css (:root),
+    // así aplica también al drawer móvil que se renderiza en un portal.
     <SidebarProvider>
       <NavegacionBackoffice rol={rol} />
       <SidebarInset className="min-w-0">
@@ -49,10 +51,16 @@ export function BackofficeShell({ rol, children }: { rol: RolBackoffice; childre
         <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-background px-4">
           <SidebarTrigger aria-label="Alternar menú" className="md:hidden" />
           <LogotipoAmena className="h-5 w-auto text-primary md:hidden" />
-          <Button variant="ghost" size="sm" className="ml-auto" onClick={() => cerrarSesion()}>
-            <LogOut className="size-4" />
-            <span className="hidden sm:inline">Cerrar sesión</span>
-          </Button>
+          <div className="ml-auto flex items-center gap-1">
+            <Button variant="ghost" size="sm" nativeButton={false} render={<Link to="/mi-cuenta" />}>
+              <UserCog className="size-4" />
+              <span className="hidden sm:inline">Mi cuenta</span>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => cerrarSesion()}>
+              <LogOut className="size-4" />
+              <span className="hidden sm:inline">Cerrar sesión</span>
+            </Button>
+          </div>
         </header>
         <TituloDetalleProvider>
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pb-4 pt-3 md:px-6 md:pb-6">

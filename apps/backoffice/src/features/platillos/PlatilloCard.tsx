@@ -12,10 +12,13 @@ export function PlatilloCard({
   platillo,
   onEditar,
   onCambiarEstado,
+  puedeGestionar = true,
 }: {
   platillo: Platillo
   onEditar: (platillo: Platillo) => void
   onCambiarEstado: (platillo: Platillo) => void
+  /** Si es false (p. ej. rol consulta), no se muestran las acciones de editar/estado. */
+  puedeGestionar?: boolean
 }) {
   return (
     <Card className={cn('overflow-hidden', !platillo.activo && 'opacity-60')}>
@@ -36,38 +39,40 @@ export function PlatilloCard({
           </div>
           {!platillo.activo && <Badge variant="secondary">Inactivo</Badge>}
         </div>
-        <div className="mt-3 flex justify-end gap-1">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => onEditar(platillo)}
-                  aria-label={`Editar ${platillo.nombre}`}
-                >
-                  <Pencil className="size-4" />
-                </Button>
-              }
-            />
-            <TooltipContent>Editar</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => onCambiarEstado(platillo)}
-                  aria-label={`${platillo.activo ? 'Desactivar' : 'Reactivar'} ${platillo.nombre}`}
-                >
-                  {platillo.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
-                </Button>
-              }
-            />
-            <TooltipContent>{platillo.activo ? 'Desactivar' : 'Reactivar'}</TooltipContent>
-          </Tooltip>
-        </div>
+        {puedeGestionar && (
+          <div className="mt-3 flex justify-end gap-1">
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => onEditar(platillo)}
+                    aria-label={`Editar ${platillo.nombre}`}
+                  >
+                    <Pencil className="size-4" />
+                  </Button>
+                }
+              />
+              <TooltipContent>Editar</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => onCambiarEstado(platillo)}
+                    aria-label={`${platillo.activo ? 'Desactivar' : 'Reactivar'} ${platillo.nombre}`}
+                  >
+                    {platillo.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
+                  </Button>
+                }
+              />
+              <TooltipContent>{platillo.activo ? 'Desactivar' : 'Reactivar'}</TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

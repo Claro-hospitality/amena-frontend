@@ -26,10 +26,11 @@ export function PlatillosPage() {
   const { data, isLoading, isError, refetch } = usePlatillos()
   const [dialogo, setDialogo] = useState<Dialogo | null>(null)
 
-  if (rol !== 'super_admin') {
+  if (rol !== 'super_admin' && rol !== 'consulta') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
+  const puedeGestionar = rol === 'super_admin'
   const platillos = data ?? []
   const cerrar = () => setDialogo(null)
   const nuevo = () => setDialogo({ tipo: 'form', platillo: null })
@@ -37,25 +38,28 @@ export function PlatillosPage() {
   return (
     <TooltipProvider>
       <div className="flex flex-col gap-4">
-        <header className="flex items-center justify-end gap-4">
-          <Button onClick={nuevo}>
-            <Plus className="size-4" />
-            Nuevo platillo
-          </Button>
-        </header>
+        {puedeGestionar && (
+          <header className="flex items-center justify-end gap-4">
+            <Button onClick={nuevo}>
+              <Plus className="size-4" />
+              Nuevo platillo
+            </Button>
+          </header>
+        )}
 
         {isLoading ? (
           <GridSkeleton />
         ) : isError ? (
           <EstadoError onReintentar={() => refetch()} />
         ) : platillos.length === 0 ? (
-          <PlatillosVacio onCrear={nuevo} />
+          <PlatillosVacio onCrear={nuevo} puedeGestionar={puedeGestionar} />
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {platillos.map((platillo) => (
               <PlatilloCard
                 key={platillo.id}
                 platillo={platillo}
+                puedeGestionar={puedeGestionar}
                 onEditar={(p) => setDialogo({ tipo: 'form', platillo: p })}
                 onCambiarEstado={(p) => setDialogo({ tipo: 'estado', platillo: p })}
               />
@@ -107,7 +111,13 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
   )
 }
 
-function PlatillosVacio({ onCrear }: { onCrear: () => void }) {
+function PlatillosVacio({
+  onCrear,
+  puedeGestionar,
+}: {
+  onCrear: () => void
+  puedeGestionar: boolean
+}) {
   return (
     <Empty>
       <EmptyHeader>
@@ -115,14 +125,20 @@ function PlatillosVacio({ onCrear }: { onCrear: () => void }) {
           <UtensilsCrossed className="size-6" />
         </EmptyMedia>
         <EmptyTitle>Aún no hay platillos</EmptyTitle>
-        <EmptyDescription>Agrega el primer platillo al catálogo para armar menús.</EmptyDescription>
+        <EmptyDescription>
+          {puedeGestionar
+            ? 'Agrega el primer platillo al catálogo para armar menús.'
+            : 'El catálogo de platillos aún está vacío.'}
+        </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent>
-        <Button onClick={onCrear}>
-          <Plus className="size-4" />
-          Nuevo platillo
-        </Button>
-      </EmptyContent>
+      {puedeGestionar && (
+        <EmptyContent>
+          <Button onClick={onCrear}>
+            <Plus className="size-4" />
+            Nuevo platillo
+          </Button>
+        </EmptyContent>
+      )}
     </Empty>
   )
 }

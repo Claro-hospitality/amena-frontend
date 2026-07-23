@@ -2,7 +2,6 @@ import { supabase } from '@amena/supabase'
 import { aISO, deISO, diasHabiles } from '@amena/utils'
 import {
   aplanarComensal,
-  SELECT_COMENSAL,
   type Colaborador,
   type FilaComensal,
 } from '../colaboradores/api'
@@ -37,9 +36,30 @@ function rangoSemana(lunesISO: string) {
   return { desde: dias[0], hasta: dias[dias.length - 1] }
 }
 
-/** Mi propio comensal (RLS limita a la fila del usuario; no se filtra por user_id a mano). */
+// Igual que SELECT_COMENSAL pero con INNER join a la identidad, para poder filtrar el
+// comensal por el user_id del usuario logueado (mi propia credencial). Es un literal (no un
+// .replace() en runtime) para que supabase-js infiera bien el tipo del resultado.
+const SELECT_MI_COMENSAL =
+  'id, activo, consumo_libre, usuario:usuarios_portal_empresarial!inner(id, user_id, nombre, email, telefono, empresa:empresas(nombre:nombre_comercial, modo_consumo, dias_permitidos, limite_diario)), credencial:credenciales_qr(qr_token, activo)'
+
+/**
+ * Mi propio comensal, filtrado por el user_id del usuario logueado. NO basta con la RLS +
+ * `.limit(1)`: un admin ve TODOS los comensales de su empresa ("admin CRUD de su empresa"),
+ * así que sin filtrar tomaría el primero de la empresa (no el suyo). Devuelve null si el
+ * usuario no tiene comensal (p. ej. admin que no come) → la UI muestra "No tienes credencial".
+ */
 export async function obtenerMiColaborador(): Promise<Colaborador | null> {
-  const { data, error } = await supabase.from('comensales').select(SELECT_COMENSAL).limit(1).maybeSingle()
+  const { data: auth, error: authError } = await supabase.auth.getUser()
+  if (authError) throw authError
+  const userId = auth.user?.id
+  if (!userId) return null
+
+  const { data, error } = await supabase
+    .from('comensales')
+    .select(SELECT_MI_COMENSAL)
+    .eq('usuario.user_id', userId)
+    .limit(1)
+    .maybeSingle()
   if (error) throw error
   return data ? aplanarComensal(data as FilaComensal) : null
 }

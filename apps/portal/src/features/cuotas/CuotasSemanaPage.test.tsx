@@ -52,7 +52,9 @@ function renderizar(tipo: TipoUsuarioPortal) {
 beforeEach(() => {
   vi.clearAllMocks()
   cuotasApi.listarCuotasSemana.mockResolvedValue(cuotas)
-  cuotasApi.listarConsumosSemana.mockResolvedValue([{ comensal_id: 1, fecha: dia0 }])
+  cuotasApi.listarConsumosSemana.mockResolvedValue([
+    { comensal_id: 1, fecha: dia0, colaborador: { id: 1, nombre: 'Ana López' } },
+  ])
 })
 
 describe('CuotasSemanaPage', () => {
@@ -78,5 +80,17 @@ describe('CuotasSemanaPage', () => {
   it('un tipo que no es admin_empresa no ve el módulo', () => {
     renderizar('colaborador')
     expect(screen.getByText(/no tienes acceso/i)).toBeInTheDocument()
+  })
+
+  it('refleja consumos libres (sin cuota) con su nombre y badge Libre', async () => {
+    // Modo consumo libre: no hay cuotas, pero sí consumos registrados.
+    cuotasApi.listarCuotasSemana.mockResolvedValue([])
+    cuotasApi.listarConsumosSemana.mockResolvedValue([
+      { comensal_id: 9, fecha: dia0, colaborador: { id: 9, nombre: 'Miguel Robles' } },
+    ])
+    renderizar('admin_empresa')
+    expect(await screen.findByText('Miguel Robles')).toBeInTheDocument()
+    expect(screen.getByText('Libre')).toBeInTheDocument()
+    expect(screen.getByText('1 consumo libre')).toBeInTheDocument()
   })
 })

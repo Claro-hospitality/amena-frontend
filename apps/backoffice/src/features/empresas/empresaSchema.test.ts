@@ -4,7 +4,7 @@ import { empresaSchema, politicaConsumoSchema } from './empresaSchema'
 const base = {
   nombre_comercial: 'Constructora Norte',
   razon_social: 'Constructora Norte S.A. de C.V.',
-  rfc: '',
+  rfc: 'XAXX010101000',
   precio_comida: '85',
   ciclo_facturacion: 'mensual',
 }
@@ -15,7 +15,7 @@ describe('empresaSchema', () => {
     expect(r.success).toBe(true)
     if (r.success) {
       expect(r.data.precio_comida).toBe(85)
-      expect(r.data.rfc).toBeNull()
+      expect(r.data.rfc).toBe('XAXX010101000')
       expect(r.data.razon_social).toBe('Constructora Norte S.A. de C.V.')
       expect(r.data.ciclo_facturacion).toBe('mensual')
     }
@@ -43,8 +43,9 @@ describe('empresaSchema', () => {
     expect(r.success && r.data.precio_comida).toBe(1234.5)
   })
 
-  it('valida RFC solo si se llena', () => {
-    expect(empresaSchema.safeParse({ ...base, rfc: 'XAXX010101000' }).success).toBe(true) // válido
+  it('exige RFC y valida su formato', () => {
+    expect(empresaSchema.safeParse({ ...base, rfc: 'xaxx010101000' }).success).toBe(true) // válido (se normaliza a mayúsculas)
+    expect(empresaSchema.safeParse({ ...base, rfc: '  ' }).success).toBe(false) // vacío → requerido
     expect(empresaSchema.safeParse({ ...base, rfc: 'nope' }).success).toBe(false) // inválido
   })
 })
