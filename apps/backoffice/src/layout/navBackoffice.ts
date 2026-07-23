@@ -55,6 +55,13 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/cierres', label: 'Cierres semanales', icon: ClipboardCheck },
     { to: '/facturas', label: 'Facturas', icon: FileText },
   ],
+  // Capitán de meseros: opera el escáner y ve platillos/menú (lectura). Nada más.
+  capitan_meseros: [
+    { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/escaner', label: 'Escáner', icon: ScanLine },
+    { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
+    { to: '/menu', label: 'Menú', icon: CalendarDays },
+  ],
 }
 
 /** Grupo de navegación colapsable (un item padre con sub-items). */

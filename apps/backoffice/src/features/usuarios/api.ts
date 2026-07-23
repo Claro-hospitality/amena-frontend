@@ -25,6 +25,7 @@ export const ETIQUETA_ROL: Record<RolBackoffice, string> = {
   finanzas: 'Finanzas',
   mesero: 'Mesero',
   consulta: 'Consulta',
+  capitan_meseros: 'Capitán de meseros',
 }
 
 /** Lista los usuarios internos con su email (RPC SECURITY DEFINER, solo super_admin). */

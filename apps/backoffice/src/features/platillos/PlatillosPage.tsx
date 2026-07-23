@@ -26,7 +26,7 @@ export function PlatillosPage() {
   const { data, isLoading, isError, refetch } = usePlatillos()
   const [dialogo, setDialogo] = useState<Dialogo | null>(null)
 
-  if (rol !== 'super_admin' && rol !== 'consulta') {
+  if (rol !== 'super_admin' && rol !== 'consulta' && rol !== 'capitan_meseros') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 

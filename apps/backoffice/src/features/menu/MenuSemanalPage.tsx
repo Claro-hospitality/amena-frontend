@@ -43,7 +43,7 @@ export function MenuSemanalPage() {
   const agregar = useAgregarPlatillo()
   const quitar = useQuitarMenuDia()
 
-  if (rol !== 'super_admin' && rol !== 'consulta') {
+  if (rol !== 'super_admin' && rol !== 'consulta' && rol !== 'capitan_meseros') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 

@@ -1,6 +1,6 @@
 import { supabase } from '@amena/supabase'
 
-export type RolBackoffice = 'super_admin' | 'mesero' | 'finanzas' | 'consulta'
+export type RolBackoffice = 'super_admin' | 'mesero' | 'finanzas' | 'consulta' | 'capitan_meseros'
 
 export interface ResultadoAcceso {
   concedido: boolean

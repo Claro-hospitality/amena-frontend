@@ -266,6 +266,7 @@ function CambiarRolDialog({
               <SelectItem value="super_admin">{ETIQUETA_ROL.super_admin}</SelectItem>
               <SelectItem value="finanzas">{ETIQUETA_ROL.finanzas}</SelectItem>
               <SelectItem value="mesero">{ETIQUETA_ROL.mesero}</SelectItem>
+              <SelectItem value="capitan_meseros">{ETIQUETA_ROL.capitan_meseros}</SelectItem>
               <SelectItem value="consulta">{ETIQUETA_ROL.consulta}</SelectItem>
             </SelectContent>
           </Select>

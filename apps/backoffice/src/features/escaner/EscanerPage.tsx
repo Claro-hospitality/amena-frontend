@@ -22,7 +22,7 @@ export function EscanerPage() {
 
   useConsumosRealtime()
 
-  if (rol !== 'mesero' && rol !== 'super_admin') {
+  if (rol !== 'mesero' && rol !== 'super_admin' && rol !== 'capitan_meseros') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
