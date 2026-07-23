@@ -43,7 +43,7 @@ export function EmpresasPage() {
 
   const hayEmpresas = (empresas ?? []).length > 0
 
-  if (rol !== 'super_admin' && rol !== 'finanzas') {
+  if (rol !== 'super_admin' && rol !== 'finanzas' && rol !== 'consulta') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 

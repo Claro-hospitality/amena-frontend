@@ -44,7 +44,7 @@ export function EmpresaDetallePage() {
   // El breadcrumb del shell muestra el nombre de la empresa como paso final.
   useSetTituloDetalle(empresa ? nombreEmpresa(empresa) : null)
 
-  if (rol !== 'super_admin' && rol !== 'finanzas') {
+  if (rol !== 'super_admin' && rol !== 'finanzas' && rol !== 'consulta') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 

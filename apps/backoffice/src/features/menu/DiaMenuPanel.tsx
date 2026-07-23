@@ -25,6 +25,7 @@ export function DiaMenuPanel({
   onAgregar,
   onQuitar,
   onClose,
+  soloLectura = false,
 }: {
   fecha: Date
   asignados: MenuDiaConPlatillo[]
@@ -32,8 +33,11 @@ export function DiaMenuPanel({
   onAgregar: (fechaISO: string, platilloId: number) => void
   onQuitar: (id: number) => void
   onClose: () => void
+  /** Rol sin permiso de edición (p. ej. consulta): oculta agregar/quitar. */
+  soloLectura?: boolean
 }) {
-  const pasado = esFechaPasada(fecha)
+  // Sin edición: día pasado o rol de solo lectura.
+  const pasado = esFechaPasada(fecha) || soloLectura
   const fechaISO = aISO(fecha)
   const disponibles = platillosDisponibles(
     activos,
@@ -55,7 +59,11 @@ export function DiaMenuPanel({
         <SheetHeader className="border-b border-border">
           <SheetTitle className="capitalize">{etiquetaDia(fecha)}</SheetTitle>
           <SheetDescription>
-            {pasado ? 'Día pasado — solo lectura.' : 'Platillos del menú de este día.'}
+            {soloLectura
+              ? 'Solo lectura.'
+              : esFechaPasada(fecha)
+                ? 'Día pasado — solo lectura.'
+                : 'Platillos del menú de este día.'}
           </SheetDescription>
         </SheetHeader>
 

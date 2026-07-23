@@ -48,6 +48,12 @@ const ComponentesPage = lazy(() =>
 const BrandingPage = lazy(() =>
   import('./features/desarrollo/BrandingPage').then((m) => ({ default: m.BrandingPage }))
 )
+const UsuariosPage = lazy(() =>
+  import('./features/usuarios/UsuariosPage').then((m) => ({ default: m.UsuariosPage }))
+)
+const MiCuentaPage = lazy(() =>
+  import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
+)
 
 function CargandoRuta() {
   return (
@@ -160,6 +166,26 @@ export default function App() {
           }
         />
         <Route path="facturas" element={<Placeholder titulo="Facturas" />} />
+        <Route
+          path="usuarios"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <UsuariosPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="mi-cuenta"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <MiCuentaPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
 
         {/* Sección de desarrollo: solo en dev (import.meta.env.DEV), nunca en prod. */}
         {import.meta.env.DEV && (
