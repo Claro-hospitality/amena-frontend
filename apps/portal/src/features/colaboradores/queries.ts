@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   actualizarColaborador,
-  cambiarEstadoColaborador,
   crearColaborador,
   eliminarColaborador,
   establecerConsumoLibre,
@@ -37,15 +36,6 @@ export function useActualizarColaborador() {
   return useMutation({
     mutationFn: ({ usuarioId, datos }: { usuarioId: number; datos: DatosColaborador }) =>
       actualizarColaborador(usuarioId, datos),
-    onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
-  })
-}
-
-export function useCambiarEstadoColaborador() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
-      cambiarEstadoColaborador(id, activo),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE_COLABORADORES }),
   })
 }

@@ -1,14 +1,5 @@
 import { useId } from 'react'
-import {
-  KeyRound,
-  MoreVertical,
-  Pencil,
-  Power,
-  PowerOff,
-  ShieldCheck,
-  ShieldOff,
-  Trash2,
-} from 'lucide-react'
+import { KeyRound, MoreVertical, Pencil, ShieldCheck, ShieldOff, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -65,22 +56,20 @@ export function ToggleConsumoLibre({ colaborador }: { colaborador: Colaborador }
 }
 
 /**
- * Menú de acciones secundarias. Dos ejes independientes:
- * - **Comida** (`activo` = comensal.activo): desactivar/reactivar consumo + QR.
- * - **Acceso** (`accesoActivo` = usuarios_portal_empresarial.activo): habilita/deshabilita el
- *   login al portal. **Eliminar** (borrado lógico) solo aparece con el acceso ya desactivado.
+ * Menú de acciones secundarias. El **acceso** (`accesoActivo` = usuarios_portal_empresarial.activo)
+ * es el interruptor único: al desactivarlo se apaga también la comida del comensal (consumo + QR)
+ * y al reactivarlo se encienden, en una sola acción (lo cascadea el backend). **Eliminar**
+ * (borrado lógico) solo aparece con el acceso ya desactivado.
  */
 export function AccionesColaborador({
   colaborador,
   onEditar,
-  onCambiarEstado,
   onResetear,
   onToggleAcceso,
   onEliminar,
 }: {
   colaborador: Colaborador
   onEditar: (colaborador: Colaborador) => void
-  onCambiarEstado: (colaborador: Colaborador) => void
   onResetear: (colaborador: Colaborador) => void
   onToggleAcceso: (colaborador: Colaborador) => void
   onEliminar: (colaborador: Colaborador) => void
@@ -111,11 +100,7 @@ export function AccionesColaborador({
             Restablecer contraseña
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => onCambiarEstado(colaborador)}>
-          {colaborador.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
-          {colaborador.activo ? 'Desactivar comida' : 'Activar comida'}
-        </DropdownMenuItem>
-        {/* Acceso (login) solo aplica a quien ya tiene cuenta. */}
+        {/* Acceso (login) solo aplica a quien ya tiene cuenta. Al desactivarlo se apaga también su comida. */}
         {colaborador.user_id != null && (
           <DropdownMenuItem onClick={() => onToggleAcceso(colaborador)}>
             {colaborador.accesoActivo ? (

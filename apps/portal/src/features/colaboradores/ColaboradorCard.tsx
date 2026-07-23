@@ -10,7 +10,6 @@ export function ColaboradorCard({
   colaborador,
   onVerQR,
   onEditar,
-  onCambiarEstado,
   onResetear,
   onToggleAcceso,
   onEliminar,
@@ -18,7 +17,6 @@ export function ColaboradorCard({
   colaborador: Colaborador
   onVerQR: (colaborador: Colaborador) => void
   onEditar: (colaborador: Colaborador) => void
-  onCambiarEstado: (colaborador: Colaborador) => void
   onResetear: (colaborador: Colaborador) => void
   onToggleAcceso: (colaborador: Colaborador) => void
   onEliminar: (colaborador: Colaborador) => void
@@ -37,7 +35,7 @@ export function ColaboradorCard({
             {colaborador.activo ? (
               <Badge className="bg-success text-success-foreground">Activo</Badge>
             ) : (
-              <Badge variant="secondary">Inactivo</Badge>
+              <Badge variant="destructive">Inactivo</Badge>
             )}
             {!conAcceso ? (
               <Badge variant="outline">Sin acceso al portal</Badge>
@@ -70,7 +68,6 @@ export function ColaboradorCard({
           <AccionesColaborador
             colaborador={colaborador}
             onEditar={onEditar}
-            onCambiarEstado={onCambiarEstado}
             onResetear={onResetear}
             onToggleAcceso={onToggleAcceso}
             onEliminar={onEliminar}

@@ -178,15 +178,10 @@ export async function actualizarColaborador(
   if (error) throw error
 }
 
-/** Baja/alta lógica del comensal — nunca delete (conserva historial de consumos). */
-export async function cambiarEstadoColaborador(id: number, activo: boolean): Promise<void> {
-  const { error } = await supabase.from('comensales').update({ activo }).eq('id', id)
-  if (error) throw error
-}
-
 /**
- * Activa/desactiva el ACCESO (login) de un colaborador vía el RPC `establecer_estado_portal`
- * (usuarios_portal_empresarial.activo). `usuarioId` = colaborador.usuario_id. Reversible.
+ * Activa/desactiva el ACCESO (login) de un colaborador vía el RPC `establecer_estado_portal`.
+ * En un solo paso también apaga/enciende su comida (comensal.activo): la cascada la hace el
+ * backend. `usuarioId` = colaborador.usuario_id. Reversible.
  */
 export async function establecerEstadoAcceso(usuarioId: number, activo: boolean): Promise<void> {
   const { error } = await supabase.rpc('establecer_estado_portal', {

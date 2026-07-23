@@ -28,6 +28,9 @@ const PlatillosPage = lazy(() =>
 const MenuSemanalPage = lazy(() =>
   import('./features/menu/MenuSemanalPage').then((m) => ({ default: m.MenuSemanalPage }))
 )
+const ConsumosPage = lazy(() =>
+  import('./features/consumos/ConsumosPage').then((m) => ({ default: m.ConsumosPage }))
+)
 const EscanerPage = lazy(() =>
   import('./features/escaner/EscanerPage').then((m) => ({ default: m.EscanerPage }))
 )
@@ -139,6 +142,16 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <MenuSemanalPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="consumos"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ConsumosPage />
               </Suspense>
             </RutaErrorBoundary>
           }

@@ -25,7 +25,6 @@ import {
   ConfirmarAccesoColaborador,
   ConfirmarEliminarColaborador,
 } from './ConfirmarAccesoColaborador'
-import { ConfirmarEstadoColaborador } from './ConfirmarEstadoColaborador'
 import { CredencialDialog } from './CredencialDialog'
 import { RestablecerPasswordColaborador } from './RestablecerPasswordColaborador'
 import { useColaboradores } from './queries'
@@ -33,7 +32,6 @@ import { useColaboradores } from './queries'
 type Dialogo =
   | { tipo: 'form'; colaborador: Colaborador | null }
   | { tipo: 'credencial'; colaborador: Colaborador }
-  | { tipo: 'estado'; colaborador: Colaborador }
   | { tipo: 'reset'; colaborador: Colaborador }
   | { tipo: 'acceso'; colaborador: Colaborador }
   | { tipo: 'eliminar'; colaborador: Colaborador }
@@ -61,7 +59,6 @@ export function ColaboradoresPage() {
 
   const verQR = (colaborador: Colaborador) => setDialogo({ tipo: 'credencial', colaborador })
   const editar = (colaborador: Colaborador) => setDialogo({ tipo: 'form', colaborador })
-  const cambiarEstado = (colaborador: Colaborador) => setDialogo({ tipo: 'estado', colaborador })
   const restablecer = (colaborador: Colaborador) => setDialogo({ tipo: 'reset', colaborador })
   const toggleAcceso = (colaborador: Colaborador) => setDialogo({ tipo: 'acceso', colaborador })
   const eliminar = (colaborador: Colaborador) => setDialogo({ tipo: 'eliminar', colaborador })
@@ -71,7 +68,6 @@ export function ColaboradoresPage() {
   const columnas = crearColumnasColaboradores({
     onVerQR: verQR,
     onEditar: editar,
-    onCambiarEstado: cambiarEstado,
     onResetear: restablecer,
     onToggleAcceso: toggleAcceso,
     onEliminar: eliminar,
@@ -122,7 +118,6 @@ export function ColaboradoresPage() {
                     colaborador={colaborador}
                     onVerQR={verQR}
                     onEditar={editar}
-                    onCambiarEstado={cambiarEstado}
                     onResetear={restablecer}
                     onToggleAcceso={toggleAcceso}
                     onEliminar={eliminar}
@@ -155,9 +150,6 @@ export function ColaboradoresPage() {
       {dialogo?.tipo === 'credencial' && (
         <CredencialDialog colaborador={dialogo.colaborador} onClose={cerrar} />
       )}
-      {dialogo?.tipo === 'estado' && (
-        <ConfirmarEstadoColaborador colaborador={dialogo.colaborador} onClose={cerrar} />
-      )}
       {dialogo?.tipo === 'reset' && (
         <RestablecerPasswordColaborador colaborador={dialogo.colaborador} onClose={cerrar} />
       )}
@@ -174,14 +166,12 @@ export function ColaboradoresPage() {
 function crearColumnasColaboradores({
   onVerQR,
   onEditar,
-  onCambiarEstado,
   onResetear,
   onToggleAcceso,
   onEliminar,
 }: {
   onVerQR: (c: Colaborador) => void
   onEditar: (c: Colaborador) => void
-  onCambiarEstado: (c: Colaborador) => void
   onResetear: (c: Colaborador) => void
   onToggleAcceso: (c: Colaborador) => void
   onEliminar: (c: Colaborador) => void
@@ -206,7 +196,7 @@ function crearColumnasColaboradores({
         row.original.activo ? (
           <Badge className="bg-success text-success-foreground">Activo</Badge>
         ) : (
-          <Badge variant="secondary">Inactivo</Badge>
+          <Badge variant="destructive">Inactivo</Badge>
         ),
     },
     {
@@ -247,7 +237,6 @@ function crearColumnasColaboradores({
           <AccionesColaborador
             colaborador={row.original}
             onEditar={onEditar}
-            onCambiarEstado={onCambiarEstado}
             onResetear={onResetear}
             onToggleAcceso={onToggleAcceso}
             onEliminar={onEliminar}
