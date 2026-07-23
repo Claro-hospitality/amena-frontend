@@ -22,7 +22,10 @@ export interface Colaborador {
   usuario_id: number
   /** cuenta auth enlazada; null = aún sin acceso al portal. */
   user_id: string | null
+  /** comensal.activo (puede comer / QR). */
   activo: boolean
+  /** usuarios_portal_empresarial.activo — ACCESO (login) al portal. */
+  accesoActivo: boolean
   /** Consumo libre activado para este comensal (solo aplica si la empresa está en modo libre). */
   consumoLibre: boolean
   nombre: string
@@ -61,7 +64,7 @@ export function empresaEnModoLibre(colaborador: Colaborador): boolean {
 }
 
 export const SELECT_COMENSAL =
-  'id, activo, consumo_libre, usuario:usuarios_portal_empresarial(id, user_id, nombre, email, telefono, empresa:empresas(nombre:nombre_comercial, modo_consumo, dias_permitidos, limite_diario)), credencial:credenciales_qr(qr_token, activo)'
+  'id, activo, consumo_libre, usuario:usuarios_portal_empresarial(id, user_id, nombre, email, telefono, acceso_activo:activo, eliminado_en, empresa:empresas(nombre:nombre_comercial, modo_consumo, dias_permitidos, limite_diario)), credencial:credenciales_qr(qr_token, activo)'
 
 export interface FilaComensal {
   id: number
@@ -73,6 +76,8 @@ export interface FilaComensal {
     nombre: string
     email: string | null
     telefono: string | null
+    acceso_activo: boolean
+    eliminado_en: string | null
     empresa: {
       nombre: string | null
       modo_consumo: ModoConsumo
@@ -91,6 +96,7 @@ export function aplanarComensal(fila: FilaComensal): Colaborador {
     usuario_id: fila.usuario?.id ?? 0,
     user_id: fila.usuario?.user_id ?? null,
     activo: fila.activo,
+    accesoActivo: fila.usuario?.acceso_activo ?? true,
     consumoLibre: fila.consumo_libre,
     nombre: fila.usuario?.nombre ?? '',
     email: fila.usuario?.email ?? null,
@@ -116,6 +122,7 @@ export async function listarColaboradores(): Promise<Colaborador[]> {
   const { data, error } = await supabase.from('comensales').select(SELECT_COMENSAL)
   if (error) throw error
   return ((data ?? []) as FilaComensal[])
+    .filter((f) => f.usuario != null && f.usuario.eliminado_en == null) // ocultar eliminados
     .map(aplanarComensal)
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
 }
@@ -174,6 +181,27 @@ export async function actualizarColaborador(
 /** Baja/alta lógica del comensal — nunca delete (conserva historial de consumos). */
 export async function cambiarEstadoColaborador(id: number, activo: boolean): Promise<void> {
   const { error } = await supabase.from('comensales').update({ activo }).eq('id', id)
+  if (error) throw error
+}
+
+/**
+ * Activa/desactiva el ACCESO (login) de un colaborador vía el RPC `establecer_estado_portal`
+ * (usuarios_portal_empresarial.activo). `usuarioId` = colaborador.usuario_id. Reversible.
+ */
+export async function establecerEstadoAcceso(usuarioId: number, activo: boolean): Promise<void> {
+  const { error } = await supabase.rpc('establecer_estado_portal', {
+    p_usuario_id: usuarioId,
+    p_activo: activo,
+  })
+  if (error) throw error
+}
+
+/**
+ * Borrado lógico de un colaborador vía `eliminar_usuario_portal`: lo oculta de la lista y apaga
+ * su comida/QR y roles. Requiere que el acceso ya esté desactivado. `usuarioId` = colaborador.usuario_id.
+ */
+export async function eliminarColaborador(usuarioId: number): Promise<void> {
+  const { error } = await supabase.rpc('eliminar_usuario_portal', { p_usuario_id: usuarioId })
   if (error) throw error
 }
 

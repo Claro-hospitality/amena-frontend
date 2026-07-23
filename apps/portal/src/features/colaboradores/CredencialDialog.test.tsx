@@ -18,6 +18,7 @@ const colaborador = {
   email: null,
   telefono: null,
   activo: true,
+  accesoActivo: true,
   consumoLibre: false,
   qr_token: '10000000-0000-0000-0000-000000000001',
   empresa: { nombre: 'Constructora Norte' },

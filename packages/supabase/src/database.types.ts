@@ -466,6 +466,7 @@ export type Database = {
           activo: boolean
           created_at: string
           debe_cambiar_password: boolean
+          eliminado_en: string | null
           nombre: string
           password_reseteada_en: string | null
           password_reseteada_por: string | null
@@ -477,6 +478,7 @@ export type Database = {
           activo?: boolean
           created_at?: string
           debe_cambiar_password?: boolean
+          eliminado_en?: string | null
           nombre: string
           password_reseteada_en?: string | null
           password_reseteada_por?: string | null
@@ -488,6 +490,7 @@ export type Database = {
           activo?: boolean
           created_at?: string
           debe_cambiar_password?: boolean
+          eliminado_en?: string | null
           nombre?: string
           password_reseteada_en?: string | null
           password_reseteada_por?: string | null
@@ -501,6 +504,7 @@ export type Database = {
         Row: {
           activo: boolean
           created_at: string
+          eliminado_en: string | null
           email: string | null
           empresa_id: number
           id: number
@@ -512,6 +516,7 @@ export type Database = {
         Insert: {
           activo?: boolean
           created_at?: string
+          eliminado_en?: string | null
           email?: string | null
           empresa_id: number
           id?: number
@@ -523,6 +528,7 @@ export type Database = {
         Update: {
           activo?: boolean
           created_at?: string
+          eliminado_en?: string | null
           email?: string | null
           empresa_id?: number
           id?: number
@@ -575,6 +581,14 @@ export type Database = {
         }
         Returns: Json
       }
+      eliminar_usuario_backoffice: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      eliminar_usuario_portal: {
+        Args: { p_usuario_id: number }
+        Returns: undefined
+      }
       es_capitan_meseros: { Args: never; Returns: boolean }
       es_consulta: { Args: never; Returns: boolean }
       es_finanzas: { Args: never; Returns: boolean }
@@ -591,6 +605,10 @@ export type Database = {
       establecer_estado_backoffice: {
         Args: { p_activo: boolean; p_user_id: string }
         Returns: undefined
+      }
+      establecer_estado_portal: {
+        Args: { p_activo: boolean; p_usuario_id: number }
+        Returns: Json
       }
       establecer_rol_portal: {
         Args: {

@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock del cliente: controlamos qué devuelve la consulta a usuarios_portal_empresarial.
-// La cadena from().select().eq().order() se resuelve como una promesa con { data, error }.
+// La cadena from().select().eq().is().order() se resuelve como una promesa con { data, error }.
 const mocks = vi.hoisted(() => ({ order: vi.fn() }))
 vi.mock('@amena/supabase', () => ({
   supabase: {
     from: () => ({
       select: () => ({
         eq: () => ({
-          order: mocks.order,
+          is: () => ({
+            order: mocks.order,
+          }),
         }),
       }),
     }),

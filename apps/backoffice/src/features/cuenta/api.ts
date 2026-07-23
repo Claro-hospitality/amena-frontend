@@ -1,4 +1,23 @@
 import { supabase } from '@amena/supabase'
+import type { RolBackoffice } from '../../auth/validarAccesoPortal'
+
+/** Perfil del usuario interno actual (nombre + rol), del RPC `mi_perfil_backoffice`. */
+export interface MiPerfil {
+  nombre: string
+  rol: RolBackoffice
+}
+
+/**
+ * Perfil del usuario autenticado (nombre y rol) vía el RPC SECURITY DEFINER
+ * `mi_perfil_backoffice` (resuelve con auth.uid(), saltándose RLS). El correo se toma de
+ * la sesión de auth, no de aquí.
+ */
+export async function obtenerMiPerfil(): Promise<MiPerfil> {
+  const { data, error } = await supabase.rpc('mi_perfil_backoffice')
+  if (error || !data) throw error ?? new Error('No se pudo cargar tu perfil.')
+  const perfil = data as unknown as { nombre: string; rol: RolBackoffice }
+  return { nombre: perfil.nombre, rol: perfil.rol }
+}
 
 /**
  * Cambia la contraseña del usuario actual (Supabase Auth) y limpia el flag

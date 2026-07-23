@@ -12,12 +12,16 @@ export function ColaboradorCard({
   onEditar,
   onCambiarEstado,
   onResetear,
+  onToggleAcceso,
+  onEliminar,
 }: {
   colaborador: Colaborador
   onVerQR: (colaborador: Colaborador) => void
   onEditar: (colaborador: Colaborador) => void
   onCambiarEstado: (colaborador: Colaborador) => void
   onResetear: (colaborador: Colaborador) => void
+  onToggleAcceso: (colaborador: Colaborador) => void
+  onEliminar: (colaborador: Colaborador) => void
 }) {
   const conAcceso = colaborador.user_id != null
 
@@ -35,7 +39,13 @@ export function ColaboradorCard({
             ) : (
               <Badge variant="secondary">Inactivo</Badge>
             )}
-            <Badge variant="outline">{conAcceso ? 'Con acceso' : 'Sin acceso al portal'}</Badge>
+            {!conAcceso ? (
+              <Badge variant="outline">Sin acceso al portal</Badge>
+            ) : colaborador.accesoActivo ? (
+              <Badge variant="outline">Con acceso</Badge>
+            ) : (
+              <Badge variant="secondary">Acceso desactivado</Badge>
+            )}
             {empresaEnModoLibre(colaborador) && colaborador.consumoLibre && (
               <Badge className="bg-success text-success-foreground">Consumo libre</Badge>
             )}
@@ -62,6 +72,8 @@ export function ColaboradorCard({
             onEditar={onEditar}
             onCambiarEstado={onCambiarEstado}
             onResetear={onResetear}
+            onToggleAcceso={onToggleAcceso}
+            onEliminar={onEliminar}
           />
         </div>
       </CardContent>

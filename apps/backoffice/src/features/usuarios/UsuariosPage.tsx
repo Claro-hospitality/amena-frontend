@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { KeyRound, Power, Shield, TriangleAlert, UserPlus } from 'lucide-react'
+import { KeyRound, Power, Shield, Trash2, TriangleAlert, UserPlus } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +55,13 @@ import {
   type UsuarioBackoffice,
 } from './api'
 import { UsuarioFormDialog } from './UsuarioFormDialog'
-import { useCambiarRol, useEstablecerEstado, useResetearPassword, useUsuarios } from './queries'
+import {
+  useCambiarRol,
+  useEliminarUsuario,
+  useEstablecerEstado,
+  useResetearPassword,
+  useUsuarios,
+} from './queries'
 
 export function UsuariosPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
@@ -67,6 +73,7 @@ export function UsuariosPage() {
   const [rolTarget, setRolTarget] = useState<UsuarioBackoffice | null>(null)
   const [estadoTarget, setEstadoTarget] = useState<UsuarioBackoffice | null>(null)
   const [resetTarget, setResetTarget] = useState<UsuarioBackoffice | null>(null)
+  const [eliminarTarget, setEliminarTarget] = useState<UsuarioBackoffice | null>(null)
   const [credsReset, setCredsReset] = useState<CredencialesAlta | null>(null)
 
   // Id del último super_admin activo (para bloquear su degradación/desactivación en la UI).
@@ -130,8 +137,16 @@ export function UsuariosPage() {
                 icon={KeyRound}
                 onClick={() => setResetTarget(u)}
                 disabled={esYo}
-                motivo="Para tu propia contraseña usa Mi cuenta"
+                motivo="Para tu propia contraseña usa Mi perfil"
               />
+              {/* Eliminar (borrado lógico) solo disponible cuando ya está desactivado. */}
+              {!u.activo && (
+                <AccionIcono
+                  etiqueta="Eliminar"
+                  icon={Trash2}
+                  onClick={() => setEliminarTarget(u)}
+                />
+              )}
             </div>
           )
         },
@@ -195,7 +210,50 @@ export function UsuariosPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {eliminarTarget && (
+        <ConfirmarEliminarDialog usuario={eliminarTarget} onClose={() => setEliminarTarget(null)} />
+      )}
     </TooltipProvider>
+  )
+}
+
+function ConfirmarEliminarDialog({
+  usuario,
+  onClose,
+}: {
+  usuario: UsuarioBackoffice
+  onClose: () => void
+}) {
+  const eliminar = useEliminarUsuario()
+  return (
+    <AlertDialog open onOpenChange={(a) => !a && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Eliminar a {usuario.nombre}</AlertDialogTitle>
+          <AlertDialogDescription>
+            Se eliminará de la lista de usuarios (borrado lógico). El historial se conserva, pero
+            esta acción no se puede deshacer desde aquí.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => {
+              try {
+                await eliminar.mutateAsync(usuario.user_id)
+                toast.success('Usuario eliminado')
+                onClose()
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : 'No se pudo eliminar el usuario.')
+              }
+            }}
+          >
+            Eliminar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

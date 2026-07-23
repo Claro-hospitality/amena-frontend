@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   cambiarRol,
   crearUsuario,
+  eliminarUsuario,
   establecerEstado,
   listarUsuarios,
   resetearPassword,
@@ -45,6 +46,14 @@ export function useEstablecerEstado() {
   return useMutation({
     mutationFn: ({ userId, activo }: { userId: string; activo: boolean }) =>
       establecerEstado(userId, activo),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE }),
+  })
+}
+
+export function useEliminarUsuario() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: string) => eliminarUsuario(userId),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE }),
   })
 }
