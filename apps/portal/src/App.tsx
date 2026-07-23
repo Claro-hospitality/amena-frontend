@@ -39,6 +39,9 @@ const MiCredencialPage = lazy(() =>
 const CierresPage = lazy(() =>
   import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
 )
+const MiCuentaPage = lazy(() =>
+  import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
+)
 
 /** /inicio despacha por tipo: el colaborador ve su espacio; el admin, su panel. */
 function InicioRouter() {
@@ -139,6 +142,16 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <MiCredencialPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="mi-cuenta"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <MiCuentaPage />
               </Suspense>
             </RutaErrorBoundary>
           }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { PantallaCargando } from '../components/PantallaCargando'
+import { CambioPasswordObligatorio } from '../features/cuenta/CambioPasswordObligatorio'
 import { BackofficeShell } from '../layout/BackofficeShell'
 import { useAuth } from './useAuth'
 import {
@@ -14,8 +15,9 @@ type EstadoAcceso = 'validando' | ResultadoAcceso
 /**
  * Guardia de las rutas privadas:
  *   - sin sesión → /login
- *   - con sesión → valida acceso al portal (validarAccesoPortal)
+ *   - con sesión → valida acceso (validarAccesoPortal)
  *       - denegado → /sin-acceso
+ *       - debe cambiar contraseña → pantalla de cambio obligatorio (sin navegar)
  *       - concedido → monta el shell y pasa el rol a las rutas hijas vía <Outlet>
  */
 export function RutaProtegida() {
@@ -25,6 +27,8 @@ export function RutaProtegida() {
   const [validado, setValidado] = useState<{ userId: string; acceso: ResultadoAcceso } | null>(
     null
   )
+  // Se incrementa tras un cambio de contraseña obligatorio para re-validar (limpiar el flag).
+  const [recarga, setRecarga] = useState(0)
 
   useEffect(() => {
     if (!session) return
@@ -36,7 +40,7 @@ export function RutaProtegida() {
     return () => {
       vigente = false
     }
-  }, [session])
+  }, [session, recarga])
 
   if (cargando) return <PantallaCargando />
   if (!session) return <Navigate to="/login" replace />
@@ -46,6 +50,10 @@ export function RutaProtegida() {
 
   if (acceso === 'validando') return <PantallaCargando />
   if (!acceso.concedido || !acceso.rol) return <Navigate to="/sin-acceso" replace />
+
+  if (acceso.debeCambiarPassword) {
+    return <CambioPasswordObligatorio onListo={() => setRecarga((n) => n + 1)} />
+  }
 
   const contexto: ContextoAcceso = { rol: acceso.rol }
   return (

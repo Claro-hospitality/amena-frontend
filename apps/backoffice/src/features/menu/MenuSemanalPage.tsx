@@ -43,10 +43,11 @@ export function MenuSemanalPage() {
   const agregar = useAgregarPlatillo()
   const quitar = useQuitarMenuDia()
 
-  if (rol !== 'super_admin') {
+  if (rol !== 'super_admin' && rol !== 'consulta') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
+  const soloLectura = rol !== 'super_admin'
   const activos = (catalogo ?? []).filter((p) => p.activo)
   const menu = mesQuery.data ?? []
 
@@ -104,6 +105,7 @@ export function MenuSemanalPage() {
             activos={activos}
             onAgregar={onAgregar}
             onQuitar={onQuitar}
+            soloLectura={soloLectura}
           />
         )}
       </div>

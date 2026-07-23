@@ -34,10 +34,15 @@ function montar(rutaInicial: string) {
 
 const sesionFake = { access_token: 'tok', user: { id: 'u1' } }
 
-function stubRoles({ sa = false, fin = false, mes = false }) {
+function stubRol(rol: string | null, debeCambiar = false) {
   db.rpc.mockImplementation((name: string) => {
-    const map: Record<string, boolean> = { es_super_admin: sa, es_finanzas: fin, es_mesero: mes }
-    return Promise.resolve({ data: map[name] ?? false, error: null })
+    if (name === 'mi_perfil_backoffice') {
+      return Promise.resolve({
+        data: rol ? { rol, nombre: 'Test', debe_cambiar_password: debeCambiar } : null,
+        error: null,
+      })
+    }
+    return Promise.resolve({ data: null, error: null })
   })
 }
 
@@ -56,29 +61,36 @@ describe('rutas protegidas del backoffice', () => {
 
   it('super_admin llega a /inicio', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
-    stubRoles({ sa: true })
+    stubRol('super_admin')
     montar('/')
     expect(await screen.findByText(/panel del backoffice/i)).toBeInTheDocument()
   })
 
   it('finanzas llega a /inicio', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
-    stubRoles({ fin: true })
+    stubRol('finanzas')
     montar('/')
     expect(await screen.findByText(/panel del backoffice/i)).toBeInTheDocument()
   })
 
   it('mesero es redirigido a /escaner', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
-    stubRoles({ mes: true })
+    stubRol('mesero')
     montar('/')
     expect(await screen.findByRole('heading', { name: 'Escáner' })).toBeInTheDocument()
   })
 
   it('usuario sin rol interno → pantalla sin acceso', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
-    stubRoles({})
+    stubRol(null)
     montar('/')
     expect(await screen.findByText(/no tienes acceso a este portal/i)).toBeInTheDocument()
+  })
+
+  it('con debe_cambiar_password fuerza el cambio de contraseña antes de entrar', async () => {
+    auth.obtenerSesion.mockResolvedValue(sesionFake)
+    stubRol('super_admin', true)
+    montar('/')
+    expect(await screen.findByText(/cambia tu contraseña/i)).toBeInTheDocument()
   })
 })

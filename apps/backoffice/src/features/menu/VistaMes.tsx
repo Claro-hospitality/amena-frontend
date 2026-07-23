@@ -20,6 +20,7 @@ export function VistaMes({
   activos,
   onAgregar,
   onQuitar,
+  soloLectura = false,
 }: {
   /** Cualquier fecha dentro del mes mostrado (para atenuar los días de otros meses). */
   mes: Date
@@ -29,6 +30,8 @@ export function VistaMes({
   activos: Platillo[]
   onAgregar: (fechaISO: string, platilloId: number) => void
   onQuitar: (id: number) => void
+  /** Rol sin permiso de edición (p. ej. consulta): el panel del día es de solo lectura. */
+  soloLectura?: boolean
 }) {
   const [abiertoISO, setAbiertoISO] = useState<string | null>(null)
 
@@ -81,6 +84,7 @@ export function VistaMes({
           onAgregar={onAgregar}
           onQuitar={onQuitar}
           onClose={() => setAbiertoISO(null)}
+          soloLectura={soloLectura}
         />
       )}
     </div>
