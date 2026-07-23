@@ -3,13 +3,13 @@ import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
 import { CredencialesAcceso } from '@amena/ui/components/ui/credenciales-acceso'
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@amena/ui/components/ui/sheet'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@amena/ui/components/ui/dialog'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@amena/ui/components/ui/field'
 import { Input } from '@amena/ui/components/ui/input'
 import {
@@ -74,31 +74,30 @@ export function ColaboradorFormDialog({
   )
 
   return (
-    <Sheet
+    <Dialog
       open
       onOpenChange={(abierto) => {
         if (!abierto) onClose()
       }}
     >
-      <SheetContent side="right">
+      <DialogContent>
         {credenciales ? (
-          <div className="overflow-y-auto p-6">
-            <CredencialesAcceso credenciales={credenciales} onClose={onClose} />
-          </div>
+          <CredencialesAcceso credenciales={credenciales} onClose={onClose} />
         ) : (
           <>
-            <SheetHeader>
-              <SheetTitle>{esEdicion ? 'Editar colaborador' : 'Nueva persona del portal'}</SheetTitle>
-              <SheetDescription>
+            <DialogHeader>
+              <DialogTitle>
+                {esEdicion ? 'Editar colaborador' : 'Nueva persona del portal'}
+              </DialogTitle>
+              <DialogDescription>
                 {esEdicion
                   ? 'Actualiza los datos del colaborador.'
                   : 'Se crea su acceso al portal con una contraseña temporal. Los colaboradores además reciben su credencial QR.'}
-              </SheetDescription>
-            </SheetHeader>
+              </DialogDescription>
+            </DialogHeader>
 
-            <form action={accion} className="flex min-h-0 flex-1 flex-col">
-              <div className="min-h-0 flex-1 overflow-y-auto px-6">
-                <FieldGroup>
+            <form action={accion}>
+              <FieldGroup>
                 {!esEdicion && (
                   <Field>
                     <FieldLabel htmlFor="rol">Rol</FieldLabel>
@@ -140,21 +139,20 @@ export function ColaboradorFormDialog({
                   />
                   {estado.errors.email && <FieldError>{estado.errors.email[0]}</FieldError>}
                 </Field>
-                </FieldGroup>
-              </div>
+              </FieldGroup>
 
-              <SheetFooter className="flex-row justify-end gap-2">
+              <DialogFooter className="mt-6">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={pending}>
                   {pending ? 'Guardando…' : 'Guardar'}
                 </Button>
-              </SheetFooter>
+              </DialogFooter>
             </form>
           </>
         )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
