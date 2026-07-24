@@ -34,9 +34,6 @@ const ConsumosPage = lazy(() =>
 const EscanerPage = lazy(() =>
   import('./features/escaner/EscanerPage').then((m) => ({ default: m.EscanerPage }))
 )
-const ListaConsumosHoy = lazy(() =>
-  import('./features/escaner/ListaConsumosHoy').then((m) => ({ default: m.ListaConsumosHoy }))
-)
 const CierresPage = lazy(() =>
   import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
 )
@@ -82,16 +79,6 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <EscanerPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="escaner/hoy"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <ListaConsumosHoy />
               </Suspense>
             </RutaErrorBoundary>
           }

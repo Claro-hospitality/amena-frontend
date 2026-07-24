@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Link, useOutletContext } from 'react-router-dom'
-import { ArrowLeft, TriangleAlert, UtensilsCrossed } from 'lucide-react'
+import { useOutletContext } from 'react-router-dom'
+import { TriangleAlert, UtensilsCrossed } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import {
   Empty,
@@ -40,17 +40,9 @@ export function ListaConsumosHoy() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
       <header className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="icon-sm"
-          nativeButton={false}
-          render={<Link to="/escaner" />}
-          aria-label="Volver al escáner"
-        >
-          <ArrowLeft className="size-4" />
-        </Button>
+        <h2 className="text-sm font-semibold tracking-tight">Comidas de hoy</h2>
         {!isLoading && !isError && (
           <span className="ml-auto text-sm text-muted-foreground">
             Tus escaneos hoy: <span className="font-semibold text-foreground">{misEscaneos}</span>
