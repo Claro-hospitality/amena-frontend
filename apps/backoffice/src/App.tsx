@@ -54,6 +54,11 @@ const UsuariosPage = lazy(() =>
 const MiPerfilPage = lazy(() =>
   import('./features/cuenta/MiPerfilPage').then((m) => ({ default: m.MiPerfilPage }))
 )
+const DefinirContrasenaPage = lazy(() =>
+  import('./features/acceso/DefinirContrasenaPage').then((m) => ({
+    default: m.DefinirContrasenaPage,
+  }))
+)
 
 function CargandoRuta() {
   return (
@@ -68,6 +73,14 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/sin-acceso" element={<SinAccesoPage />} />
+      <Route
+        path="/definir-contrasena"
+        element={
+          <Suspense fallback={<CargandoRuta />}>
+            <DefinirContrasenaPage />
+          </Suspense>
+        }
+      />
 
       {/* Todo lo demás es privado: RutaProtegida exige sesión + acceso, y "/" redirige por rol. */}
       <Route element={<RutaProtegida />}>

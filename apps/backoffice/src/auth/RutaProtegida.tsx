@@ -45,6 +45,11 @@ export function RutaProtegida() {
   if (cargando) return <PantallaCargando />
   if (!session) return <Navigate to="/login" replace />
 
+  // Invitado que aún no define su contraseña: al flujo de acceso desde cualquier ruta.
+  if (session.user.user_metadata?.debe_definir_password === true) {
+    return <Navigate to="/definir-contrasena" replace />
+  }
+
   const acceso: EstadoAcceso =
     validado && validado.userId === session.user.id ? validado.acceso : 'validando'
 
