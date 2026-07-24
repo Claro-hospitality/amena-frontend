@@ -38,7 +38,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
 import type { Empresa } from '../empresas/api'
@@ -348,7 +348,7 @@ export function UsuariosEmpresa({
           fillHeight={fillHeight}
           rowClassName={(u) => (u.activo ? undefined : 'opacity-60')}
           toolbar={
-            <Input
+            <SearchInput
               placeholder="Buscar por nombre o correo…"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}

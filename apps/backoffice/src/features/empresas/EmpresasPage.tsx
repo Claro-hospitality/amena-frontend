@@ -10,7 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
@@ -70,7 +70,7 @@ export function EmpresasPage() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            <Input
+            <SearchInput
               placeholder="Buscar por nombre…"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}

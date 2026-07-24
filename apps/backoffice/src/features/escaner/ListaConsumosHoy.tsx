@@ -10,7 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { horaCorta } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
@@ -38,7 +38,7 @@ export function ListaConsumosHoy() {
       <h2 className="text-sm font-semibold tracking-tight">Comidas de hoy</h2>
 
       {!isLoading && !isError && totalDia > 0 && (
-        <Input
+        <SearchInput
           placeholder="Buscar por nombre…"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { Plus, QrCode, TriangleAlert, Users } from 'lucide-react'
+import { CalendarDays, Plus, QrCode, TriangleAlert, UtensilsCrossed, Users } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { DataTable, type ColumnDef } from '@amena/ui/components/data-table'
@@ -15,7 +15,7 @@ import {
 import { Input } from '@amena/ui/components/ui/input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
-import { resumenPoliticaConsumo } from '@amena/utils'
+import { formatearDiasPermitidos } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { empresaEnModoLibre, type Colaborador, type PoliticaEmpresa } from './api'
 import { AccionesColaborador, BotonInvitar, ToggleConsumoLibre } from './ColaboradorAcciones'
@@ -249,18 +249,46 @@ function crearColumnasColaboradores({
 
 /** Resumen (solo lectura) de la política de consumo de la empresa. */
 function PoliticaVigente({ politica }: { politica: PoliticaEmpresa }) {
-  const libre = politica.modo_consumo === 'libre'
+  // Modo declaración: aviso compacto y discreto.
+  if (politica.modo_consumo !== 'libre') {
+    return (
+      <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Consumo libre:</span> no autorizado — tus
+        colaboradores consumen con la cuota que declaras cada semana.
+      </div>
+    )
+  }
+
+  // Modo libre: card destacado con los tonos de marca (salvia), claro sobre qué habilita.
+  const dias = formatearDiasPermitidos(politica.dias_permitidos)
+  const diasLabel = dias === 'L-V' ? 'Lunes a viernes' : dias
+  const sinLimite = politica.limite_diario == null
+
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="font-medium">Consumo libre:</span>
-        {libre ? (
-          <span className="text-muted-foreground">
-            Autorizado — {resumenPoliticaConsumo(politica.dias_permitidos, politica.limite_diario)}
+    <div className="rounded-xl border border-salvia-200 bg-salvia-50 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold">Consumo libre activo</h3>
+            <Badge className="bg-secondary text-secondary-foreground">Autorizado</Badge>
+          </div>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Tus colaboradores autorizados piden su comida{' '}
+            <strong className="font-medium text-foreground">sin declararla por adelantado</strong>,
+            dentro de estos límites:
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2 sm:shrink-0">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-salvia-200 bg-card px-3 py-2 text-sm font-medium">
+            <CalendarDays className="size-4 text-salvia-600" />
+            {diasLabel}
           </span>
-        ) : (
-          <span className="text-muted-foreground">No autorizado</span>
-        )}
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-salvia-200 bg-card px-3 py-2 text-sm font-medium">
+            <UtensilsCrossed className="size-4 text-salvia-600" />
+            {sinLimite ? 'Comidas ilimitadas' : `Hasta ${politica.limite_diario} al día`}
+          </span>
+        </div>
       </div>
     </div>
   )

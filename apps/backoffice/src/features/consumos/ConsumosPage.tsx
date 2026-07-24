@@ -20,7 +20,7 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Field, FieldLabel } from '@amena/ui/components/ui/field'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import {
   Select,
   SelectContent,
@@ -328,7 +328,7 @@ export function ConsumosPage() {
                 data={rows}
                 emptyMessage="Ningún consumo coincide con la búsqueda."
                 toolbar={
-                  <Input
+                  <SearchInput
                     placeholder="Buscar comensal…"
                     value={busqueda}
                     onChange={(e) => setBusqueda(e.target.value)}

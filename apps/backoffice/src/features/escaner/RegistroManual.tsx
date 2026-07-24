@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, UtensilsCrossed } from 'lucide-react'
+import { UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -12,7 +12,7 @@ import {
   AlertDialogTitle,
 } from '@amena/ui/components/ui/alert-dialog'
 import { Button } from '@amena/ui/components/ui/button'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import type { BusquedaComensal } from './api'
 import { estadoComensalTexto, mapearMotivoRechazo, puedeRegistrar } from './logica'
@@ -47,16 +47,12 @@ export function RegistroManual({ registradoPor }: { registradoPor: string }) {
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-sm font-semibold tracking-tight">Registrar comida sin QR</h2>
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Busca al comensal por nombre para registrar su comida…"
-          aria-label="Buscar comensal para registrar su comida sin QR"
-          className="pl-9"
-        />
-      </div>
+      <SearchInput
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Busca al comensal por nombre para registrar su comida…"
+        aria-label="Buscar comensal para registrar su comida sin QR"
+      />
 
       {term.length >= 2 && (
         <div className="rounded-lg border border-border">
