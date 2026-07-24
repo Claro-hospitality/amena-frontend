@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, UserPlus } from 'lucide-react'
+import { Search, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -46,13 +46,14 @@ export function RegistroManual({ registradoPor }: { registradoPor: string }) {
 
   return (
     <section className="flex flex-col gap-2">
+      <h2 className="text-sm font-semibold tracking-tight">Registrar comida sin QR</h2>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Registrar sin QR: busca por nombre…"
-          aria-label="Buscar comensal para registro manual"
+          placeholder="Busca al comensal por nombre para registrar su comida…"
+          aria-label="Buscar comensal para registrar su comida sin QR"
           className="pl-9"
         />
       </div>
@@ -84,8 +85,8 @@ export function RegistroManual({ registradoPor }: { registradoPor: string }) {
                     variant={puedeRegistrar(c) ? 'default' : 'outline'}
                     onClick={() => setElegido(c)}
                   >
-                    <UserPlus className="size-4" />
-                    Registrar
+                    <UtensilsCrossed className="size-4" />
+                    Registrar comida
                   </Button>
                 </li>
               ))}

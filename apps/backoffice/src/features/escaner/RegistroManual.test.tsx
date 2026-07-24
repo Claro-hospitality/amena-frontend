@@ -37,7 +37,7 @@ describe('RegistroManual', () => {
     expect(screen.getByText(/Con cuota disponible/)).toBeInTheDocument()
 
     // Abrir confirmación → el título nombra a la persona.
-    await user.click(screen.getByRole('button', { name: /^registrar$/i }))
+    await user.click(screen.getByRole('button', { name: /registrar comida/i }))
     expect(screen.getByText(/¿Registrar la comida de Ana Ruiz\?/)).toBeInTheDocument()
 
     // Confirmar → dispara la mutación con el comensal y el mesero.
