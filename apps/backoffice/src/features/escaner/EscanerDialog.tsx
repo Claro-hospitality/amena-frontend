@@ -85,7 +85,7 @@ export function EscanerDialog({
         onOpenChange(abierto)
       }}
     >
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Escanear QR</DialogTitle>
         </DialogHeader>

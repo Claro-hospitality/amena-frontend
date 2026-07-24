@@ -44,35 +44,62 @@ export function ResultadoOverlay({
       type="button"
       onClick={onCerrar}
       aria-label="Descartar y seguir escaneando"
-      className={`absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 p-8 text-center ${
+      className={`absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 overflow-y-auto p-6 text-center duration-300 ease-out animate-in fade-in-0 zoom-in-95 sm:gap-6 sm:p-8 ${
         exito
           ? 'bg-success text-success-foreground'
           : 'bg-destructive text-destructive-foreground'
       }`}
     >
-      <span className="flex size-28 items-center justify-center rounded-full bg-white/20">
-        {exito ? <Check className="size-16" /> : <X className="size-16" />}
+      {/* Ícono con "pop" natural; en éxito un anillo se expande una vez detrás. */}
+      <span className="relative flex size-24 shrink-0 items-center justify-center sm:size-28">
+        {exito && (
+          <span className="absolute inset-0 rounded-full bg-white/25 animate-ping" />
+        )}
+        <span
+          className="relative flex size-full items-center justify-center rounded-full bg-white/20 duration-500 ease-out animate-in zoom-in-50"
+          style={{ animationDelay: '80ms' }}
+        >
+          {exito ? <Check className="size-14 sm:size-16" /> : <X className="size-14 sm:size-16" />}
+        </span>
       </span>
 
-      {resultado.tipo === 'exito' ? (
-        <>
-          <p className="text-5xl font-bold leading-tight md:text-6xl">{resultado.nombre}</p>
-          {resultado.empresa && <p className="text-2xl opacity-90">{resultado.empresa}</p>}
-          {resultado.modo === 'libre' && resultado.consumosHoy != null && (
-            <p className="text-3xl font-semibold">
-              {ordinalComida(resultado.consumosHoy)} comida de hoy
+      <div
+        className="flex flex-col items-center gap-2 duration-500 ease-out animate-in fade-in-0 slide-in-from-bottom-4 sm:gap-3"
+        style={{ animationDelay: '150ms' }}
+      >
+        {resultado.tipo === 'exito' ? (
+          <>
+            <p className="text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+              {resultado.nombre}
             </p>
-          )}
-          <p className="text-3xl font-semibold tabular-nums">{resultado.hora}</p>
-        </>
-      ) : (
-        <>
-          <p className="text-5xl font-bold leading-tight md:text-6xl">{resultado.motivo}</p>
-          {resultado.nombre && <p className="text-2xl opacity-90">{resultado.nombre}</p>}
-        </>
-      )}
+            {resultado.empresa && (
+              <p className="text-xl opacity-90 sm:text-2xl">{resultado.empresa}</p>
+            )}
+            {resultado.modo === 'libre' && resultado.consumosHoy != null && (
+              <p className="text-2xl font-semibold sm:text-3xl">
+                {ordinalComida(resultado.consumosHoy)} comida de hoy
+              </p>
+            )}
+            <p className="text-2xl font-semibold tabular-nums sm:text-3xl">{resultado.hora}</p>
+          </>
+        ) : (
+          <>
+            <p className="text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+              {resultado.motivo}
+            </p>
+            {resultado.nombre && (
+              <p className="text-xl opacity-90 sm:text-2xl">{resultado.nombre}</p>
+            )}
+          </>
+        )}
+      </div>
 
-      <p className="text-sm opacity-80">Toca para continuar</p>
+      <p
+        className="text-sm opacity-80 duration-500 ease-out animate-in fade-in-0"
+        style={{ animationDelay: '400ms' }}
+      >
+        Toca para continuar
+      </p>
     </button>
   )
 }
