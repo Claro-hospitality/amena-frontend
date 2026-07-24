@@ -1,7 +1,6 @@
 import { useActionState, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
-import { CredencialesAcceso } from '@amena/ui/components/ui/credenciales-acceso'
 import {
   Dialog,
   DialogContent,
@@ -19,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@amena/ui/components/ui/select'
-import { ETIQUETA_ROL, type CredencialesAlta, type RolBackoffice } from './api'
+import { ETIQUETA_ROL, type RolBackoffice } from './api'
 import { useCrearUsuario } from './queries'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -29,10 +28,9 @@ interface Errores {
   rol?: string
 }
 
-/** Alta de un usuario interno. Al crearlo muestra la contraseña temporal UNA sola vez. */
+/** Alta de un usuario interno. Al crearlo se le envía una invitación por correo. */
 export function UsuarioFormDialog({ onClose }: { onClose: () => void }) {
   const crear = useCrearUsuario()
-  const [credenciales, setCredenciales] = useState<CredencialesAlta | null>(null)
   const [errores, setErrores] = useState<Errores>({})
 
   const [, accion, pending] = useActionState(async (_prev: unknown, fd: FormData) => {
@@ -49,7 +47,15 @@ export function UsuarioFormDialog({ onClose }: { onClose: () => void }) {
     setErrores(errs)
     if (Object.keys(errs).length > 0) return null
     try {
-      setCredenciales(await crear.mutateAsync({ nombre, email, rol }))
+      const r = await crear.mutateAsync({ nombre, email, rol })
+      if (r.correo_enviado) {
+        toast.success(`Usuario creado. Se envió la invitación a ${email}.`)
+      } else {
+        toast.warning(
+          `Usuario creado, pero el correo no salió. Usa "Reenviar invitación" en la lista.`
+        )
+      }
+      onClose()
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'No se pudo crear el usuario.')
     }
@@ -64,19 +70,16 @@ export function UsuarioFormDialog({ onClose }: { onClose: () => void }) {
       }}
     >
       <DialogContent>
-        {credenciales ? (
-          <CredencialesAcceso credenciales={credenciales} onClose={onClose} />
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle>Nuevo usuario del backoffice</DialogTitle>
-              <DialogDescription>
-                Crea su acceso interno. Recibirás una contraseña temporal para entregarle; deberá
-                cambiarla al primer inicio de sesión.
-              </DialogDescription>
-            </DialogHeader>
+        <>
+          <DialogHeader>
+            <DialogTitle>Nuevo usuario del backoffice</DialogTitle>
+            <DialogDescription>
+              Se le enviará una invitación por correo para que defina su propia contraseña. Nadie
+              genera ni ve una contraseña.
+            </DialogDescription>
+          </DialogHeader>
 
-            <form action={accion}>
+          <form action={accion}>
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor="rol">Rol</FieldLabel>
@@ -122,12 +125,11 @@ export function UsuarioFormDialog({ onClose }: { onClose: () => void }) {
                   Cancelar
                 </Button>
                 <Button type="submit" loading={pending}>
-                  Crear y generar acceso
+                  Crear y enviar invitación
                 </Button>
               </DialogFooter>
             </form>
           </>
-        )}
       </DialogContent>
     </Dialog>
   )

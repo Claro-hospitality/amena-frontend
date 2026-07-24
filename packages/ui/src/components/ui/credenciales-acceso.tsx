@@ -10,9 +10,9 @@ import {
 } from "@amena/ui/components/ui/dialog"
 
 /**
- * Credenciales de acceso resultado de un alta del portal. Si se creó una cuenta nueva,
- * trae `tempPassword` (se muestra UNA sola vez). Si el email ya tenía cuenta,
- * `yaTeniaCuenta=true` y NO hay `tempPassword` (usa su contraseña actual).
+ * Resultado de un alta. El acceso se entrega por correo (enlace de un solo uso): ya NO se
+ * genera ni se muestra contraseña. Si el email ya tenía cuenta, `yaTeniaCuenta=true` y usa su
+ * contraseña actual. `tempPassword` es legado y no debería venir; si viene, se muestra.
  */
 export interface DatosCredencialAcceso {
   email: string
@@ -64,26 +64,43 @@ export function CredencialesAcceso({
     )
   }
 
-  return (
-    <>
-      <DialogHeader>
-        <DialogTitle>Acceso creado</DialogTitle>
-        <DialogDescription>
-          Entrega estas credenciales al usuario. La contraseña temporal{" "}
-          <strong>no se vuelve a mostrar</strong>; al primer inicio de sesión deberá cambiarla.
-        </DialogDescription>
-      </DialogHeader>
-
-      <div className="flex flex-col gap-3">
-        <CampoCredencial etiqueta="Correo" valor={credenciales.email} onCopiar={copiar} />
-        {credenciales.tempPassword && (
+  // Contraseña temporal legada (ya no se usa): si por algún motivo llega, se muestra.
+  if (credenciales.tempPassword) {
+    return (
+      <>
+        <DialogHeader>
+          <DialogTitle>Acceso creado</DialogTitle>
+          <DialogDescription>
+            Entrega estas credenciales al usuario. La contraseña temporal{" "}
+            <strong>no se vuelve a mostrar</strong>; al primer inicio de sesión deberá cambiarla.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-3">
+          <CampoCredencial etiqueta="Correo" valor={credenciales.email} onCopiar={copiar} />
           <CampoCredencial
             etiqueta="Contraseña temporal"
             valor={credenciales.tempPassword}
             onCopiar={copiar}
           />
-        )}
-      </div>
+        </div>
+        <DialogFooter className="mt-6">
+          <Button onClick={onClose}>Listo</Button>
+        </DialogFooter>
+      </>
+    )
+  }
+
+  // Caso normal: se envió una invitación por correo para que la persona defina su contraseña.
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>Invitación enviada</DialogTitle>
+        <DialogDescription>
+          Se envió un correo a <strong>{credenciales.email}</strong> con un enlace para definir su
+          contraseña. Nadie ve ni entrega una contraseña. Si no llega, puedes reenviar la invitación
+          desde la lista.
+        </DialogDescription>
+      </DialogHeader>
 
       <DialogFooter className="mt-6">
         <Button onClick={onClose}>Listo</Button>
