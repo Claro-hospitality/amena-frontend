@@ -4,14 +4,17 @@ import { ScanLine } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useAuth } from '../../auth/useAuth'
+import { BannersOperativos } from './BannersOperativos'
 import { EscanerDialog } from './EscanerDialog'
 import { ListaConsumosHoy } from './ListaConsumosHoy'
+import { RegistroManual } from './RegistroManual'
+import { ResumenTurno } from './ResumenTurno'
 import { useConsumosRealtime } from './realtime'
 
 /**
- * Sección del escáner. Al entrar muestra la lista de comidas de hoy; la cámara vive en un
- * dialog que se abre con el botón "Escanear" (no se enciende sola, para no sobrecargar la
- * tablet). Realtime mantiene la lista al día.
+ * Centro de turno del mesero. Arriba: avisos + resumen vivo del día. Al centro: el botón
+ * protagonista "Escanear" (la cámara vive en un dialog, no se enciende sola). Debajo: el plan B
+ * (registro manual por nombre) y la lista del día. Realtime mantiene todo al día.
  */
 export function EscanerPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
@@ -28,10 +31,19 @@ export function EscanerPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-      <Button size="lg" className="min-h-14 w-full text-base" onClick={() => setDialogAbierto(true)}>
-        <ScanLine className="size-5" />
+      <BannersOperativos />
+      <ResumenTurno miUid={registradoPor} />
+
+      <Button
+        size="lg"
+        className="min-h-20 w-full text-lg"
+        onClick={() => setDialogAbierto(true)}
+      >
+        <ScanLine className="size-6" />
         Escanear QR
       </Button>
+
+      <RegistroManual registradoPor={registradoPor} />
 
       <ListaConsumosHoy />
 

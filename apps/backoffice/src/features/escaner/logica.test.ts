@@ -1,5 +1,28 @@
 import { describe, expect, it } from 'vitest'
-import { debeIgnorarLectura, esUuidValido, mapearMotivoRechazo } from './logica'
+import type { BusquedaComensal } from './api'
+import {
+  debeIgnorarLectura,
+  esUuidValido,
+  estadoComensalTexto,
+  mapearMotivoRechazo,
+  puedeRegistrar,
+} from './logica'
+
+/** Construye un comensal de búsqueda con valores por defecto (declaración, sin consumo). */
+function comensal(over: Partial<BusquedaComensal> = {}): BusquedaComensal {
+  return {
+    comensal_id: 1,
+    nombre: 'Ana Ruiz',
+    empresa_nombre: 'Acme',
+    es_libre: false,
+    tiene_cuota: false,
+    consumio_hoy: false,
+    ultima_hora: null,
+    consumos_hoy: 0,
+    limite_diario: null,
+    ...over,
+  }
+}
 
 describe('esUuidValido', () => {
   it('acepta un UUID bien formado', () => {
@@ -33,6 +56,40 @@ describe('mapearMotivoRechazo', () => {
   it('desconocido → mensaje genérico', () => {
     expect(mapearMotivoRechazo({ message: 'boom' })).toBe('No se pudo registrar')
     expect(mapearMotivoRechazo(null)).toBe('No se pudo registrar')
+  })
+})
+
+describe('estadoComensalTexto', () => {
+  it('modo libre: "Libre: N de M hoy" (M = límite o ∞)', () => {
+    expect(estadoComensalTexto(comensal({ es_libre: true, consumos_hoy: 1, limite_diario: 2 }))).toBe(
+      'Libre: 1 de 2 hoy'
+    )
+    expect(estadoComensalTexto(comensal({ es_libre: true, consumos_hoy: 0, limite_diario: null }))).toBe(
+      'Libre: 0 de ∞ hoy'
+    )
+  })
+  it('ya consumió: muestra la hora', () => {
+    const texto = estadoComensalTexto(
+      comensal({ consumio_hoy: true, ultima_hora: '2026-07-24T19:10:00Z' })
+    )
+    expect(texto).toMatch(/^Ya consumió a las \d{1,2}:\d{2}/)
+  })
+  it('declaración con cuota / sin cuota', () => {
+    expect(estadoComensalTexto(comensal({ tiene_cuota: true }))).toBe('Con cuota disponible')
+    expect(estadoComensalTexto(comensal({ tiene_cuota: false }))).toBe('Sin cuota para hoy')
+  })
+})
+
+describe('puedeRegistrar', () => {
+  it('libre: true bajo el límite, false al alcanzarlo, true si es ilimitado', () => {
+    expect(puedeRegistrar(comensal({ es_libre: true, consumos_hoy: 1, limite_diario: 2 }))).toBe(true)
+    expect(puedeRegistrar(comensal({ es_libre: true, consumos_hoy: 2, limite_diario: 2 }))).toBe(false)
+    expect(puedeRegistrar(comensal({ es_libre: true, consumos_hoy: 9, limite_diario: null }))).toBe(true)
+  })
+  it('declaración: true solo con cuota y sin consumo previo', () => {
+    expect(puedeRegistrar(comensal({ tiene_cuota: true, consumio_hoy: false }))).toBe(true)
+    expect(puedeRegistrar(comensal({ tiene_cuota: true, consumio_hoy: true }))).toBe(false)
+    expect(puedeRegistrar(comensal({ tiene_cuota: false }))).toBe(false)
   })
 })
 

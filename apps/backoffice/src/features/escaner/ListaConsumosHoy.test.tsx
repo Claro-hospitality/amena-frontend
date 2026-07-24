@@ -12,6 +12,8 @@ const consumos: ConsumoHoy[] = [
     empresa_nombre: 'Acme',
     registrado_por: 'yo-1',
     mesero_nombre: 'Mesero Uno',
+    metodo: 'qr',
+    origen: 'declaracion',
   },
   {
     id: 2,
@@ -20,14 +22,13 @@ const consumos: ConsumoHoy[] = [
     empresa_nombre: 'Beta',
     registrado_por: 'otro-2',
     mesero_nombre: 'Mesero Dos',
+    metodo: 'manual',
+    origen: 'libre',
   },
 ]
 
 vi.mock('./queries', () => ({
   useConsumosHoy: () => ({ data: consumos, isLoading: false, isError: false, refetch: vi.fn() }),
-}))
-vi.mock('../../auth/useAuth', () => ({
-  useAuth: () => ({ session: { user: { id: 'yo-1' } } }),
 }))
 
 import type { RolBackoffice } from '../../auth/validarAccesoPortal'
@@ -46,15 +47,13 @@ function renderizar(rol: RolBackoffice) {
 }
 
 describe('ListaConsumosHoy', () => {
-  it('muestra el resumen del turno (míos vs total) y quién registró cada consumo', () => {
+  it('lista los consumos con quién registró y marca los manuales con un badge', () => {
     renderizar('mesero')
-    expect(screen.getByText(/Tus escaneos hoy:/)).toBeInTheDocument()
-    // 1 de los 2 fue registrado por el usuario actual
-    expect(screen.getByText('1')).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
     expect(screen.getByText('Juan Pérez')).toBeInTheDocument()
     expect(screen.getByText('Registró: Mesero Uno')).toBeInTheDocument()
     expect(screen.getByText('Registró: Mesero Dos')).toBeInTheDocument()
+    // El consumo manual (Ana) muestra el badge; el de QR (Juan) no.
+    expect(screen.getByText('Manual')).toBeInTheDocument()
   })
 
   it('filtra por nombre de comensal', async () => {

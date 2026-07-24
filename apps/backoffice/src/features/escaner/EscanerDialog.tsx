@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@amena/ui/components/ui/dialog'
+import { useWakeLock } from '@amena/ui/hooks/use-wake-lock'
 import { horaCorta } from '@amena/utils'
 import { CamaraQR } from './CamaraQR'
 import { ResultadoOverlay, type Resultado } from './ResultadoOverlay'
@@ -27,6 +28,8 @@ export function EscanerDialog({
   registradoPor: string
 }) {
   const registrar = useRegistrarConsumo()
+  // Pantalla encendida mientras la cámara está abierta (hora pico, tablet apoyada).
+  useWakeLock(open)
   const [resultado, setResultado] = useState<Resultado | null>(null)
   const ultimaLectura = useRef<{ id: string; ts: number } | null>(null)
   const procesando = useRef(false)
@@ -94,7 +97,7 @@ export function EscanerDialog({
           {resultado && <ResultadoOverlay resultado={resultado} onCerrar={cerrarResultado} />}
         </div>
         <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full">
-          Cerrar
+          Cerrar cámara
         </Button>
       </DialogContent>
     </Dialog>

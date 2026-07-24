@@ -157,6 +157,7 @@ export type Database = {
           empresa_id: number
           fecha: string
           id: number
+          metodo: Database["public"]["Enums"]["metodo_consumo"]
           registrado_por: string | null
         }
         Insert: {
@@ -165,6 +166,7 @@ export type Database = {
           empresa_id: number
           fecha?: string
           id?: number
+          metodo?: Database["public"]["Enums"]["metodo_consumo"]
           registrado_por?: string | null
         }
         Update: {
@@ -173,6 +175,7 @@ export type Database = {
           empresa_id?: number
           fecha?: string
           id?: number
+          metodo?: Database["public"]["Enums"]["metodo_consumo"]
           registrado_por?: string | null
         }
         Relationships: [
@@ -552,6 +555,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _registrar_consumo_core: {
+        Args: {
+          p_comensal_id: number
+          p_metodo: Database["public"]["Enums"]["metodo_consumo"]
+          p_registrado_por: string
+        }
+        Returns: Json
+      }
       asignar_rol_unico: {
         Args: {
           p_rol: Database["public"]["Enums"]["rol_portal"]
@@ -560,6 +571,20 @@ export type Database = {
         Returns: Json
       }
       auth_user_id_por_email: { Args: { p_email: string }; Returns: string }
+      buscar_comensales_consumo: {
+        Args: { p_limit?: number; p_q: string }
+        Returns: {
+          comensal_id: number
+          consumio_hoy: boolean
+          consumos_hoy: number
+          empresa_nombre: string
+          es_libre: boolean
+          limite_diario: number
+          nombre: string
+          tiene_cuota: boolean
+          ultima_hora: string
+        }[]
+      }
       cambiar_rol_backoffice: {
         Args: {
           p_rol: Database["public"]["Enums"]["rol_backoffice"]
@@ -618,6 +643,7 @@ export type Database = {
         }
         Returns: Json
       }
+      estado_operativo_dia: { Args: never; Returns: Json }
       generar_cierre_semanal: {
         Args: { p_empresa_id: number; p_semana_inicio: string }
         Returns: Json
@@ -643,6 +669,7 @@ export type Database = {
           fecha: string
           id: number
           mesero_nombre: string
+          metodo: Database["public"]["Enums"]["metodo_consumo"]
           origen: string
           precio_comida: number
           registrado_por: string
@@ -657,6 +684,8 @@ export type Database = {
           empresa_nombre: string
           id: number
           mesero_nombre: string
+          metodo: Database["public"]["Enums"]["metodo_consumo"]
+          origen: string
           registrado_por: string
         }[]
       }
@@ -679,6 +708,10 @@ export type Database = {
         Args: { p_qr_token: string; p_registrado_por: string }
         Returns: Json
       }
+      registrar_consumo_manual: {
+        Args: { p_comensal_id: number; p_registrado_por: string }
+        Returns: Json
+      }
       resumen_consumos: {
         Args: {
           p_desde: string
@@ -697,6 +730,7 @@ export type Database = {
       ciclo_facturacion: "semanal" | "mensual"
       estado_cierre: "abierto" | "cerrado"
       estado_factura: "pendiente" | "pagada" | "cancelada"
+      metodo_consumo: "qr" | "manual"
       modo_consumo: "declaracion" | "libre"
       origen_cuota: "declaracion" | "extra"
       rol_backoffice:
@@ -839,6 +873,7 @@ export const Constants = {
       ciclo_facturacion: ["semanal", "mensual"],
       estado_cierre: ["abierto", "cerrado"],
       estado_factura: ["pendiente", "pagada", "cancelada"],
+      metodo_consumo: ["qr", "manual"],
       modo_consumo: ["declaracion", "libre"],
       origen_cuota: ["declaracion", "extra"],
       rol_backoffice: [
