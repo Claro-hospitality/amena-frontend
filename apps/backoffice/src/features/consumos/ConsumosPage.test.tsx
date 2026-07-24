@@ -56,6 +56,10 @@ const resumen: ResumenConsumos = {
     { registrado_por: 'u-1', nombre: 'Mesero Uno', comidas: 2 },
     { registrado_por: 'u-2', nombre: 'Mesero Dos', comidas: 1 },
   ],
+  por_empresa: [
+    { empresa_id: 1, nombre: 'Acme', comidas: 2 },
+    { empresa_id: 2, nombre: 'Beta', comidas: 1 },
+  ],
   top_comensales: [
     { comensal_id: 10, nombre: 'Juan Pérez', comidas: 2 },
     { comensal_id: 20, nombre: 'Ana Ruiz', comidas: 1 },
@@ -77,6 +81,7 @@ vi.mock('recharts', () => ({
   Bar: () => null,
   BarChart: () => null,
   CartesianGrid: () => null,
+  Cell: () => null,
   XAxis: () => null,
   YAxis: () => null,
 }))
