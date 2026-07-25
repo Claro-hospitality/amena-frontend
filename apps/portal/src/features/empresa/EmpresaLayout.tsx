@@ -41,7 +41,7 @@ export function EmpresaLayout() {
     <div className="flex min-w-0 flex-col gap-4">
       <nav
         aria-label="Gestión de la empresa"
-        className="-mb-px flex items-center gap-1 overflow-x-auto border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {navEmpresa.map((item) => {
           const Icono = item.icon
@@ -65,7 +65,7 @@ export function EmpresaLayout() {
                   {item.label}
                   {isActive && (
                     <motion.span
-                      className="absolute inset-x-0 -bottom-px h-1 rounded-full bg-salvia-500"
+                      className="absolute inset-x-0 bottom-0 h-1 rounded-full bg-salvia-500"
                       initial={reducirMovimiento ? false : { scaleX: 0, opacity: 0 }}
                       animate={{ scaleX: 1, opacity: 1 }}
                       transition={
