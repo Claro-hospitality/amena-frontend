@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@amena/ui/components/ui/dialog";
 import { deISO, formatearMoneda, rangoSemanaLegible } from "@amena/utils";
+import { SeccionFacturaCorte } from "../facturas/SeccionFacturaCorte";
 import type { CorteConEmpresa } from "./api";
 import { BadgeEstadoCorte } from "./BadgeEstadoCorte";
 
@@ -93,16 +94,11 @@ export function CorteDetalleDialog({
               <Dato etiqueta="Estado">
                 <BadgeEstadoCorte estado={corte.estado} />
               </Dato>
-              <Dato etiqueta="Factura">
-                {corte.factura_id ? (
-                  <span className="font-mono text-xs">{corte.factura_id}</span>
-                ) : (
-                  <span className="text-muted-foreground">Sin factura</span>
-                )}
-              </Dato>
             </dl>
           );
         })()}
+
+        <SeccionFacturaCorte corte={corte} />
       </DialogContent>
     </Dialog>
   );

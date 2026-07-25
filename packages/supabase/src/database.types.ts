@@ -149,7 +149,6 @@ export type Database = {
           empresa_id: number
           estado: Database["public"]["Enums"]["estado_corte"]
           extras: number
-          factura_id: number | null
           id: number
           monto_total: number
           precio_unitario: number
@@ -163,7 +162,6 @@ export type Database = {
           empresa_id: number
           estado?: Database["public"]["Enums"]["estado_corte"]
           extras: number
-          factura_id?: number | null
           id?: number
           monto_total: number
           precio_unitario: number
@@ -177,7 +175,6 @@ export type Database = {
           empresa_id?: number
           estado?: Database["public"]["Enums"]["estado_corte"]
           extras?: number
-          factura_id?: number | null
           id?: number
           monto_total?: number
           precio_unitario?: number
@@ -191,13 +188,6 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cortes_semanales_factura_id_fkey"
-            columns: ["factura_id"]
-            isOneToOne: false
-            referencedRelation: "facturas"
             referencedColumns: ["id"]
           },
         ]
@@ -367,41 +357,91 @@ export type Database = {
       facturas: {
         Row: {
           activo: boolean
+          corte_id: number
           created_at: string
+          datos_fiscales_id: number | null
           empresa_id: number
           estado: Database["public"]["Enums"]["estado_factura"]
+          facturado_en: string | null
+          facturado_por: string | null
+          folio: string
           id: number
-          monto: number
+          intentos_timbrado: number
+          iva: number
+          mensaje_error: string | null
           pdf_url: string | null
           periodo_fin: string
           periodo_inicio: string
+          serie: string
+          subtotal: number
+          total: number
           updated_at: string
+          uuid_sat: string | null
+          xml_url: string | null
         }
         Insert: {
           activo?: boolean
+          corte_id: number
           created_at?: string
+          datos_fiscales_id?: number | null
           empresa_id: number
           estado?: Database["public"]["Enums"]["estado_factura"]
+          facturado_en?: string | null
+          facturado_por?: string | null
+          folio: string
           id?: number
-          monto: number
+          intentos_timbrado?: number
+          iva?: number
+          mensaje_error?: string | null
           pdf_url?: string | null
           periodo_fin: string
           periodo_inicio: string
+          serie?: string
+          subtotal?: number
+          total: number
           updated_at?: string
+          uuid_sat?: string | null
+          xml_url?: string | null
         }
         Update: {
           activo?: boolean
+          corte_id?: number
           created_at?: string
+          datos_fiscales_id?: number | null
           empresa_id?: number
           estado?: Database["public"]["Enums"]["estado_factura"]
+          facturado_en?: string | null
+          facturado_por?: string | null
+          folio?: string
           id?: number
-          monto?: number
+          intentos_timbrado?: number
+          iva?: number
+          mensaje_error?: string | null
           pdf_url?: string | null
           periodo_fin?: string
           periodo_inicio?: string
+          serie?: string
+          subtotal?: number
+          total?: number
           updated_at?: string
+          uuid_sat?: string | null
+          xml_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "facturas_corte_id_fkey"
+            columns: ["corte_id"]
+            isOneToOne: true
+            referencedRelation: "cortes_semanales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_datos_fiscales_id_fkey"
+            columns: ["datos_fiscales_id"]
+            isOneToOne: false
+            referencedRelation: "datos_fiscales"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "facturas_empresa_id_fkey"
             columns: ["empresa_id"]
@@ -822,13 +862,17 @@ export type Database = {
         Returns: Json
       }
       resumen_empresa: { Args: { p_empresa_id: number }; Returns: Json }
+      siguiente_folio_dia: {
+        Args: { p_fecha: string; p_serie: string }
+        Returns: string
+      }
       tiene_algun_rol: { Args: never; Returns: boolean }
       usuarios_de_mis_empresas: { Args: never; Returns: number[] }
     }
     Enums: {
       ciclo_facturacion: "semanal" | "mensual"
       estado_corte: "abierto" | "cerrado"
-      estado_factura: "pendiente" | "pagada" | "cancelada"
+      estado_factura: "borrador" | "emitida" | "error" | "pagada" | "cancelada"
       metodo_consumo: "qr" | "manual"
       modo_consumo: "reserva" | "libre"
       origen_cuota: "reserva" | "extra"
@@ -971,7 +1015,7 @@ export const Constants = {
     Enums: {
       ciclo_facturacion: ["semanal", "mensual"],
       estado_corte: ["abierto", "cerrado"],
-      estado_factura: ["pendiente", "pagada", "cancelada"],
+      estado_factura: ["borrador", "emitida", "error", "pagada", "cancelada"],
       metodo_consumo: ["qr", "manual"],
       modo_consumo: ["reserva", "libre"],
       origen_cuota: ["reserva", "extra"],
