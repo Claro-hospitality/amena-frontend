@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -47,9 +48,13 @@ describe('PortalShell', () => {
     expect(screen.queryAllByRole('link', { name: 'Cuotas' }).length).toBe(0)
   })
 
-  it('ofrece cerrar sesión y renderiza el contenido', () => {
+  it('el menú de usuario ofrece "Mi cuenta" y "Cerrar sesión"', async () => {
+    const user = userEvent.setup()
     renderShell('admin_empresa')
     expect(screen.getByText('contenido')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /cerrar sesión/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /menú de usuario/i }))
+    expect(await screen.findByRole('menuitem', { name: /mi cuenta/i })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: /cerrar sesión/i })).toBeInTheDocument()
   })
 })

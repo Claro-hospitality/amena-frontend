@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { LogOut, QrCode, UserCog } from 'lucide-react'
+import { QrCode } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
-import { Button } from '@amena/ui/components/ui/button'
 import { useIsMobile } from '@amena/ui/hooks/use-mobile'
 import { cn } from '@amena/ui/lib/utils'
 import { Breadcrumbs } from './Breadcrumbs'
-import { useAuth } from '../auth/useAuth'
+import { UsuarioMenu } from './UsuarioMenu'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
 import { navPorTipo, type ItemNav } from './navPortal'
 
@@ -26,8 +25,6 @@ export function PortalShell({
   esComensal?: boolean
   children: ReactNode
 }) {
-  const { cerrarSesion } = useAuth()
-
   // El admin que también come ve "Mi QR" (el colaborador ya lo tiene en su Inicio).
   const items: ItemNav[] =
     tipo === 'admin_empresa' && esComensal
@@ -59,15 +56,8 @@ export function PortalShell({
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 lg:ml-0">
-          <Button variant="ghost" size="sm" nativeButton={false} render={<NavLink to="/mi-cuenta" />}>
-            <UserCog className="size-4" />
-            <span className="hidden sm:inline">Mi cuenta</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => cerrarSesion()}>
-            <LogOut className="size-4" />
-            <span className="hidden sm:inline">Cerrar sesión</span>
-          </Button>
+        <div className="ml-auto flex items-center lg:ml-0">
+          <UsuarioMenu />
         </div>
       </header>
 
