@@ -5,7 +5,6 @@ import { InicioPorRol } from './auth/InicioPorRol'
 import { RutaProtegida } from './auth/RutaProtegida'
 import { RutaErrorBoundary } from './components/RutaErrorBoundary'
 import { LoginPage } from './features/auth/LoginPage'
-import { Placeholder } from './features/Placeholder'
 import { SinAccesoPage } from './features/auth/SinAccesoPage'
 import { InicioPage } from './features/inicio/InicioPage'
 
@@ -178,7 +177,6 @@ export default function App() {
             </RutaErrorBoundary>
           }
         />
-        <Route path="facturas" element={<Placeholder titulo="Facturas" />} />
         <Route
           path="usuarios"
           element={

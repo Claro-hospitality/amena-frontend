@@ -12,7 +12,6 @@ export const RUTAS_BREADCRUMB: Record<string, string> = {
   '/consumos': 'Consumos',
   '/cortes': 'Cortes semanales',
   '/configuracion': 'Configuración',
-  '/facturas': 'Facturas',
   '/mi-perfil': 'Mi perfil',
   '/componentes': 'Componentes',
   '/branding': 'Branding',
