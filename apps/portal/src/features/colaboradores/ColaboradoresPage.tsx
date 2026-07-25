@@ -18,7 +18,7 @@ import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import { formatearDiasPermitidos } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { empresaEnModoLibre, type Colaborador, type PoliticaEmpresa } from './api'
-import { AccionesColaborador, BotonInvitar, ToggleConsumoLibre } from './ColaboradorAcciones'
+import { AccionesColaborador, ToggleConsumoLibre } from './ColaboradorAcciones'
 import { ColaboradorCard } from './ColaboradorCard'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
 import {
@@ -200,22 +200,6 @@ function crearColumnasColaboradores({
         ),
     },
     {
-      id: 'acceso',
-      header: 'Acceso',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
-          {row.original.user_id == null ? (
-            <Badge variant="outline">Sin acceso</Badge>
-          ) : row.original.accesoActivo ? (
-            <Badge variant="outline">Con acceso</Badge>
-          ) : (
-            <Badge variant="secondary">Desactivado</Badge>
-          )}
-          <BotonInvitar colaborador={row.original} />
-        </div>
-      ),
-    },
-    {
       id: 'consumo_libre',
       header: 'Consumo libre',
       cell: ({ row }) =>
@@ -247,17 +231,11 @@ function crearColumnasColaboradores({
   ]
 }
 
-/** Resumen (solo lectura) de la política de consumo de la empresa. */
+/** Resumen (solo lectura) de la política de consumo de la empresa. Solo se muestra cuando la
+ *  empresa tiene consumo libre; en modo declaración no se muestra nada. */
 function PoliticaVigente({ politica }: { politica: PoliticaEmpresa }) {
-  // Modo declaración: aviso compacto y discreto.
-  if (politica.modo_consumo !== 'libre') {
-    return (
-      <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">Consumo libre:</span> no autorizado — tus
-        colaboradores consumen con la cuota que declaras cada semana.
-      </div>
-    )
-  }
+  // Modo declaración: no se muestra ninguna tarjeta.
+  if (politica.modo_consumo !== 'libre') return null
 
   // Modo libre: card destacado con los tonos de marca (salvia), claro sobre qué habilita.
   const dias = formatearDiasPermitidos(politica.dias_permitidos)

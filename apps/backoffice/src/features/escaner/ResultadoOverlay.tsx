@@ -44,7 +44,7 @@ export function ResultadoOverlay({
       type="button"
       onClick={onCerrar}
       aria-label="Descartar y seguir escaneando"
-      className={`absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 overflow-y-auto p-6 text-center duration-300 ease-out animate-in fade-in-0 zoom-in-95 sm:gap-6 sm:p-8 ${
+      className={`absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 overflow-y-auto p-6 text-center duration-300 ease-out animate-in fade-in-0 zoom-in-95 motion-reduce:animate-none sm:gap-6 sm:p-8 ${
         exito
           ? 'bg-success text-success-foreground'
           : 'bg-destructive text-destructive-foreground'
@@ -53,10 +53,10 @@ export function ResultadoOverlay({
       {/* Ícono con "pop" natural; en éxito un anillo se expande una vez detrás. */}
       <span className="relative flex size-24 shrink-0 items-center justify-center sm:size-28">
         {exito && (
-          <span className="absolute inset-0 rounded-full bg-white/25 animate-ping" />
+          <span className="absolute inset-0 rounded-full bg-white/25 animate-ping motion-reduce:animate-none" />
         )}
         <span
-          className="relative flex size-full items-center justify-center rounded-full bg-white/20 duration-500 ease-out animate-in zoom-in-50"
+          className="relative flex size-full items-center justify-center rounded-full bg-white/20 duration-500 ease-out animate-in zoom-in-50 motion-reduce:animate-none"
           style={{ animationDelay: '80ms' }}
         >
           {exito ? <Check className="size-14 sm:size-16" /> : <X className="size-14 sm:size-16" />}
@@ -64,7 +64,7 @@ export function ResultadoOverlay({
       </span>
 
       <div
-        className="flex flex-col items-center gap-2 duration-500 ease-out animate-in fade-in-0 slide-in-from-bottom-4 sm:gap-3"
+        className="flex flex-col items-center gap-2 duration-500 ease-out animate-in fade-in-0 slide-in-from-bottom-4 motion-reduce:animate-none sm:gap-3"
         style={{ animationDelay: '150ms' }}
       >
         {resultado.tipo === 'exito' ? (
@@ -95,7 +95,7 @@ export function ResultadoOverlay({
       </div>
 
       <p
-        className="text-sm opacity-80 duration-500 ease-out animate-in fade-in-0"
+        className="text-sm opacity-80 duration-500 ease-out animate-in fade-in-0 motion-reduce:animate-none"
         style={{ animationDelay: '400ms' }}
       >
         Toca para continuar

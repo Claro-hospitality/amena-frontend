@@ -120,12 +120,17 @@ export function PoliticaConsumoSection({
 
   const guardar = () => {
     const datos = validar()
-    setConfirmando(false)
-    if (!datos) return
+    if (!datos) {
+      setConfirmando(false)
+      return
+    }
     actualizar.mutate(
       { id: empresa.id, datos },
       {
-        onSuccess: () => toast.success('Política de consumo actualizada'),
+        onSuccess: () => {
+          toast.success('Política de consumo actualizada')
+          setConfirmando(false)
+        },
         onError: () => toast.error('No se pudo guardar la política. Intenta de nuevo.'),
       }
     )
@@ -280,7 +285,9 @@ export function PoliticaConsumoSection({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={guardar}>Guardar cambios</AlertDialogAction>
+            <AlertDialogAction onClick={guardar} loading={actualizar.isPending}>
+              Guardar cambios
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

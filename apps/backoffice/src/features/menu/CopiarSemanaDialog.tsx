@@ -22,15 +22,16 @@ export function CopiarSemanaDialog({
 
   function confirmar() {
     copiar.mutate(undefined, {
-      onSuccess: (cuantos) =>
+      onSuccess: (cuantos) => {
         toast.success(
           cuantos > 0
             ? `Se copiaron ${cuantos} platillos de la semana anterior.`
             : 'La semana anterior no tenía platillos.'
-        ),
+        )
+        onClose()
+      },
       onError: () => toast.error('No se pudo copiar la semana. Intenta de nuevo.'),
     })
-    onClose()
   }
 
   return (
@@ -50,7 +51,9 @@ export function CopiarSemanaDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={confirmar}>Copiar semana</AlertDialogAction>
+          <AlertDialogAction onClick={confirmar} loading={copiar.isPending}>
+            Copiar semana
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -36,12 +36,14 @@ export function RegistroManual({ registradoPor }: { registradoPor: string }) {
     registrar.mutate(
       { comensalId: elegido.comensal_id, registradoPor },
       {
-        onSuccess: (r) => toast.success(`Comida registrada para ${r.comensalNombre}`),
+        onSuccess: (r) => {
+          toast.success(`Comida registrada para ${r.comensalNombre}`)
+          setElegido(null)
+          setQ('')
+        },
         onError: (e) => toast.error(mapearMotivoRechazo(e)),
       }
     )
-    setElegido(null)
-    setQ('')
   }
 
   return (
@@ -107,7 +109,9 @@ export function RegistroManual({ registradoPor }: { registradoPor: string }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmar}>Registrar manualmente</AlertDialogAction>
+            <AlertDialogAction onClick={confirmar} loading={registrar.isPending}>
+              Registrar manualmente
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

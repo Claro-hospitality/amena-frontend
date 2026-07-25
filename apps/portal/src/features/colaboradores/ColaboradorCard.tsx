@@ -2,7 +2,7 @@ import { QrCode } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
-import { AccionesColaborador, BotonInvitar, ToggleConsumoLibre } from './ColaboradorAcciones'
+import { AccionesColaborador, ToggleConsumoLibre } from './ColaboradorAcciones'
 import { empresaEnModoLibre, type Colaborador } from './api'
 
 /** Tarjeta de colaborador para la vista móvil (mobile-first). */
@@ -21,8 +21,6 @@ export function ColaboradorCard({
   onToggleAcceso: (colaborador: Colaborador) => void
   onEliminar: (colaborador: Colaborador) => void
 }) {
-  const conAcceso = colaborador.user_id != null
-
   return (
     <Card className={colaborador.activo ? undefined : 'opacity-60'}>
       <CardContent className="flex items-start justify-between gap-3 p-4">
@@ -37,17 +35,9 @@ export function ColaboradorCard({
             ) : (
               <Badge variant="destructive">Inactivo</Badge>
             )}
-            {!conAcceso ? (
-              <Badge variant="outline">Sin acceso al portal</Badge>
-            ) : colaborador.accesoActivo ? (
-              <Badge variant="outline">Con acceso</Badge>
-            ) : (
-              <Badge variant="secondary">Acceso desactivado</Badge>
-            )}
             {empresaEnModoLibre(colaborador) && colaborador.consumoLibre && (
               <Badge className="bg-success text-success-foreground">Consumo libre</Badge>
             )}
-            <BotonInvitar colaborador={colaborador} />
           </div>
           {empresaEnModoLibre(colaborador) && (
             <div className="mt-3">

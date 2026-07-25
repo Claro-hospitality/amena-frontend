@@ -10,7 +10,6 @@ import {
 } from '@amena/ui/components/ui/dropdown-menu'
 import { Label } from '@amena/ui/components/ui/label'
 import { Switch } from '@amena/ui/components/ui/switch'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
 import { empresaEnModoLibre, type Colaborador } from './api'
 import { useConsumoLibre } from './queries'
 
@@ -120,24 +119,5 @@ export function AccionesColaborador({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-/** Botón "Invitar" deshabilitado (V1: la invitación por email aún no se implementa). */
-export function BotonInvitar({ colaborador }: { colaborador: Colaborador }) {
-  if (colaborador.user_id != null) return null
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span tabIndex={0}>
-            <Button variant="outline" size="xs" disabled>
-              Invitar
-            </Button>
-          </span>
-        }
-      />
-      <TooltipContent>Próximamente</TooltipContent>
-    </Tooltip>
   )
 }

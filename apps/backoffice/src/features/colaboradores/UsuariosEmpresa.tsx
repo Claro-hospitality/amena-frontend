@@ -275,12 +275,14 @@ export function UsuariosEmpresa({
     })
   }
 
-  const cambiarComida = (u: UsuarioEmpresa, activo: boolean) => {
+  const cambiarComida = (u: UsuarioEmpresa, activo: boolean, onDone?: () => void) => {
     establecerComida.mutate(
       { usuarioId: u.id, activo },
       {
-        onSuccess: () =>
-          toast.success(activo ? `Comida activada para ${u.nombre}` : `Comida desactivada para ${u.nombre}`),
+        onSuccess: () => {
+          toast.success(activo ? `Comida activada para ${u.nombre}` : `Comida desactivada para ${u.nombre}`)
+          onDone?.()
+        },
         onError: () => toast.error('No se pudo cambiar la comida. Intenta de nuevo.'),
       }
     )
@@ -389,9 +391,10 @@ export function UsuariosEmpresa({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
+              loading={establecerComida.isPending}
               onClick={() => {
-                if (desactivandoComida) cambiarComida(desactivandoComida, false)
-                setDesactivandoComida(null)
+                if (desactivandoComida)
+                  cambiarComida(desactivandoComida, false, () => setDesactivandoComida(null))
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

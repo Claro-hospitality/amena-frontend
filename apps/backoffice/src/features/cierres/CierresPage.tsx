@@ -85,7 +85,6 @@ export function CierresPage() {
   }
 
   async function confirmarCierreAhora() {
-    setConfirmarCierre(false)
     try {
       const res = await ejecutar.mutateAsync()
       if (res.corrio && res.resultado) {
@@ -94,6 +93,7 @@ export function CierresPage() {
       } else {
         toast.info(res.motivo ?? 'No se generaron cierres.')
       }
+      setConfirmarCierre(false)
     } catch {
       toast.error('No se pudo ejecutar el cierre. Intenta de nuevo.')
     }
@@ -216,7 +216,9 @@ export function CierresPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarCierreAhora}>Ejecutar cierre</AlertDialogAction>
+            <AlertDialogAction onClick={confirmarCierreAhora} loading={ejecutar.isPending}>
+              Ejecutar cierre
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

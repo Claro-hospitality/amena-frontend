@@ -95,10 +95,12 @@ function FormDiaCierre({ diaActual }: { diaActual: DiaSemana }) {
 
   function guardar() {
     actualizar.mutate(seleccion, {
-      onSuccess: () => toast.success(`Día de cierre actualizado a ${seleccion}.`),
+      onSuccess: () => {
+        toast.success(`Día de cierre actualizado a ${seleccion}.`)
+        setConfirmando(false)
+      },
       onError: () => toast.error('No se pudo guardar el cambio. Intenta de nuevo.'),
     })
-    setConfirmando(false)
   }
 
   return (
@@ -148,7 +150,9 @@ function FormDiaCierre({ diaActual }: { diaActual: DiaSemana }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={guardar}>Guardar</AlertDialogAction>
+            <AlertDialogAction onClick={guardar} loading={actualizar.isPending}>
+              Guardar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
