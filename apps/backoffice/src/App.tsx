@@ -34,8 +34,8 @@ const ConsumosPage = lazy(() =>
 const EscanerPage = lazy(() =>
   import('./features/escaner/EscanerPage').then((m) => ({ default: m.EscanerPage }))
 )
-const CierresPage = lazy(() =>
-  import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
+const CortesPage = lazy(() =>
+  import('./features/cortes/CortesPage').then((m) => ({ default: m.CortesPage }))
 )
 const ConfiguracionPage = lazy(() =>
   import('./features/configuracion/ConfiguracionPage').then((m) => ({
@@ -157,17 +157,17 @@ export default function App() {
           }
         />
         <Route
-          path="cierres"
+          path="cortes"
           element={
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
-                <CierresPage />
+                <CortesPage />
               </Suspense>
             </RutaErrorBoundary>
           }
         />
-        {/* Compatibilidad: la sección se llamó "Cortes"; redirige links viejos a /cierres. */}
-        <Route path="cortes" element={<Navigate to="/cierres" replace />} />
+        {/* Compatibilidad: la sección se llamó "Cierres"; redirige links viejos a /cortes. */}
+        <Route path="cierres" element={<Navigate to="/cortes" replace />} />
         <Route
           path="configuracion"
           element={

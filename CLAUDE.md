@@ -21,6 +21,7 @@ packages/
 ## Reglas de oro
 
 1. **Terminología:** "**colaborador**" es un **rol** del portal; la persona que come es un "**comensal**" (entidad `comensales`, con su QR = `credenciales_qr.qr_token`). Nunca "empleado". Los ids de tablas propias son `int8` → `number` en TS (no `string`/uuid); `user_id` y `qr_token` siguen siendo uuid (`string`).
+   - **Terminología cerrada — se usa CORTE (no 'cierre') en toda la stack: base de datos, código, UI, textos y documentación. Esta decisión no se re-abre sin cambio de negocio explícito del owner. Nombres canónicos: `cortes_semanales` (tabla), `generar_corte_semanal` (función), `corte-semanal` (edge function), `/cortes` (ruta).**
 2. **Código compartido va en `packages/`**, nunca duplicado entre apps. Si dos apps necesitan lo mismo, es un paquete.
 3. **Los tipos de la base de datos no se escriben a mano.** Se generan con `pnpm gen:types` (requiere el stack local de `amena-backend` corriendo). Si un tipo no existe, el cambio va primero en el backend.
 4. **Toda lógica no trivial lleva test** (Vitest + Testing Library). Correr `pnpm test` antes de dar por terminada cualquier tarea.

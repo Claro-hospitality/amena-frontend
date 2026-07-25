@@ -20,10 +20,10 @@ import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useSetTituloDetalle } from '../../layout/tituloDetalle'
 import { UsuariosEmpresa } from '../colaboradores/UsuariosEmpresa'
-import type { CierreConEmpresa } from '../cierres/api'
-import { CierreDetalleDialog } from '../cierres/CierreDetalleDialog'
-import { crearColumnasCierres } from '../cierres/columns'
-import { useCierres } from '../cierres/queries'
+import type { CorteConEmpresa } from '../cortes/api'
+import { CorteDetalleDialog } from '../cortes/CorteDetalleDialog'
+import { crearColumnasCortes } from '../cortes/columns'
+import { useCortes } from '../cortes/queries'
 import type { Empresa } from './api'
 import { useEmpresas, useResumenEmpresa } from './queries'
 import type { ResumenEmpresa } from './resumenApi'
@@ -39,7 +39,7 @@ export function EmpresaDetallePage() {
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
   const empresa = empresas?.find((e) => e.id === id)
 
-  const [detalleCierre, setDetalleCierre] = useState<CierreConEmpresa | null>(null)
+  const [detalleCorte, setDetalleCorte] = useState<CorteConEmpresa | null>(null)
 
   // El breadcrumb del shell muestra el nombre de la empresa como paso final.
   useSetTituloDetalle(empresa ? nombreEmpresa(empresa) : null)
@@ -106,19 +106,19 @@ export function EmpresaDetallePage() {
         <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
           <TabsList>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
-            <TabsTrigger value="cierres">Cierres semanales</TabsTrigger>
+            <TabsTrigger value="cortes">Cortes semanales</TabsTrigger>
           </TabsList>
           <TabsContent value="usuarios" className="flex min-h-0 flex-col">
             <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} fillHeight />
           </TabsContent>
-          <TabsContent value="cierres" className="flex min-h-0 flex-col">
-            <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} fillHeight />
+          <TabsContent value="cortes" className="flex min-h-0 flex-col">
+            <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCorte} fillHeight />
           </TabsContent>
         </Tabs>
       </div>
 
-      {detalleCierre && (
-        <CierreDetalleDialog cierre={detalleCierre} onClose={() => setDetalleCierre(null)} />
+      {detalleCorte && (
+        <CorteDetalleDialog corte={detalleCorte} onClose={() => setDetalleCorte(null)} />
       )}
     </TooltipProvider>
   )
@@ -224,7 +224,7 @@ function MetricaDinero({ etiqueta, valor }: { etiqueta: string; valor: number })
   )
 }
 
-/* ----- Histórico de cierres de la empresa ----- */
+/* ----- Histórico de cortes de la empresa ----- */
 
 function HistoricoSeccion({
   empresaId,
@@ -232,30 +232,30 @@ function HistoricoSeccion({
   fillHeight = false,
 }: {
   empresaId: number
-  onVerDetalle: (cierre: CierreConEmpresa) => void
+  onVerDetalle: (corte: CorteConEmpresa) => void
   /** En tab: ocupa el alto restante y la tabla hace scroll interno. */
   fillHeight?: boolean
 }) {
-  const { data: cierres, isLoading, isError, refetch } = useCierres()
+  const { data: cortes, isLoading, isError, refetch } = useCortes()
 
   const columnas = useMemo(
     () =>
-      crearColumnasCierres({ onVerDetalle }).filter(
+      crearColumnasCortes({ onVerDetalle }).filter(
         (col) => !('accessorKey' in col && col.accessorKey === 'empresa')
       ),
     [onVerDetalle]
   )
 
-  const cierresEmpresa = useMemo(
-    () => (cierres ?? []).filter((c) => c.empresa_id === empresaId),
-    [cierres, empresaId]
+  const cortesEmpresa = useMemo(
+    () => (cortes ?? []).filter((c) => c.empresa_id === empresaId),
+    [cortes, empresaId]
   )
 
   return (
     <section className={`flex flex-col gap-3 ${fillHeight ? 'min-h-0 flex-1' : ''}`}>
       {!fillHeight && (
         <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-          Cierres semanales
+          Cortes semanales
         </h2>
       )}
       {isLoading ? (
@@ -269,7 +269,7 @@ function HistoricoSeccion({
           <CardContent className="flex flex-col items-start gap-3 p-5">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <TriangleAlert className="size-4" />
-              No se pudieron cargar los cierres.
+              No se pudieron cargar los cortes.
             </p>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               Reintentar
@@ -279,9 +279,9 @@ function HistoricoSeccion({
       ) : (
         <DataTable
           columns={columnas}
-          data={cierresEmpresa}
+          data={cortesEmpresa}
           fillHeight={fillHeight}
-          emptyMessage="Aún no hay cierres para esta empresa."
+          emptyMessage="Aún no hay cortes para esta empresa."
         />
       )}
     </section>

@@ -34,66 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      cierres_semanales: {
-        Row: {
-          comprometidas: number
-          consumidas: number
-          created_at: string
-          empresa_id: number
-          estado: Database["public"]["Enums"]["estado_cierre"]
-          extras: number
-          factura_id: number | null
-          id: number
-          monto_total: number
-          precio_unitario: number
-          semana_inicio: string
-          updated_at: string
-        }
-        Insert: {
-          comprometidas: number
-          consumidas: number
-          created_at?: string
-          empresa_id: number
-          estado?: Database["public"]["Enums"]["estado_cierre"]
-          extras: number
-          factura_id?: number | null
-          id?: number
-          monto_total: number
-          precio_unitario: number
-          semana_inicio: string
-          updated_at?: string
-        }
-        Update: {
-          comprometidas?: number
-          consumidas?: number
-          created_at?: string
-          empresa_id?: number
-          estado?: Database["public"]["Enums"]["estado_cierre"]
-          extras?: number
-          factura_id?: number | null
-          id?: number
-          monto_total?: number
-          precio_unitario?: number
-          semana_inicio?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cierres_semanales_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cierres_semanales_factura_id_fkey"
-            columns: ["factura_id"]
-            isOneToOne: false
-            referencedRelation: "facturas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       comensales: {
         Row: {
           activo: boolean
@@ -199,6 +139,66 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "usuarios_backoffice"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cortes_semanales: {
+        Row: {
+          comprometidas: number
+          consumidas: number
+          created_at: string
+          empresa_id: number
+          estado: Database["public"]["Enums"]["estado_corte"]
+          extras: number
+          factura_id: number | null
+          id: number
+          monto_total: number
+          precio_unitario: number
+          semana_inicio: string
+          updated_at: string
+        }
+        Insert: {
+          comprometidas: number
+          consumidas: number
+          created_at?: string
+          empresa_id: number
+          estado?: Database["public"]["Enums"]["estado_corte"]
+          extras: number
+          factura_id?: number | null
+          id?: number
+          monto_total: number
+          precio_unitario: number
+          semana_inicio: string
+          updated_at?: string
+        }
+        Update: {
+          comprometidas?: number
+          consumidas?: number
+          created_at?: string
+          empresa_id?: number
+          estado?: Database["public"]["Enums"]["estado_corte"]
+          extras?: number
+          factura_id?: number | null
+          id?: number
+          monto_total?: number
+          precio_unitario?: number
+          semana_inicio?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cortes_semanales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cortes_semanales_factura_id_fkey"
+            columns: ["factura_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -402,6 +402,51 @@ export type Database = {
           },
         ]
       }
+      notificaciones_log: {
+        Row: {
+          asunto: string | null
+          codigo_error: number | null
+          created_at: string
+          destinatario: string
+          error: string | null
+          estado: string
+          id: number
+          message_id: string | null
+          metadata: Json | null
+          plantilla: string | null
+          reintentable: boolean
+          tipo: string
+        }
+        Insert: {
+          asunto?: string | null
+          codigo_error?: number | null
+          created_at?: string
+          destinatario: string
+          error?: string | null
+          estado: string
+          id?: never
+          message_id?: string | null
+          metadata?: Json | null
+          plantilla?: string | null
+          reintentable?: boolean
+          tipo: string
+        }
+        Update: {
+          asunto?: string | null
+          codigo_error?: number | null
+          created_at?: string
+          destinatario?: string
+          error?: string | null
+          estado?: string
+          id?: never
+          message_id?: string | null
+          metadata?: Json | null
+          plantilla?: string | null
+          reintentable?: boolean
+          tipo?: string
+        }
+        Relationships: []
+      }
       platillos: {
         Row: {
           activo: boolean
@@ -552,7 +597,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      notificaciones_fallidas_24h: {
+        Row: {
+          codigo_error: number | null
+          permanentes: number | null
+          plantilla: string | null
+          reintentables: number | null
+          tipo: string | null
+          ultimo_intento: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _registrar_consumo_core: {
@@ -644,11 +699,11 @@ export type Database = {
         Returns: Json
       }
       estado_operativo_dia: { Args: never; Returns: Json }
-      generar_cierre_semanal: {
+      generar_corte_semanal: {
         Args: { p_empresa_id: number; p_semana_inicio: string }
         Returns: Json
       }
-      generar_cierres_pendientes: { Args: { p_fecha: string }; Returns: Json }
+      generar_cortes_pendientes: { Args: { p_fecha: string }; Returns: Json }
       get_config: { Args: { p_clave: string }; Returns: Json }
       listar_consumos: {
         Args: {
@@ -728,7 +783,7 @@ export type Database = {
     }
     Enums: {
       ciclo_facturacion: "semanal" | "mensual"
-      estado_cierre: "abierto" | "cerrado"
+      estado_corte: "abierto" | "cerrado"
       estado_factura: "pendiente" | "pagada" | "cancelada"
       metodo_consumo: "qr" | "manual"
       modo_consumo: "declaracion" | "libre"
@@ -871,7 +926,7 @@ export const Constants = {
   public: {
     Enums: {
       ciclo_facturacion: ["semanal", "mensual"],
-      estado_cierre: ["abierto", "cerrado"],
+      estado_corte: ["abierto", "cerrado"],
       estado_factura: ["pendiente", "pagada", "cancelada"],
       metodo_consumo: ["qr", "manual"],
       modo_consumo: ["declaracion", "libre"],

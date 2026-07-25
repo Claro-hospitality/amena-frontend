@@ -12,5 +12,5 @@ export const RUTAS_BREADCRUMB: Record<string, string> = {
   '/empresa/colaboradores': 'Colaboradores',
   '/empresa/cuotas': 'Cuotas',
   '/empresa/cuotas/declarar': 'Declarar cuotas',
-  '/empresa/cierres': 'Cierres',
+  '/empresa/cortes': 'Cortes',
 }

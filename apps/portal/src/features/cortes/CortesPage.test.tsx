@@ -4,14 +4,14 @@ import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const api = vi.hoisted(() => ({
-  listarMisCierres: vi.fn(),
+  listarMisCortes: vi.fn(),
 }))
 vi.mock('./api', () => api)
 
 import type { TipoUsuarioPortal } from '../../auth/validarAccesoPortal'
-import { CierresPage } from './CierresPage'
+import { CortesPage } from './CortesPage'
 
-const cierre = {
+const corte = {
   id: 'c1',
   empresa_id: 'e1',
   factura_id: null,
@@ -33,7 +33,7 @@ function renderizar(tipo: TipoUsuarioPortal) {
       <MemoryRouter>
         <Routes>
           <Route element={<Outlet context={{ tipo }} />}>
-            <Route index element={<CierresPage />} />
+            <Route index element={<CortesPage />} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -43,11 +43,11 @@ function renderizar(tipo: TipoUsuarioPortal) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  api.listarMisCierres.mockResolvedValue([cierre])
+  api.listarMisCortes.mockResolvedValue([corte])
 })
 
-describe('CierresPage (portal)', () => {
-  it('muestra una card por cierre con semana y monto (admin_empresa)', async () => {
+describe('CortesPage (portal)', () => {
+  it('muestra una card por corte con semana y monto (admin_empresa)', async () => {
     renderizar('admin_empresa')
     expect(await screen.findByText(/13.*jul 2026/)).toBeInTheDocument()
     expect(screen.getByText('$680.00')).toBeInTheDocument()
@@ -58,16 +58,16 @@ describe('CierresPage (portal)', () => {
     expect(screen.getByText(/no tienes acceso/i)).toBeInTheDocument()
   })
 
-  it('muestra el estado vacío sin cierres', async () => {
-    api.listarMisCierres.mockResolvedValue([])
+  it('muestra el estado vacío sin cortes', async () => {
+    api.listarMisCortes.mockResolvedValue([])
     renderizar('admin_empresa')
-    expect(await screen.findByText(/aún no hay cierres de tu empresa/i)).toBeInTheDocument()
+    expect(await screen.findByText(/aún no hay cortes de tu empresa/i)).toBeInTheDocument()
   })
 
   it('muestra el estado de error y permite reintentar', async () => {
-    api.listarMisCierres.mockRejectedValue(new Error('boom'))
+    api.listarMisCortes.mockRejectedValue(new Error('boom'))
     renderizar('admin_empresa')
-    expect(await screen.findByText(/no se pudieron cargar los cierres/i)).toBeInTheDocument()
+    expect(await screen.findByText(/no se pudieron cargar los cortes/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument()
   })
 })

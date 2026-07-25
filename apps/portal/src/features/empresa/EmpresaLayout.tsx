@@ -7,7 +7,7 @@ import { navEmpresa } from '../../layout/navPortal'
 
 /**
  * Sección "Empresa" (solo admin): agrupador de gestión con subnavegación interna
- * (Colaboradores, Cuotas, Cierres). Facturas queda como placeholder deshabilitado hasta
+ * (Colaboradores, Cuotas, Cortes). Facturas queda como placeholder deshabilitado hasta
  * que aterrice el módulo 4.8. Re-pasa el contexto de acceso a las rutas hijas.
  */
 export function EmpresaLayout() {

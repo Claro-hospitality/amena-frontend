@@ -15,7 +15,7 @@ import { navPorTipo, type ItemNav } from './navPortal'
  * - lg+: navegación en línea en el header.
  *
  * Ambos roles ven "Inicio" y "Mi QR"; el admin suma "Empresa". La gestión (colaboradores,
- * cuotas, cierres) vive dentro de la sección Empresa, no en el nav principal.
+ * cuotas, cortes) vive dentro de la sección Empresa, no en el nav principal.
  */
 export function PortalShell({
   tipo,

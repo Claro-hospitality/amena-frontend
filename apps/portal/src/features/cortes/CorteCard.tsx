@@ -1,9 +1,9 @@
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
 import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
-import type { Cierre } from './api'
+import type { Corte } from './api'
 
-function BadgeEstado({ estado }: { estado: Cierre['estado'] }) {
+function BadgeEstado({ estado }: { estado: Corte['estado'] }) {
   return estado === 'cerrado' ? (
     <Badge className="bg-success text-success-foreground">Cerrado</Badge>
   ) : (
@@ -20,26 +20,26 @@ function Metrica({ etiqueta, valor }: { etiqueta: string; valor: number }) {
   )
 }
 
-/** Card de un cierre semanal (solo lectura): transparencia de "qué me van a cobrar". */
-export function CierreCard({ cierre }: { cierre: Cierre }) {
+/** Card de un corte semanal (solo lectura): transparencia de "qué me van a cobrar". */
+export function CorteCard({ corte }: { corte: Corte }) {
   return (
     <Card>
       <CardContent className="flex flex-col gap-3 p-4">
         <header className="flex items-center justify-between gap-2">
-          <h3 className="font-medium">{rangoSemanaLegible(deISO(cierre.semana_inicio))}</h3>
-          <BadgeEstado estado={cierre.estado} />
+          <h3 className="font-medium">{rangoSemanaLegible(deISO(corte.semana_inicio))}</h3>
+          <BadgeEstado estado={corte.estado} />
         </header>
 
         <dl className="grid grid-cols-3 gap-2">
-          <Metrica etiqueta="Comprometidas" valor={cierre.comprometidas} />
-          <Metrica etiqueta="Extras" valor={cierre.extras} />
-          <Metrica etiqueta="Consumidas" valor={cierre.consumidas} />
+          <Metrica etiqueta="Comprometidas" valor={corte.comprometidas} />
+          <Metrica etiqueta="Extras" valor={corte.extras} />
+          <Metrica etiqueta="Consumidas" valor={corte.consumidas} />
         </dl>
 
         <div className="flex items-baseline justify-between border-t border-border pt-3">
           <span className="text-sm text-muted-foreground">Monto</span>
           <span className="font-mono text-lg font-semibold tabular-nums">
-            {formatearMoneda(cierre.monto_total)}
+            {formatearMoneda(corte.monto_total)}
           </span>
         </div>
       </CardContent>

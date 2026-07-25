@@ -23,8 +23,8 @@ const DeclararCuotasPage = lazy(() =>
 const MiCredencialPage = lazy(() =>
   import('./features/colaborador/MiCredencialPage').then((m) => ({ default: m.MiCredencialPage }))
 )
-const CierresPage = lazy(() =>
-  import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
+const CortesPage = lazy(() =>
+  import('./features/cortes/CortesPage').then((m) => ({ default: m.CortesPage }))
 )
 const MiCuentaPage = lazy(() =>
   import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
@@ -68,7 +68,9 @@ export default function App() {
           <Route path="colaboradores" element={<Ruta><ColaboradoresPage /></Ruta>} />
           <Route path="cuotas" element={<Ruta><CuotasSemanaPage /></Ruta>} />
           <Route path="cuotas/declarar" element={<Ruta><DeclararCuotasPage /></Ruta>} />
-          <Route path="cierres" element={<Ruta><CierresPage /></Ruta>} />
+          <Route path="cortes" element={<Ruta><CortesPage /></Ruta>} />
+          {/* La sección se llamó "cierres": redirige el link viejo dentro de Empresa. */}
+          <Route path="cierres" element={<Navigate to="/empresa/cortes" replace />} />
         </Route>
 
         {/* Redirecciones de rutas viejas (bookmarks, correos, enlaces guardados). */}
@@ -77,7 +79,7 @@ export default function App() {
         <Route path="colaboradores" element={<Navigate to="/empresa/colaboradores" replace />} />
         <Route path="cuotas" element={<Navigate to="/empresa/cuotas" replace />} />
         <Route path="cuotas/declarar" element={<Navigate to="/empresa/cuotas/declarar" replace />} />
-        <Route path="cierres" element={<Navigate to="/empresa/cierres" replace />} />
+        <Route path="cierres" element={<Navigate to="/empresa/cortes" replace />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,8 +1,8 @@
 import { Badge } from '@amena/ui/components/ui/badge'
-import type { Cierre } from './api'
+import type { Corte } from './api'
 
-/** Badge de estado del cierre: cerrado = éxito (inmutable), abierto = en curso. */
-export function BadgeEstadoCierre({ estado }: { estado: Cierre['estado'] }) {
+/** Badge de estado del corte: cerrado = éxito (inmutable), abierto = en curso. */
+export function BadgeEstadoCorte({ estado }: { estado: Corte['estado'] }) {
   return estado === 'cerrado' ? (
     <Badge className="bg-success text-success-foreground">Cerrado</Badge>
   ) : (

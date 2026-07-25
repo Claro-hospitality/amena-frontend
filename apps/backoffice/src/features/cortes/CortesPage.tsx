@@ -34,68 +34,68 @@ import { deISO, rangoSemanaLegible } from '@amena/utils'
 import { DataTable } from '@amena/ui/components/data-table'
 import { toast } from 'sonner'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import type { CierreConEmpresa } from './api'
-import { CierreDetalleDialog } from './CierreDetalleDialog'
-import { crearColumnasCierres } from './columns'
-import { useCierres, useEjecutarCierre } from './queries'
+import type { CorteConEmpresa } from './api'
+import { CorteDetalleDialog } from './CorteDetalleDialog'
+import { crearColumnasCortes } from './columns'
+import { useCortes, useEjecutarCorte } from './queries'
 
-export function CierresPage() {
+export function CortesPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
-  const { data: cierres, isLoading, isError, refetch } = useCierres()
+  const { data: cortes, isLoading, isError, refetch } = useCortes()
   const [empresaSel, setEmpresaSel] = useState('')
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
-  const [confirmarCierre, setConfirmarCierre] = useState(false)
-  const [detalle, setDetalle] = useState<CierreConEmpresa | null>(null)
-  const ejecutar = useEjecutarCierre()
+  const [confirmarCorte, setConfirmarCorte] = useState(false)
+  const [detalle, setDetalle] = useState<CorteConEmpresa | null>(null)
+  const ejecutar = useEjecutarCorte()
 
   const esSuperAdmin = rol === 'super_admin'
 
   const empresas = useMemo(() => {
     const mapa = new Map<string, string>()
-    for (const c of cierres ?? []) {
+    for (const c of cortes ?? []) {
       if (c.empresa) mapa.set(String(c.empresa_id), c.empresa.nombre)
     }
     return [...mapa.entries()]
       .map(([id, nombre]) => ({ id, nombre }))
       .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
-  }, [cierres])
+  }, [cortes])
 
   const semanas = useMemo(() => {
     const set = new Set<string>()
-    for (const c of cierres ?? []) set.add(c.semana_inicio)
+    for (const c of cortes ?? []) set.add(c.semana_inicio)
     return [...set].sort((a, b) => b.localeCompare(a))
-  }, [cierres])
+  }, [cortes])
 
   const filtrados = useMemo(() => {
-    return (cierres ?? []).filter((c) => {
+    return (cortes ?? []).filter((c) => {
       if (empresaSel && String(c.empresa_id) !== empresaSel) return false
       if (desde && c.semana_inicio < desde) return false
       if (hasta && c.semana_inicio > hasta) return false
       return true
     })
-  }, [cierres, empresaSel, desde, hasta])
+  }, [cortes, empresaSel, desde, hasta])
 
-  const columnas = crearColumnasCierres({ onVerDetalle: (c) => setDetalle(c) })
+  const columnas = crearColumnasCortes({ onVerDetalle: (c) => setDetalle(c) })
 
-  const hayCierres = (cierres ?? []).length > 0
+  const hayCortes = (cortes ?? []).length > 0
 
   if (rol !== 'super_admin' && rol !== 'finanzas' && rol !== 'consulta') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
-  async function confirmarCierreAhora() {
+  async function confirmarCorteAhora() {
     try {
       const res = await ejecutar.mutateAsync()
       if (res.corrio && res.resultado) {
         const { generados, ya_existentes } = res.resultado
-        toast.success(`Cierre ejecutado: ${generados} generados · ${ya_existentes} ya existían.`)
+        toast.success(`Corte ejecutado: ${generados} generados · ${ya_existentes} ya existían.`)
       } else {
-        toast.info(res.motivo ?? 'No se generaron cierres.')
+        toast.info(res.motivo ?? 'No se generaron cortes.')
       }
-      setConfirmarCierre(false)
+      setConfirmarCorte(false)
     } catch {
-      toast.error('No se pudo ejecutar el cierre. Intenta de nuevo.')
+      toast.error('No se pudo ejecutar el corte. Intenta de nuevo.')
     }
   }
 
@@ -104,9 +104,9 @@ export function CierresPage() {
       <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
         {esSuperAdmin && (
           <header className="flex items-center justify-end gap-4">
-            <Button onClick={() => setConfirmarCierre(true)} loading={ejecutar.isPending}>
+            <Button onClick={() => setConfirmarCorte(true)} loading={ejecutar.isPending}>
               <Play className="size-4" />
-              Ejecutar cierre ahora
+              Ejecutar corte ahora
             </Button>
           </header>
         )}
@@ -115,8 +115,8 @@ export function CierresPage() {
           <TablaSkeleton />
         ) : isError ? (
           <EstadoError onReintentar={() => refetch()} />
-        ) : !hayCierres ? (
-          <CierresVacio hayFiltros={false} />
+        ) : !hayCortes ? (
+          <CortesVacio hayFiltros={false} />
         ) : (
           <DataTable
             columns={columnas}
@@ -192,32 +192,32 @@ export function CierresPage() {
                 </Field>
               </div>
             }
-            emptyMessage="Ningún cierre coincide con los filtros seleccionados."
+            emptyMessage="Ningún corte coincide con los filtros seleccionados."
           />
         )}
       </div>
 
-      {detalle && <CierreDetalleDialog cierre={detalle} onClose={() => setDetalle(null)} />}
+      {detalle && <CorteDetalleDialog corte={detalle} onClose={() => setDetalle(null)} />}
 
       <AlertDialog
-        open={confirmarCierre}
+        open={confirmarCorte}
         onOpenChange={(abierto) => {
-          if (!abierto) setConfirmarCierre(false)
+          if (!abierto) setConfirmarCorte(false)
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Ejecutar el cierre ahora?</AlertDialogTitle>
+            <AlertDialogTitle>¿Ejecutar el corte ahora?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se generarán los cierres de la última semana completa para todas las empresas
+              Se generarán los cortes de la última semana completa para todas las empresas
               activas, sin esperar al día configurado. La operación es idempotente: las semanas
               ya cerradas no se recalculan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarCierreAhora} loading={ejecutar.isPending}>
-              Ejecutar cierre
+            <AlertDialogAction onClick={confirmarCorteAhora} loading={ejecutar.isPending}>
+              Ejecutar corte
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -243,7 +243,7 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
         <EmptyMedia variant="icon">
           <TriangleAlert className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>No se pudieron cargar los cierres</EmptyTitle>
+        <EmptyTitle>No se pudieron cargar los cortes</EmptyTitle>
         <EmptyDescription>Ocurrió un error al consultar los datos.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -255,18 +255,18 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
   )
 }
 
-function CierresVacio({ hayFiltros }: { hayFiltros: boolean }) {
+function CortesVacio({ hayFiltros }: { hayFiltros: boolean }) {
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <ClipboardCheck className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>{hayFiltros ? 'Sin resultados' : 'Aún no hay cierres'}</EmptyTitle>
+        <EmptyTitle>{hayFiltros ? 'Sin resultados' : 'Aún no hay cortes'}</EmptyTitle>
         <EmptyDescription>
           {hayFiltros
-            ? 'Ningún cierre coincide con los filtros seleccionados.'
-            : 'Los cierres aparecerán aquí cuando se ejecute el cierre semanal.'}
+            ? 'Ningún corte coincide con los filtros seleccionados.'
+            : 'Los cortes aparecerán aquí cuando se ejecute el corte semanal.'}
         </EmptyDescription>
       </EmptyHeader>
     </Empty>

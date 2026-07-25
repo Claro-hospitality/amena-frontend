@@ -14,8 +14,8 @@ vi.mock('./api', () => empresasApi)
 const resumenApi = vi.hoisted(() => ({ obtenerResumenEmpresa: vi.fn() }))
 vi.mock('./resumenApi', () => resumenApi)
 
-const cierresApi = vi.hoisted(() => ({ listarCierres: vi.fn(), ejecutarCierreManual: vi.fn() }))
-vi.mock('../cierres/api', () => cierresApi)
+const cortesApi = vi.hoisted(() => ({ listarCortes: vi.fn(), ejecutarCorteManual: vi.fn() }))
+vi.mock('../cortes/api', () => cortesApi)
 
 const colaboradoresApi = vi.hoisted(() => ({
   listarColaboradores: vi.fn(),
@@ -72,7 +72,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   empresasApi.listarEmpresas.mockResolvedValue([empresaFake])
   resumenApi.obtenerResumenEmpresa.mockResolvedValue(resumenFake)
-  cierresApi.listarCierres.mockResolvedValue([])
+  cortesApi.listarCortes.mockResolvedValue([])
   colaboradoresApi.listarUsuariosEmpresa.mockResolvedValue([
     { id: 1, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true },
     { id: 2, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false },
@@ -91,9 +91,9 @@ describe('EmpresaDetallePage', () => {
 
   it('lista todos los usuarios de la empresa (admins + colaboradores)', async () => {
     renderizar('super_admin')
-    // Tabs de Usuarios y Cierres semanales; la de Usuarios está activa por defecto.
+    // Tabs de Usuarios y Cortes semanales; la de Usuarios está activa por defecto.
     expect(await screen.findByRole('tab', { name: 'Usuarios' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Cierres semanales' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Cortes semanales' })).toBeInTheDocument()
     expect(await screen.findByText('Juan Pérez')).toBeInTheDocument()
     expect(screen.getByText('Adriana Ruiz')).toBeInTheDocument() // admin también aparece
   })

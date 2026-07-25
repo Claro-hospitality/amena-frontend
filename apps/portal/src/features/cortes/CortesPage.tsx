@@ -10,12 +10,12 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { CierreCard } from './CierreCard'
-import { useMisCierres } from './queries'
+import { CorteCard } from './CorteCard'
+import { useMisCortes } from './queries'
 
-export function CierresPage() {
+export function CortesPage() {
   const { tipo } = useOutletContext<ContextoAcceso>()
-  const { data: cierres, isLoading, isError, refetch } = useMisCierres()
+  const { data: cortes, isLoading, isError, refetch } = useMisCortes()
 
   if (tipo !== 'admin_empresa') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -31,14 +31,14 @@ export function CierresPage() {
         <ListaSkeleton />
       ) : isError ? (
         <EstadoError onReintentar={() => refetch()} />
-      ) : cierres && cierres.length > 0 ? (
+      ) : cortes && cortes.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {cierres.map((c) => (
-            <CierreCard key={c.id} cierre={c} />
+          {cortes.map((c) => (
+            <CorteCard key={c.id} corte={c} />
           ))}
         </div>
       ) : (
-        <CierresVacio />
+        <CortesVacio />
       )}
     </div>
   )
@@ -61,8 +61,8 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
         <EmptyMedia variant="icon">
           <TriangleAlert className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>No se pudieron cargar los cierres</EmptyTitle>
-        <EmptyDescription>Ocurrió un error al consultar tus cierres.</EmptyDescription>
+        <EmptyTitle>No se pudieron cargar los cortes</EmptyTitle>
+        <EmptyDescription>Ocurrió un error al consultar tus cortes.</EmptyDescription>
       </EmptyHeader>
       <Button variant="outline" onClick={onReintentar}>
         Reintentar
@@ -71,14 +71,14 @@ function EstadoError({ onReintentar }: { onReintentar: () => void }) {
   )
 }
 
-function CierresVacio() {
+function CortesVacio() {
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <ClipboardCheck className="size-6" />
         </EmptyMedia>
-        <EmptyTitle>Aún no hay cierres de tu empresa</EmptyTitle>
+        <EmptyTitle>Aún no hay cortes de tu empresa</EmptyTitle>
         <EmptyDescription>
           Aparecerán aquí al terminar cada semana, con el desglose y el monto.
         </EmptyDescription>

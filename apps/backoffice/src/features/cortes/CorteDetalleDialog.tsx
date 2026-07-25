@@ -7,8 +7,8 @@ import {
   DialogTitle,
 } from '@amena/ui/components/ui/dialog'
 import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
-import type { CierreConEmpresa } from './api'
-import { BadgeEstadoCierre } from './BadgeEstadoCierre'
+import type { CorteConEmpresa } from './api'
+import { BadgeEstadoCorte } from './BadgeEstadoCorte'
 
 function Dato({ etiqueta, children }: { etiqueta: string; children: ReactNode }) {
   return (
@@ -19,12 +19,12 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: ReactNode })
   )
 }
 
-/** Detalle completo de un cierre (solo lectura). */
-export function CierreDetalleDialog({
-  cierre,
+/** Detalle completo de un corte (solo lectura). */
+export function CorteDetalleDialog({
+  corte,
   onClose,
 }: {
-  cierre: CierreConEmpresa
+  corte: CorteConEmpresa
   onClose: () => void
 }) {
   return (
@@ -36,36 +36,36 @@ export function CierreDetalleDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{cierre.empresa?.nombre ?? 'Cierre'}</DialogTitle>
+          <DialogTitle>{corte.empresa?.nombre ?? 'Corte'}</DialogTitle>
           <DialogDescription>
-            Semana {rangoSemanaLegible(deISO(cierre.semana_inicio))}
+            Semana {rangoSemanaLegible(deISO(corte.semana_inicio))}
           </DialogDescription>
         </DialogHeader>
 
         <dl>
           <Dato etiqueta="Comprometidas">
-            <span className="font-mono tabular-nums">{cierre.comprometidas}</span>
+            <span className="font-mono tabular-nums">{corte.comprometidas}</span>
           </Dato>
           <Dato etiqueta="Extras">
-            <span className="font-mono tabular-nums">{cierre.extras}</span>
+            <span className="font-mono tabular-nums">{corte.extras}</span>
           </Dato>
           <Dato etiqueta="Consumidas">
-            <span className="font-mono tabular-nums">{cierre.consumidas}</span>
+            <span className="font-mono tabular-nums">{corte.consumidas}</span>
           </Dato>
           <Dato etiqueta="Precio unitario">
             <span className="font-mono tabular-nums">
-              {formatearMoneda(cierre.precio_unitario)}
+              {formatearMoneda(corte.precio_unitario)}
             </span>
           </Dato>
           <Dato etiqueta="Monto total">
-            <span className="font-mono tabular-nums">{formatearMoneda(cierre.monto_total)}</span>
+            <span className="font-mono tabular-nums">{formatearMoneda(corte.monto_total)}</span>
           </Dato>
           <Dato etiqueta="Estado">
-            <BadgeEstadoCierre estado={cierre.estado} />
+            <BadgeEstadoCorte estado={corte.estado} />
           </Dato>
           <Dato etiqueta="Factura">
-            {cierre.factura_id ? (
-              <span className="font-mono text-xs">{cierre.factura_id}</span>
+            {corte.factura_id ? (
+              <span className="font-mono text-xs">{corte.factura_id}</span>
             ) : (
               <span className="text-muted-foreground">Sin factura</span>
             )}

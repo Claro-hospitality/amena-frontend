@@ -31,7 +31,7 @@ import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { toast } from 'sonner'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { DIAS_SEMANA, type DiaSemana } from './api'
-import { useActualizarDiaCierre, useDiaCierre } from './queries'
+import { useActualizarDiaCorte, useDiaCorte } from './queries'
 
 function capitalizar(dia: string): string {
   return dia.charAt(0).toUpperCase() + dia.slice(1)
@@ -47,20 +47,20 @@ export function ConfiguracionPage() {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-muted-foreground">Parámetros globales del sistema.</p>
-      <SeccionCierresSemanales />
+      <SeccionCortesSemanales />
     </div>
   )
 }
 
-function SeccionCierresSemanales() {
-  const { data: diaActual, isLoading, isError, refetch } = useDiaCierre()
+function SeccionCortesSemanales() {
+  const { data: diaActual, isLoading, isError, refetch } = useDiaCorte()
 
   return (
     <Card className="max-w-xl">
       <CardHeader>
-        <CardTitle>Cierres semanales</CardTitle>
+        <CardTitle>Cortes semanales</CardTitle>
         <CardDescription>
-          Día de la semana en que se genera automáticamente el cierre semanal de todas las
+          Día de la semana en que se genera automáticamente el corte semanal de todas las
           empresas: se cierra la semana y se calcula lo comprometido, lo consumido y el monto a
           facturar.
         </CardDescription>
@@ -79,24 +79,24 @@ function SeccionCierresSemanales() {
             </Button>
           </div>
         ) : (
-          <FormDiaCierre diaActual={diaActual} />
+          <FormDiaCorte diaActual={diaActual} />
         )}
       </CardContent>
     </Card>
   )
 }
 
-function FormDiaCierre({ diaActual }: { diaActual: DiaSemana }) {
+function FormDiaCorte({ diaActual }: { diaActual: DiaSemana }) {
   const [seleccion, setSeleccion] = useState<DiaSemana>(diaActual)
   const [confirmando, setConfirmando] = useState(false)
-  const actualizar = useActualizarDiaCierre()
+  const actualizar = useActualizarDiaCorte()
 
   const sinCambios = seleccion === diaActual
 
   function guardar() {
     actualizar.mutate(seleccion, {
       onSuccess: () => {
-        toast.success(`Día de cierre actualizado a ${seleccion}.`)
+        toast.success(`Día de corte actualizado a ${seleccion}.`)
         setConfirmando(false)
       },
       onError: () => toast.error('No se pudo guardar el cambio. Intenta de nuevo.'),
@@ -106,12 +106,12 @@ function FormDiaCierre({ diaActual }: { diaActual: DiaSemana }) {
   return (
     <div className="flex flex-col gap-4">
       <Field className="max-w-xs">
-        <FieldLabel htmlFor="dia_cierre">Día de cierre semanal</FieldLabel>
+        <FieldLabel htmlFor="dia_corte">Día de corte semanal</FieldLabel>
         <Select
           value={seleccion}
           onValueChange={(valor) => setSeleccion(valor as DiaSemana)}
         >
-          <SelectTrigger id="dia_cierre" className="w-full" aria-label="Día de cierre semanal">
+          <SelectTrigger id="dia_corte" className="w-full" aria-label="Día de corte semanal">
             <SelectValue>{(valor) => capitalizar(valor as string)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -142,9 +142,9 @@ function FormDiaCierre({ diaActual }: { diaActual: DiaSemana }) {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Cambiar el día de cierre a {seleccion}?</AlertDialogTitle>
+            <AlertDialogTitle>¿Cambiar el día de corte a {seleccion}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Los cierres automáticos se ejecutarán cada {seleccion}. Los cierres ya generados no
+              Los cortes automáticos se ejecutarán cada {seleccion}. Los cortes ya generados no
               cambian.
             </AlertDialogDescription>
           </AlertDialogHeader>

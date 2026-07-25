@@ -36,7 +36,7 @@ describe('PortalShell', () => {
     expect(screen.getAllByRole('link', { name: 'Inicio' }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('link', { name: 'Mi QR' }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('link', { name: 'Empresa' }).length).toBeGreaterThan(0)
-    // La gestión (Colaboradores, Cuotas, Cierres) vive DENTRO de Empresa, no en el nav principal.
+    // La gestión (Colaboradores, Cuotas, Cortes) vive DENTRO de Empresa, no en el nav principal.
     expect(screen.queryAllByRole('link', { name: 'Colaboradores' }).length).toBe(0)
     expect(screen.queryAllByRole('link', { name: 'Cuotas' }).length).toBe(0)
   })

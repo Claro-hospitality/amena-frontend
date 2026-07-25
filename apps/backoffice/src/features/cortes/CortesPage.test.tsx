@@ -5,15 +5,15 @@ import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const api = vi.hoisted(() => ({
-  listarCierres: vi.fn(),
-  ejecutarCierreManual: vi.fn(),
+  listarCortes: vi.fn(),
+  ejecutarCorteManual: vi.fn(),
 }))
 vi.mock('./api', () => api)
 
 import type { RolBackoffice } from '../../auth/validarAccesoPortal'
-import { CierresPage } from './CierresPage'
+import { CortesPage } from './CortesPage'
 
-const cierreConstructora = {
+const corteConstructora = {
   id: 'c1',
   empresa_id: 'e1',
   factura_id: null,
@@ -28,8 +28,8 @@ const cierreConstructora = {
   updated_at: '',
   empresa: { nombre: 'Constructora Norte' },
 }
-const cierreEstudio = {
-  ...cierreConstructora,
+const corteEstudio = {
+  ...corteConstructora,
   id: 'c2',
   empresa_id: 'e2',
   semana_inicio: '2026-07-06',
@@ -44,7 +44,7 @@ function renderizar(rol: RolBackoffice) {
       <MemoryRouter>
         <Routes>
           <Route element={<Outlet context={{ rol }} />}>
-            <Route index element={<CierresPage />} />
+            <Route index element={<CortesPage />} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -54,15 +54,15 @@ function renderizar(rol: RolBackoffice) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  api.listarCierres.mockResolvedValue([cierreConstructora, cierreEstudio])
-  api.ejecutarCierreManual.mockResolvedValue({
+  api.listarCortes.mockResolvedValue([corteConstructora, corteEstudio])
+  api.ejecutarCorteManual.mockResolvedValue({
     corrio: true,
     resultado: { semana_inicio: '2026-07-13', generados: 2, ya_existentes: 1, empresas: [] },
   })
 })
 
-describe('CierresPage', () => {
-  it('muestra los cierres con semana y montos formateados (super_admin)', async () => {
+describe('CortesPage', () => {
+  it('muestra los cortes con semana y montos formateados (super_admin)', async () => {
     renderizar('super_admin')
     const tabla = await screen.findByRole('table')
     expect(within(tabla).getByText('Constructora Norte')).toBeInTheDocument()
@@ -72,17 +72,17 @@ describe('CierresPage', () => {
     expect(within(tabla).getAllByText(/jul 2026/).length).toBeGreaterThan(0)
   })
 
-  it('super_admin ve el botón de ejecutar cierre', async () => {
+  it('super_admin ve el botón de ejecutar corte', async () => {
     renderizar('super_admin')
     await screen.findByRole('table')
-    expect(screen.getByRole('button', { name: 'Ejecutar cierre ahora' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ejecutar corte ahora' })).toBeInTheDocument()
   })
 
-  it('finanzas ve el listado sin el botón de cierre', async () => {
+  it('finanzas ve el listado sin el botón de corte', async () => {
     renderizar('finanzas')
     await screen.findByRole('table')
     expect(
-      screen.queryByRole('button', { name: 'Ejecutar cierre ahora' })
+      screen.queryByRole('button', { name: 'Ejecutar corte ahora' })
     ).not.toBeInTheDocument()
   })
 
@@ -92,22 +92,22 @@ describe('CierresPage', () => {
   })
 
   it('muestra skeleton mientras carga (sin tabla)', () => {
-    api.listarCierres.mockReturnValue(new Promise(() => {}))
+    api.listarCortes.mockReturnValue(new Promise(() => {}))
     renderizar('super_admin')
-    expect(screen.getByRole('button', { name: /ejecutar cierre/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ejecutar corte/i })).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
   it('muestra el estado vacío sin datos', async () => {
-    api.listarCierres.mockResolvedValue([])
+    api.listarCortes.mockResolvedValue([])
     renderizar('super_admin')
-    expect(await screen.findByText(/aún no hay cierres/i)).toBeInTheDocument()
+    expect(await screen.findByText(/aún no hay cortes/i)).toBeInTheDocument()
   })
 
   it('muestra el estado de error y permite reintentar', async () => {
-    api.listarCierres.mockRejectedValue(new Error('boom'))
+    api.listarCortes.mockRejectedValue(new Error('boom'))
     renderizar('super_admin')
-    expect(await screen.findByText(/no se pudieron cargar los cierres/i)).toBeInTheDocument()
+    expect(await screen.findByText(/no se pudieron cargar los cortes/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument()
   })
 
@@ -126,19 +126,19 @@ describe('CierresPage', () => {
     expect(within(tablaFiltrada).getByText('Estudio Creativo Sur')).toBeInTheDocument()
   })
 
-  it('ejecuta el cierre manual tras confirmar', async () => {
+  it('ejecuta el corte manual tras confirmar', async () => {
     const user = userEvent.setup()
     renderizar('super_admin')
     await screen.findByRole('table')
 
-    await user.click(screen.getByRole('button', { name: 'Ejecutar cierre ahora' }))
+    await user.click(screen.getByRole('button', { name: 'Ejecutar corte ahora' }))
     const dialogo = await screen.findByRole('alertdialog')
-    await user.click(within(dialogo).getByRole('button', { name: 'Ejecutar cierre' }))
+    await user.click(within(dialogo).getByRole('button', { name: 'Ejecutar corte' }))
 
-    await waitFor(() => expect(api.ejecutarCierreManual).toHaveBeenCalled())
+    await waitFor(() => expect(api.ejecutarCorteManual).toHaveBeenCalled())
   })
 
-  it('abre el detalle de un cierre', async () => {
+  it('abre el detalle de un corte', async () => {
     const user = userEvent.setup()
     renderizar('super_admin')
     await screen.findByRole('table')

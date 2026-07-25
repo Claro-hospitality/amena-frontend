@@ -280,7 +280,7 @@ export function PoliticaConsumoSection({
             <AlertDialogTitle>¿Actualizar la política de consumo?</AlertDialogTitle>
             <AlertDialogDescription>
               Los comensales autorizados podrán consumir sin declaración previa; cada consumo se
-              cobra en el cierre.
+              cobra en el corte.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
