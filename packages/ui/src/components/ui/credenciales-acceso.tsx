@@ -57,7 +57,7 @@ export function CredencialesAcceso({
           <CampoCredencial etiqueta="Correo" valor={credenciales.email} onCopiar={copiar} />
         </div>
 
-        <DialogFooter className="mt-6">
+        <DialogFooter>
           <Button onClick={onClose}>Listo</Button>
         </DialogFooter>
       </>
@@ -83,7 +83,7 @@ export function CredencialesAcceso({
             onCopiar={copiar}
           />
         </div>
-        <DialogFooter className="mt-6">
+        <DialogFooter>
           <Button onClick={onClose}>Listo</Button>
         </DialogFooter>
       </>
