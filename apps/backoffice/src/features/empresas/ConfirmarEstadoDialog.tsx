@@ -47,8 +47,8 @@ export function ConfirmarEstadoDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>
             {desactivando
-              ? `¿Desactivar ${empresa.nombre_comercial ?? empresa.razon_social}?`
-              : `¿Reactivar ${empresa.nombre_comercial ?? empresa.razon_social}?`}
+              ? `¿Desactivar ${empresa.nombre_comercial ?? 'empresa'}?`
+              : `¿Reactivar ${empresa.nombre_comercial ?? 'empresa'}?`}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {desactivando

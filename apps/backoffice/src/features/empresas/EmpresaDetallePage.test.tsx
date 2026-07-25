@@ -8,8 +8,13 @@ const empresasApi = vi.hoisted(() => ({
   crearEmpresa: vi.fn(),
   actualizarEmpresa: vi.fn(),
   cambiarEstadoEmpresa: vi.fn(),
+  obtenerDatosFiscales: vi.fn(),
+  listarDatosFiscales: vi.fn(),
 }))
-vi.mock('./api', () => empresasApi)
+vi.mock('./api', async (importActual) => {
+  const actual = await importActual<typeof import('./api')>()
+  return { ...empresasApi, datosFiscalesCompletos: actual.datosFiscalesCompletos }
+})
 
 const resumenApi = vi.hoisted(() => ({ obtenerResumenEmpresa: vi.fn() }))
 vi.mock('./resumenApi', () => resumenApi)
@@ -31,8 +36,6 @@ import { EmpresaDetallePage } from './EmpresaDetallePage'
 const empresaFake = {
   id: 1,
   nombre_comercial: 'Constructora Norte',
-  razon_social: 'Constructora Norte S.A. de C.V.',
-  rfc: null,
   precio_comida: 100,
   ciclo_facturacion: 'mensual' as const,
   activo: true,
@@ -71,6 +74,8 @@ function renderizar(rol: RolBackoffice, empresaId = '1') {
 beforeEach(() => {
   vi.clearAllMocks()
   empresasApi.listarEmpresas.mockResolvedValue([empresaFake])
+  empresasApi.obtenerDatosFiscales.mockResolvedValue(null)
+  empresasApi.listarDatosFiscales.mockResolvedValue([])
   resumenApi.obtenerResumenEmpresa.mockResolvedValue(resumenFake)
   cortesApi.listarCortes.mockResolvedValue([])
   colaboradoresApi.listarUsuariosEmpresa.mockResolvedValue([

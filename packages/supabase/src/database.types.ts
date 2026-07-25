@@ -275,6 +275,56 @@ export type Database = {
           },
         ]
       }
+      datos_fiscales: {
+        Row: {
+          activo: boolean
+          codigo_postal_fiscal: string
+          created_at: string
+          email_facturacion: string
+          empresa_id: number
+          id: number
+          razon_social: string
+          regimen_fiscal: string
+          rfc: string
+          updated_at: string
+          uso_cfdi: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo_postal_fiscal: string
+          created_at?: string
+          email_facturacion: string
+          empresa_id: number
+          id?: number
+          razon_social: string
+          regimen_fiscal: string
+          rfc: string
+          updated_at?: string
+          uso_cfdi?: string
+        }
+        Update: {
+          activo?: boolean
+          codigo_postal_fiscal?: string
+          created_at?: string
+          email_facturacion?: string
+          empresa_id?: number
+          id?: number
+          razon_social?: string
+          regimen_fiscal?: string
+          rfc?: string
+          updated_at?: string
+          uso_cfdi?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "datos_fiscales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: true
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           activo: boolean
@@ -286,8 +336,6 @@ export type Database = {
           modo_consumo: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial: string | null
           precio_comida: number
-          razon_social: string | null
-          rfc: string | null
           updated_at: string
         }
         Insert: {
@@ -300,8 +348,6 @@ export type Database = {
           modo_consumo?: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial?: string | null
           precio_comida: number
-          razon_social?: string | null
-          rfc?: string | null
           updated_at?: string
         }
         Update: {
@@ -314,8 +360,6 @@ export type Database = {
           modo_consumo?: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial?: string | null
           precio_comida?: number
-          razon_social?: string | null
-          rfc?: string | null
           updated_at?: string
         }
         Relationships: []

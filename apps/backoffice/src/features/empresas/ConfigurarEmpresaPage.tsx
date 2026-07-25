@@ -23,7 +23,7 @@ import { useEmpresas } from './queries'
 
 type Dialogo = { tipo: 'form' } | { tipo: 'estado' } | null
 
-const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'Empresa'
+const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? 'Empresa'
 
 /**
  * Página de configuración de una empresa (hija del detalle). Reúne la política de consumo

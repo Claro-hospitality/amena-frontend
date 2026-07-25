@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui
 import { formatearMoneda } from '@amena/utils'
 import type { Empresa } from './api'
 
-const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'Empresa'
+const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? 'Empresa'
 
 /**
  * Card de empresa clicable: al pulsarla (click o Enter/Espacio) navega al detalle.
@@ -15,12 +15,15 @@ const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'E
  */
 export function EmpresaCard({
   empresa,
+  facturable,
   puedeGestionar,
   onVer,
   onEditar,
   onCambiarEstado,
 }: {
   empresa: Empresa
+  /** True si la empresa tiene sus datos fiscales completos (es facturable). */
+  facturable: boolean
   puedeGestionar: boolean
   onVer: (empresa: Empresa) => void
   onEditar: (empresa: Empresa) => void
@@ -50,8 +53,12 @@ export function EmpresaCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-0.5">
             <CardTitle>{nombre}</CardTitle>
-            {empresa.razon_social && (
-              <span className="text-sm text-muted-foreground">{empresa.razon_social}</span>
+            {facturable ? (
+              <Badge className="w-fit bg-success text-success-foreground">Facturable</Badge>
+            ) : (
+              <Badge variant="secondary" className="w-fit">
+                Sin datos fiscales
+              </Badge>
             )}
           </div>
           {empresa.activo ? (

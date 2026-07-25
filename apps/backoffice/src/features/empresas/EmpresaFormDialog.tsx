@@ -18,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@amena/ui/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@amena/ui/components/ui/tabs'
 import type { Empresa } from './api'
+import { DatosFiscalesForm } from './DatosFiscalesForm'
 import { empresaSchema } from './empresaSchema'
 import { MoneyInput } from '@amena/ui/components/money-input'
 import { useActualizarEmpresa, useCrearEmpresa } from './queries'
@@ -29,8 +31,15 @@ interface EstadoForm {
 }
 
 /**
- * Dialog de crear/editar empresa. El padre lo monta (y le pasa `key`) por apertura,
- * así useActionState y los defaultValue se reinician en cada uso.
+ * Dialog de crear/editar empresa, organizado en dos tabs:
+ * - "Datos comerciales": nombre_comercial, precio_comida, ciclo_facturacion (submit propio).
+ *   La política de consumo (modo/días/límite) NO vive aquí: se gestiona en el detalle
+ *   (PoliticaConsumoSection); no se duplica en este form.
+ * - "Datos fiscales": upsert independiente (DatosFiscalesForm). En creación queda
+ *   deshabilitado hasta guardar primero los datos comerciales (la empresa aún no existe).
+ *
+ * El padre lo monta (y le pasa `key`) por apertura, así useActionState y los defaultValue
+ * se reinician en cada uso.
  */
 export function EmpresaFormDialog({
   empresa,
@@ -74,7 +83,7 @@ export function EmpresaFormDialog({
         if (!abierto) onClose()
       }}
     >
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{esEdicion ? 'Editar empresa' : 'Nueva empresa'}</DialogTitle>
           <DialogDescription>
@@ -84,84 +93,84 @@ export function EmpresaFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form action={accion}>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="nombre_comercial">Nombre comercial (opcional)</FieldLabel>
-              <Input
-                id="nombre_comercial"
-                name="nombre_comercial"
-                defaultValue={empresa?.nombre_comercial ?? ''}
-                aria-invalid={Boolean(estado.errors.nombre_comercial)}
-                autoFocus
-              />
-              {estado.errors.nombre_comercial && (
-                <FieldError>{estado.errors.nombre_comercial[0]}</FieldError>
-              )}
-            </Field>
+        <Tabs defaultValue="comercial" className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="comercial">Datos comerciales</TabsTrigger>
+            <TabsTrigger value="fiscal" disabled={!esEdicion}>
+              Datos fiscales
+            </TabsTrigger>
+          </TabsList>
 
-            <Field>
-              <FieldLabel htmlFor="razon_social">Razón social</FieldLabel>
-              <Input
-                id="razon_social"
-                name="razon_social"
-                defaultValue={empresa?.razon_social ?? ''}
-                aria-invalid={Boolean(estado.errors.razon_social)}
-                placeholder="Nombre legal para facturación"
-              />
-              {estado.errors.razon_social && (
-                <FieldError>{estado.errors.razon_social[0]}</FieldError>
-              )}
-            </Field>
+          <TabsContent value="comercial">
+            <form action={accion}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="nombre_comercial">Nombre comercial (opcional)</FieldLabel>
+                  <Input
+                    id="nombre_comercial"
+                    name="nombre_comercial"
+                    defaultValue={empresa?.nombre_comercial ?? ''}
+                    aria-invalid={Boolean(estado.errors.nombre_comercial)}
+                    autoFocus
+                  />
+                  {estado.errors.nombre_comercial && (
+                    <FieldError>{estado.errors.nombre_comercial[0]}</FieldError>
+                  )}
+                </Field>
 
-            <Field>
-              <FieldLabel htmlFor="rfc">RFC</FieldLabel>
-              <Input
-                id="rfc"
-                name="rfc"
-                defaultValue={empresa?.rfc ?? ''}
-                aria-invalid={Boolean(estado.errors.rfc)}
-                placeholder="XAXX010101000"
-              />
-              {estado.errors.rfc && <FieldError>{estado.errors.rfc[0]}</FieldError>}
-            </Field>
+                <Field>
+                  <FieldLabel htmlFor="precio_comida">Precio por comida</FieldLabel>
+                  <MoneyInput
+                    id="precio_comida"
+                    name="precio_comida"
+                    defaultValue={empresa?.precio_comida}
+                    aria-invalid={Boolean(estado.errors.precio_comida)}
+                  />
+                  {estado.errors.precio_comida && (
+                    <FieldError>{estado.errors.precio_comida[0]}</FieldError>
+                  )}
+                </Field>
 
-            <Field>
-              <FieldLabel htmlFor="precio_comida">Precio por comida</FieldLabel>
-              <MoneyInput
-                id="precio_comida"
-                name="precio_comida"
-                defaultValue={empresa?.precio_comida}
-                aria-invalid={Boolean(estado.errors.precio_comida)}
-              />
-              {estado.errors.precio_comida && (
-                <FieldError>{estado.errors.precio_comida[0]}</FieldError>
-              )}
-            </Field>
+                <Field>
+                  <FieldLabel htmlFor="ciclo_facturacion">Ciclo de facturación</FieldLabel>
+                  <Select
+                    name="ciclo_facturacion"
+                    defaultValue={empresa?.ciclo_facturacion ?? 'mensual'}
+                  >
+                    <SelectTrigger id="ciclo_facturacion" className="w-full">
+                      <SelectValue>
+                        {(valor) => (valor === 'semanal' ? 'Semanal' : 'Mensual')}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mensual">Mensual</SelectItem>
+                      <SelectItem value="semanal">Semanal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </FieldGroup>
 
-            <Field>
-              <FieldLabel htmlFor="ciclo_facturacion">Ciclo de facturación</FieldLabel>
-              <Select name="ciclo_facturacion" defaultValue={empresa?.ciclo_facturacion ?? 'mensual'}>
-                <SelectTrigger id="ciclo_facturacion" className="w-full">
-                  <SelectValue>{(valor) => (valor === 'semanal' ? 'Semanal' : 'Mensual')}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mensual">Mensual</SelectItem>
-                  <SelectItem value="semanal">Semanal</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-          </FieldGroup>
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit" loading={pending}>
+                  Guardar
+                </Button>
+              </DialogFooter>
+            </form>
+          </TabsContent>
 
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" loading={pending}>
-              Guardar
-            </Button>
-          </DialogFooter>
-        </form>
+          <TabsContent value="fiscal">
+            {empresa ? (
+              <DatosFiscalesForm empresaId={empresa.id} onGuardado={onClose} />
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Guarda primero los datos comerciales; después podrás completar los datos fiscales.
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   )

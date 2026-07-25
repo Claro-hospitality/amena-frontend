@@ -12,7 +12,7 @@ export interface Colaborador {
   nombre: string
   email: string | null
   empresa_id: number
-  empresa: { nombre_comercial: string | null; razon_social: string | null } | null
+  empresa: { nombre_comercial: string | null } | null
 }
 
 export type RolPortal = 'admin' | 'colaborador'
@@ -39,11 +39,11 @@ export interface CredencialesAlta {
 }
 
 const SELECT =
-  'id, activo, usuario:usuarios_portal_empresarial(nombre, email, empresa_id, empresa:empresas(nombre_comercial, razon_social))'
+  'id, activo, usuario:usuarios_portal_empresarial(nombre, email, empresa_id, empresa:empresas(nombre_comercial))'
 
-/** Nombre a mostrar de la empresa (comercial, con respaldo a razón social). */
+/** Nombre a mostrar de la empresa (comercial). */
 export function nombreEmpresa(colaborador: Colaborador): string {
-  return colaborador.empresa?.nombre_comercial ?? colaborador.empresa?.razon_social ?? '—'
+  return colaborador.empresa?.nombre_comercial ?? '—'
 }
 
 /**
