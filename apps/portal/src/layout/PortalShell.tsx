@@ -103,7 +103,7 @@ function NavInferior({ items }: { items: ItemNav[] }) {
       // Solo se oculta en móvil; en tablet (≥768) queda fija. Spring = deslizamiento fluido.
       animate={{ y: esMovil && oculto ? '150%' : '0%' }}
       transition={{ type: 'spring', stiffness: 220, damping: 30, mass: 0.9 }}
-      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-salvia-500 bg-salvia-500 p-1.5 lg:hidden"
+      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-salvia-300 bg-salvia-300 p-1.5 lg:hidden"
     >
       {items.map((item) => (
         <ItemPildora key={item.to} item={item} />
