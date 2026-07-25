@@ -29,9 +29,13 @@ describe('PortalShell', () => {
     expect(screen.queryAllByRole('link', { name: 'Historial' }).length).toBe(0)
   })
 
-  it('admin que también es comensal ve el acceso "Mi QR"', () => {
+  it('admin que también es comensal ve sus accesos de comensal (Menú, Historial y Mi QR)', () => {
     renderShell('admin_empresa', true)
+    expect(screen.getAllByRole('link', { name: 'Menú' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('link', { name: 'Historial' }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('link', { name: 'Mi QR' }).length).toBeGreaterThan(0)
+    // Conserva su navegación de admin.
+    expect(screen.getAllByRole('link', { name: 'Colaboradores' }).length).toBeGreaterThan(0)
   })
 
   it('admin sin comensal NO ve "Mi QR"', () => {

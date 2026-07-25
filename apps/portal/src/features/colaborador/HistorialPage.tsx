@@ -15,7 +15,7 @@ import { resumenSemana } from './logica'
 import { useMisConsumos, useMisCuotasSemana } from './queries'
 
 export function HistorialPage() {
-  const { tipo } = useOutletContext<ContextoAcceso>()
+  const { tipo, esComensal } = useOutletContext<ContextoAcceso>()
   const lunesISO = aISO(lunesDeSemana(new Date()))
   const { data: cuotas, isLoading: cargandoCuotas } = useMisCuotasSemana(lunesISO)
   const {
@@ -25,7 +25,8 @@ export function HistorialPage() {
     refetch,
   } = useMisConsumos()
 
-  if (tipo !== 'colaborador') {
+  // Sección de comensal: la ve el colaborador y también el admin que además es comensal.
+  if (tipo !== 'colaborador' && !esComensal) {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 

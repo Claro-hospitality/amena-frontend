@@ -23,11 +23,12 @@ function moverLunes(lunesISO: string, delta: number): string {
 }
 
 export function MenuColaboradorPage() {
-  const { tipo } = useOutletContext<ContextoAcceso>()
+  const { tipo, esComensal } = useOutletContext<ContextoAcceso>()
   const [lunesISO, setLunesISO] = useState(() => aISO(lunesDeSemana(new Date())))
   const { data: menu, isLoading, isError, refetch } = useMenuSemana(lunesISO)
 
-  if (tipo !== 'colaborador') {
+  // Sección de comensal: la ve el colaborador y también el admin que además es comensal.
+  if (tipo !== 'colaborador' && !esComensal) {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 

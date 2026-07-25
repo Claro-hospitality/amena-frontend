@@ -20,13 +20,13 @@ import { MenuColaboradorPage } from './MenuColaboradorPage'
 const lunes = aISO(lunesDeSemana(new Date()))
 const dia0 = diasHabiles(lunesDeSemana(new Date())).map(aISO)[0]
 
-function renderizar(tipo: TipoUsuarioPortal) {
+function renderizar(tipo: TipoUsuarioPortal, esComensal = false) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={qc}>
       <MemoryRouter>
         <Routes>
-          <Route element={<Outlet context={{ tipo }} />}>
+          <Route element={<Outlet context={{ tipo, esComensal }} />}>
             <Route index element={<MenuColaboradorPage />} />
           </Route>
         </Routes>
@@ -54,10 +54,18 @@ describe('MenuColaboradorPage', () => {
     expect(await screen.findByText(/sin menú esta semana/i)).toBeInTheDocument()
   })
 
-  it('un admin no ve el módulo', () => {
+  it('un admin sin comensal no ve el módulo', () => {
     api.menuSemana.mockResolvedValue([])
     renderizar('admin_empresa')
     expect(screen.getByText(/no tienes acceso/i)).toBeInTheDocument()
+  })
+
+  it('un admin que también es comensal sí ve el menú', async () => {
+    api.menuSemana.mockResolvedValue([
+      { fecha: dia0, platillo: { nombre: 'Milanesa con puré', foto_url: null } },
+    ])
+    renderizar('admin_empresa', true)
+    expect(await screen.findByText('Milanesa con puré')).toBeInTheDocument()
   })
 
   it('usa la semana actual como referencia', () => {

@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { QrCode } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { useIsMobile } from '@amena/ui/hooks/use-mobile'
 import { cn } from '@amena/ui/lib/utils'
 import { Breadcrumbs } from './Breadcrumbs'
 import { UsuarioMenu } from './UsuarioMenu'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
-import { navPorTipo, type ItemNav } from './navPortal'
+import { navComensalExtra, navPorTipo, type ItemNav } from './navPortal'
 
 /**
  * Shell del portal (mobile-first):
@@ -21,14 +20,15 @@ export function PortalShell({
   children,
 }: {
   tipo: TipoUsuarioPortal
-  /** Un admin que además es comensal ve un acceso extra a su propio QR. */
+  /** Un admin que además es comensal ve sus accesos de comensal (menú, historial y QR). */
   esComensal?: boolean
   children: ReactNode
 }) {
-  // El admin que también come ve "Mi QR" (el colaborador ya lo tiene en su Inicio).
+  // El admin que también es comensal ve, además de su panel, sus accesos personales de
+  // comensal: menú del día, historial de comidas y su credencial (QR).
   const items: ItemNav[] =
     tipo === 'admin_empresa' && esComensal
-      ? [...navPorTipo[tipo], { to: '/mi-qr', label: 'Mi QR', icon: QrCode }]
+      ? [...navPorTipo[tipo], ...navComensalExtra]
       : navPorTipo[tipo]
 
   return (

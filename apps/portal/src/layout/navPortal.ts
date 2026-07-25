@@ -3,6 +3,7 @@ import {
   ClipboardCheck,
   History,
   Home,
+  QrCode,
   UtensilsCrossed,
   Users,
   type LucideIcon,
@@ -33,3 +34,14 @@ export const navPorTipo: Record<TipoUsuarioPortal, ItemNav[]> = {
     { to: '/historial', label: 'Historial', icon: History },
   ],
 }
+
+/**
+ * Accesos personales del comensal que se añaden a la navegación de un admin_empresa que
+ * TAMBIÉN es comensal (tiene QR): el menú del día, su historial de comidas y su credencial.
+ * Un admin sin comensal no los ve (no tiene consumos ni QR propios).
+ */
+export const navComensalExtra: ItemNav[] = [
+  { to: '/menu', label: 'Menú', icon: UtensilsCrossed },
+  { to: '/historial', label: 'Historial', icon: History },
+  { to: '/mi-qr', label: 'Mi QR', icon: QrCode },
+]
