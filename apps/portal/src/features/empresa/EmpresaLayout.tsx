@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, Navigate, Outlet, useLocation, useOutletContext } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
-import { FileText } from 'lucide-react'
-import { Badge } from '@amena/ui/components/ui/badge'
 import { cn } from '@amena/ui/lib/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { navEmpresa } from '../../layout/navPortal'
@@ -83,18 +81,6 @@ export function EmpresaLayout() {
               </NavLink>
             )
           })}
-
-          {/* Facturas: llega en el módulo 4.8. Placeholder no interactivo. */}
-          <span
-            aria-disabled
-            className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-secondary-foreground/50"
-          >
-            <FileText className="size-4" strokeWidth={1.75} />
-            Facturas
-            <Badge variant="outline" className="ml-0.5">
-              Próximamente
-            </Badge>
-          </span>
         </nav>
       </div>
 

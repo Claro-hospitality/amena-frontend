@@ -2,6 +2,7 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
+  FileText,
   Home,
   QrCode,
   UtensilsCrossed,
@@ -40,4 +41,5 @@ export const navEmpresa: ItemNav[] = [
   { to: '/empresa/colaboradores', label: 'Colaboradores', icon: Users },
   { to: '/empresa/cuotas', label: 'Cuotas', icon: CalendarDays },
   { to: '/empresa/cortes', label: 'Cortes', icon: ClipboardCheck },
+  { to: '/empresa/facturas', label: 'Facturas', icon: FileText },
 ]

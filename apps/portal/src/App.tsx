@@ -29,6 +29,11 @@ const MenuPage = lazy(() =>
 const CortesPage = lazy(() =>
   import('./features/cortes/CortesPage').then((m) => ({ default: m.CortesPage }))
 )
+const FacturasEmpresaPage = lazy(() =>
+  import('./features/facturas/FacturasEmpresaPage').then((m) => ({
+    default: m.FacturasEmpresaPage,
+  }))
+)
 const MiCuentaPage = lazy(() =>
   import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
 )
@@ -73,6 +78,7 @@ export default function App() {
           <Route path="cuotas" element={<Ruta><CuotasSemanaPage /></Ruta>} />
           <Route path="cuotas/reservar" element={<Ruta><ReservarCuotasPage /></Ruta>} />
           <Route path="cortes" element={<Ruta><CortesPage /></Ruta>} />
+          <Route path="facturas" element={<Ruta><FacturasEmpresaPage /></Ruta>} />
           {/* La sección se llamó "cierres": redirige el link viejo dentro de Empresa. */}
           <Route path="cierres" element={<Navigate to="/empresa/cortes" replace />} />
         </Route>
