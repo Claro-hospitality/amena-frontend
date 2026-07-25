@@ -125,7 +125,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
       className={({ isActive }) =>
         cn(
           'relative flex flex-1 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
-          isActive ? 'text-primary-foreground' : 'text-primary-foreground/70'
+          isActive ? 'text-foreground' : 'text-foreground/60'
         )
       }
     >
@@ -161,7 +161,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
             transition={{ duration: 0.35, ease: 'easeOut' }}
             className="relative z-10 flex flex-col items-center gap-0.5"
           >
-            <Icono className="size-5" aria-hidden />
+            <Icono className="size-5" strokeWidth={1.5} aria-hidden />
             <span>{item.label}</span>
           </motion.div>
         </>
