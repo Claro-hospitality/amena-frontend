@@ -7,29 +7,24 @@ import { cn } from '@amena/ui/lib/utils'
 import { Breadcrumbs } from './Breadcrumbs'
 import { UsuarioMenu } from './UsuarioMenu'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
-import { navComensalExtra, navPorTipo, type ItemNav } from './navPortal'
+import { navPorTipo, type ItemNav } from './navPortal'
 
 /**
  * Shell del portal (mobile-first):
  * - móvil y tablet (< lg): navegación en una píldora inferior fija (icono + etiqueta).
  * - lg+: navegación en línea en el header.
+ *
+ * Ambos roles ven "Inicio" y "Mi QR"; el admin suma "Empresa". La gestión (colaboradores,
+ * cuotas, cierres) vive dentro de la sección Empresa, no en el nav principal.
  */
 export function PortalShell({
   tipo,
-  esComensal = false,
   children,
 }: {
   tipo: TipoUsuarioPortal
-  /** Un admin que además es comensal ve sus accesos de comensal (menú, historial y QR). */
-  esComensal?: boolean
   children: ReactNode
 }) {
-  // El admin que también es comensal ve, además de su panel, sus accesos personales de
-  // comensal: menú del día, historial de comidas y su credencial (QR).
-  const items: ItemNav[] =
-    tipo === 'admin_empresa' && esComensal
-      ? [...navPorTipo[tipo], ...navComensalExtra]
-      : navPorTipo[tipo]
+  const items = navPorTipo[tipo]
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">

@@ -1,4 +1,3 @@
-import { useOutletContext } from 'react-router-dom'
 import { Check, TriangleAlert, UtensilsCrossed } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -10,12 +9,15 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { aISO, deISO, diasHabiles, etiquetaDiaCorta, horaCorta, lunesDeSemana } from '@amena/utils'
-import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { resumenSemana } from './logica'
 import { useMisConsumos, useMisCuotasSemana } from './queries'
 
-export function HistorialPage() {
-  const { tipo, esComensal } = useOutletContext<ContextoAcceso>()
+/**
+ * Historial de comidas del usuario logueado: resumen de la semana ("Te quedan X de Y"),
+ * tira de días (asignado •/usado ✓) y lista de consumos. Se muestra bajo la credencial en
+ * "Mi QR". Consulta los datos del comensal del usuario actual.
+ */
+export function HistorialComidas() {
   const lunesISO = aISO(lunesDeSemana(new Date()))
   const { data: cuotas, isLoading: cargandoCuotas } = useMisCuotasSemana(lunesISO)
   const {
@@ -24,11 +26,6 @@ export function HistorialPage() {
     isError,
     refetch,
   } = useMisConsumos()
-
-  // Sección de comensal: la ve el colaborador y también el admin que además es comensal.
-  if (tipo !== 'colaborador' && !esComensal) {
-    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
-  }
 
   const cargando = cargandoCuotas || cargandoConsumos
   const dias = diasHabiles(deISO(lunesISO))
@@ -76,9 +73,7 @@ export function HistorialPage() {
                           ? 'border border-border text-foreground'
                           : 'bg-muted text-muted-foreground'
                     }`}
-                    aria-label={
-                      d.usada ? 'usada' : d.asignada ? 'asignada' : 'sin comida'
-                    }
+                    aria-label={d.usada ? 'usada' : d.asignada ? 'asignada' : 'sin comida'}
                   >
                     {d.usada ? <Check className="size-4" /> : d.asignada ? '•' : '–'}
                   </span>
@@ -102,7 +97,10 @@ export function HistorialPage() {
             ) : (
               <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
                 {(consumos ?? []).map((c) => (
-                  <li key={`${c.fecha}-${c.created_at}`} className="flex items-center justify-between px-4 py-3">
+                  <li
+                    key={`${c.fecha}-${c.created_at}`}
+                    className="flex items-center justify-between px-4 py-3"
+                  >
                     <span className="capitalize">{etiquetaDiaCorta(deISO(c.fecha))}</span>
                     <span className="font-mono text-sm tabular-nums text-muted-foreground">
                       {horaCorta(new Date(c.created_at))}

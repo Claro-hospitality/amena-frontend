@@ -41,7 +41,11 @@ export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
   return { concedido: false, tipo: null, esComensal: false }
 }
 
-/** Ruta inicial (home): ambos tipos entran a /inicio (el contenido se despacha por tipo). */
-export function rutaInicial(): string {
-  return '/inicio'
+/**
+ * Ruta inicial (home) según el tipo:
+ * - colaborador → /mi-qr (es lo que más usa frente al mesero; ahorra un tap).
+ * - admin_empresa → /inicio (su vista de contexto operativo).
+ */
+export function rutaInicial(tipo: TipoUsuarioPortal): string {
+  return tipo === 'colaborador' ? '/mi-qr' : '/inicio'
 }

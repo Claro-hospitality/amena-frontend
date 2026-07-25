@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
 import { CalendarDays, TriangleAlert } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -11,7 +10,6 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { aISO, deISO, diasHabiles, etiquetaDia, lunesDeSemana } from '@amena/utils'
-import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { NavegadorSemana } from '../cuotas/NavegadorSemana'
 import { TarjetaPlatillo } from './TarjetaPlatillo'
 import { useMenuSemana } from './queries'
@@ -22,15 +20,13 @@ function moverLunes(lunesISO: string, delta: number): string {
   return aISO(l)
 }
 
-export function MenuColaboradorPage() {
-  const { tipo, esComensal } = useOutletContext<ContextoAcceso>()
+/**
+ * Menú semanal (lun–vie) con navegador de semana. Lo usan el Inicio (común a colaborador y
+ * admin) — es informativo, sin restricción de rol.
+ */
+export function MenuSemanal() {
   const [lunesISO, setLunesISO] = useState(() => aISO(lunesDeSemana(new Date())))
   const { data: menu, isLoading, isError, refetch } = useMenuSemana(lunesISO)
-
-  // Sección de comensal: la ve el colaborador y también el admin que además es comensal.
-  if (tipo !== 'colaborador' && !esComensal) {
-    return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
-  }
 
   const dias = diasHabiles(deISO(lunesISO))
   const platillosDe = (iso: string) => (menu ?? []).filter((m) => m.fecha === iso)

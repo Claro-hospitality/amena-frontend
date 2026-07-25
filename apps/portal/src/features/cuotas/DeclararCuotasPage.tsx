@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { CalendarCheck, TriangleAlert, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
@@ -200,7 +200,11 @@ function SinColaboradores() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button variant="outline" nativeButton={false} render={<a href="/colaboradores" />}>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link to="/empresa/colaboradores" />}
+        >
           <CalendarCheck className="size-4" />
           Ir a colaboradores
         </Button>

@@ -1,12 +1,12 @@
-import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes, useOutletContext } from 'react-router-dom'
+import { lazy, Suspense, type ReactNode } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { InicioPorTipo } from './auth/InicioPorTipo'
 import { RutaProtegida } from './auth/RutaProtegida'
-import type { ContextoAcceso } from './auth/validarAccesoPortal'
 import { RutaErrorBoundary } from './components/RutaErrorBoundary'
 import { LoginPage } from './features/auth/LoginPage'
 import { SinAccesoPage } from './features/auth/SinAccesoPage'
+import { EmpresaLayout } from './features/empresa/EmpresaLayout'
 import { InicioPage } from './features/inicio/InicioPage'
 
 const ColaboradoresPage = lazy(() =>
@@ -20,19 +20,6 @@ const CuotasSemanaPage = lazy(() =>
 const DeclararCuotasPage = lazy(() =>
   import('./features/cuotas/DeclararCuotasPage').then((m) => ({ default: m.DeclararCuotasPage }))
 )
-const InicioColaboradorPage = lazy(() =>
-  import('./features/colaborador/InicioColaboradorPage').then((m) => ({
-    default: m.InicioColaboradorPage,
-  }))
-)
-const MenuColaboradorPage = lazy(() =>
-  import('./features/colaborador/MenuColaboradorPage').then((m) => ({
-    default: m.MenuColaboradorPage,
-  }))
-)
-const HistorialPage = lazy(() =>
-  import('./features/colaborador/HistorialPage').then((m) => ({ default: m.HistorialPage }))
-)
 const MiCredencialPage = lazy(() =>
   import('./features/colaborador/MiCredencialPage').then((m) => ({ default: m.MiCredencialPage }))
 )
@@ -43,26 +30,20 @@ const MiCuentaPage = lazy(() =>
   import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
 )
 
-/** /inicio despacha por tipo: el colaborador ve su espacio; el admin, su panel. */
-function InicioRouter() {
-  const { tipo } = useOutletContext<ContextoAcceso>()
-  if (tipo === 'colaborador') {
-    return (
-      <RutaErrorBoundary>
-        <Suspense fallback={<CargandoRuta />}>
-          <InicioColaboradorPage />
-        </Suspense>
-      </RutaErrorBoundary>
-    )
-  }
-  return <InicioPage />
-}
-
 function CargandoRuta() {
   return (
     <div className="p-4 md:p-6">
       <Skeleton className="h-64 w-full" />
     </div>
+  )
+}
+
+/** Envuelve una ruta perezosa con su ErrorBoundary + Suspense. */
+function Ruta({ children }: { children: ReactNode }) {
+  return (
+    <RutaErrorBoundary>
+      <Suspense fallback={<CargandoRuta />}>{children}</Suspense>
+    </RutaErrorBoundary>
   )
 }
 
@@ -75,87 +56,28 @@ export default function App() {
       {/* Todo lo demás es privado: RutaProtegida exige sesión + acceso, y "/" redirige por tipo. */}
       <Route element={<RutaProtegida />}>
         <Route index element={<InicioPorTipo />} />
-        <Route path="inicio" element={<InicioRouter />} />
-        <Route
-          path="colaboradores"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <ColaboradoresPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="cuotas"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <CuotasSemanaPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="cuotas/declarar"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <DeclararCuotasPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="cierres"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <CierresPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="menu"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <MenuColaboradorPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="historial"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <HistorialPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="mi-qr"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <MiCredencialPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="mi-cuenta"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <MiCuentaPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
+
+        {/* Comunes a colaborador y admin (todo usuario es primero comensal). */}
+        <Route path="inicio" element={<InicioPage />} />
+        <Route path="mi-qr" element={<Ruta><MiCredencialPage /></Ruta>} />
+        <Route path="mi-cuenta" element={<Ruta><MiCuentaPage /></Ruta>} />
+
+        {/* Gestión de empresa (solo admin): agrupador con subnav interna. */}
+        <Route path="empresa" element={<EmpresaLayout />}>
+          <Route index element={<Navigate to="/empresa/colaboradores" replace />} />
+          <Route path="colaboradores" element={<Ruta><ColaboradoresPage /></Ruta>} />
+          <Route path="cuotas" element={<Ruta><CuotasSemanaPage /></Ruta>} />
+          <Route path="cuotas/declarar" element={<Ruta><DeclararCuotasPage /></Ruta>} />
+          <Route path="cierres" element={<Ruta><CierresPage /></Ruta>} />
+        </Route>
+
+        {/* Redirecciones de rutas viejas (bookmarks, correos, enlaces guardados). */}
+        <Route path="menu" element={<Navigate to="/inicio" replace />} />
+        <Route path="historial" element={<Navigate to="/mi-qr" replace />} />
+        <Route path="colaboradores" element={<Navigate to="/empresa/colaboradores" replace />} />
+        <Route path="cuotas" element={<Navigate to="/empresa/cuotas" replace />} />
+        <Route path="cuotas/declarar" element={<Navigate to="/empresa/cuotas/declarar" replace />} />
+        <Route path="cierres" element={<Navigate to="/empresa/cierres" replace />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
