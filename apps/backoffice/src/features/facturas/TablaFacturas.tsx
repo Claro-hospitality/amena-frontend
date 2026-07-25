@@ -70,7 +70,7 @@ export function TablaFacturas({
           />
           <Field className="w-40">
             <FieldLabel htmlFor="f-estado">Estado</FieldLabel>
-            <Select value={estado} onValueChange={setEstado}>
+            <Select value={estado} onValueChange={(v) => setEstado(v ?? TODOS)}>
               <SelectTrigger id="f-estado" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -87,7 +87,7 @@ export function TablaFacturas({
           {anios.length > 1 && (
             <Field className="w-32">
               <FieldLabel htmlFor="f-anio">Año</FieldLabel>
-              <Select value={anio} onValueChange={setAnio}>
+              <Select value={anio} onValueChange={(v) => setAnio(v ?? TODOS)}>
                 <SelectTrigger id="f-anio" className="w-full">
                   <SelectValue />
                 </SelectTrigger>

@@ -272,7 +272,7 @@ function FormFacturacion({ config }: { config: ConfigFacturacion }) {
           <FieldLabel htmlFor="metodo">Método de pago</FieldLabel>
           <Select
             value={valores.metodo_pago_default}
-            onValueChange={(v) => set('metodo_pago_default', v)}
+            onValueChange={(v) => set('metodo_pago_default', v ?? '')}
           >
             <SelectTrigger id="metodo" className="w-full">
               <SelectValue />
@@ -290,7 +290,7 @@ function FormFacturacion({ config }: { config: ConfigFacturacion }) {
           <FieldLabel htmlFor="forma">Forma de pago</FieldLabel>
           <Select
             value={valores.forma_pago_default}
-            onValueChange={(v) => set('forma_pago_default', v)}
+            onValueChange={(v) => set('forma_pago_default', v ?? '')}
           >
             <SelectTrigger id="forma" className="w-full">
               <SelectValue />

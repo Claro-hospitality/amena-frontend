@@ -145,6 +145,7 @@ describe('CortesPage', () => {
 
     await user.click(screen.getByRole('button', { name: /ver detalle de constructora norte/i }))
     const dialogo = await screen.findByRole('dialog')
-    expect(within(dialogo).getByText(/sin factura/i)).toBeInTheDocument()
+    // El detalle incluye la sección de factura del corte.
+    expect(within(dialogo).getByRole('heading', { name: 'Factura' })).toBeInTheDocument()
   })
 })
