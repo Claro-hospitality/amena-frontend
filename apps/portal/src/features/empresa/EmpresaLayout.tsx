@@ -13,8 +13,9 @@ import { navEmpresa } from '../../layout/navPortal'
  * que aterrice el módulo 4.8. Re-pasa el contexto de acceso a las rutas hijas.
  *
  * La subnav es una sola fila con scroll horizontal (móvil y tablet): la opción activa se
- * desliza a la vista al seleccionarla (revela las que no caben), y un subrayado verde de
- * marca anima su posición con motion.
+ * desliza a la vista al seleccionarla (revela las que no caben). Cada opción tiene su propio
+ * subrayado (verde de marca, grueso) que aparece con motion al activarse — no es una línea
+ * continua compartida entre tabs.
  */
 export function EmpresaLayout() {
   const contexto = useOutletContext<ContextoAcceso>()
@@ -64,12 +65,13 @@ export function EmpresaLayout() {
                   {item.label}
                   {isActive && (
                     <motion.span
-                      layoutId="empresa-subnav-underline"
-                      className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-salvia-500"
+                      className="absolute inset-x-0 -bottom-px h-1 rounded-full bg-salvia-500"
+                      initial={reducirMovimiento ? false : { scaleX: 0, opacity: 0 }}
+                      animate={{ scaleX: 1, opacity: 1 }}
                       transition={
                         reducirMovimiento
                           ? { duration: 0 }
-                          : { type: 'spring', stiffness: 420, damping: 34 }
+                          : { type: 'spring', stiffness: 500, damping: 30 }
                       }
                     />
                   )}
