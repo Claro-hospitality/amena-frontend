@@ -103,7 +103,7 @@ function NavInferior({ items }: { items: ItemNav[] }) {
       // Solo se oculta en móvil; en tablet (≥768) queda fija. Spring = deslizamiento fluido.
       animate={{ y: esMovil && oculto ? '150%' : '0%' }}
       transition={{ type: 'spring', stiffness: 220, damping: 30, mass: 0.9 }}
-      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-border/50 bg-card/85 p-1.5 shadow-lg ring-1 ring-foreground/5 backdrop-blur-xl supports-[backdrop-filter]:bg-card/55 lg:hidden"
+      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex w-fit items-stretch gap-1 rounded-3xl border border-border/50 bg-card/85 p-1.5 shadow-lg ring-1 ring-foreground/5 backdrop-blur-xl supports-[backdrop-filter]:bg-card/55 lg:hidden"
     >
       {items.map((item) => (
         <ItemPildora key={item.to} item={item} />
@@ -124,8 +124,8 @@ function ItemPildora({ item }: { item: ItemNav }) {
       onClick={() => setRipples((r) => [...r, (idRef.current += 1)])}
       className={({ isActive }) =>
         cn(
-          'relative flex flex-1 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
-          isActive ? 'text-foreground' : 'text-muted-foreground'
+          'relative flex w-20 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
+          isActive ? 'text-primary' : 'text-primary/70'
         )
       }
     >
@@ -161,11 +161,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
             transition={{ duration: 0.35, ease: 'easeOut' }}
             className="relative z-10 flex flex-col items-center gap-0.5"
           >
-            <Icono
-              className={cn('size-5', isActive ? 'text-primary' : 'text-primary/70')}
-              strokeWidth={1.5}
-              aria-hidden
-            />
+            <Icono className="size-5" strokeWidth={1.5} aria-hidden />
             <span>{item.label}</span>
           </motion.div>
         </>
