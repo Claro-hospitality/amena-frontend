@@ -103,7 +103,7 @@ function NavInferior({ items }: { items: ItemNav[] }) {
       // Solo se oculta en móvil; en tablet (≥768) queda fija. Spring = deslizamiento fluido.
       animate={{ y: esMovil && oculto ? '150%' : '0%' }}
       transition={{ type: 'spring', stiffness: 220, damping: 30, mass: 0.9 }}
-      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-border bg-card p-1.5 lg:hidden"
+      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-primary bg-primary p-1.5 lg:hidden"
     >
       {items.map((item) => (
         <ItemPildora key={item.to} item={item} />
@@ -125,7 +125,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
       className={({ isActive }) =>
         cn(
           'relative flex flex-1 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
-          isActive ? 'text-primary' : 'text-muted-foreground'
+          isActive ? 'text-primary-foreground' : 'text-primary-foreground/70'
         )
       }
     >
@@ -135,7 +135,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
           {isActive && (
             <motion.span
               layoutId="portal-bn-bubble"
-              className="absolute inset-0 rounded-full bg-primary/10"
+              className="absolute inset-0 rounded-full bg-primary-foreground/20"
               transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.9 }}
             />
           )}
@@ -150,7 +150,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
                 onAnimationComplete={() => setRipples((r) => r.filter((x) => x !== id))}
-                className="pointer-events-none absolute inset-0 rounded-full bg-primary/40"
+                className="pointer-events-none absolute inset-0 rounded-full bg-primary-foreground/30"
               />
             ))}
           </AnimatePresence>
