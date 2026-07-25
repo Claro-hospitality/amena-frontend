@@ -33,9 +33,9 @@ beforeEach(() => {
 describe('HistorialComidas', () => {
   it('resume la semana y lista los consumos', async () => {
     api.misCuotasSemana.mockResolvedValue([
-      { fecha: dias[0], origen: 'declaracion', activo: true },
-      { fecha: dias[1], origen: 'declaracion', activo: true },
-      { fecha: dias[2], origen: 'declaracion', activo: true },
+      { fecha: dias[0], origen: 'reserva', activo: true },
+      { fecha: dias[1], origen: 'reserva', activo: true },
+      { fecha: dias[2], origen: 'reserva', activo: true },
     ])
     api.misConsumos.mockResolvedValue([{ fecha: dias[0], created_at: '2026-07-13T14:32:00Z' }])
     renderizar()

@@ -38,7 +38,7 @@ const empresaFake = {
   activo: true,
   created_at: '',
   updated_at: '',
-  modo_consumo: 'declaracion' as const,
+  modo_consumo: 'reserva' as const,
   dias_permitidos: [] as number[],
   limite_diario: null,
 }
@@ -47,7 +47,7 @@ const resumenFake = {
   semana_inicio: '2026-07-20',
   precio_comida: 100,
   ciclo_facturacion: 'mensual' as const,
-  en_curso: { comprometidas: 5, extras: 1, consumidas: 3, faltan: 2, gasto: 300 },
+  en_curso: { reservadas: 5, extras: 1, consumidas: 3, faltan: 2, gasto: 300 },
   gasto_periodo: 800,
   gasto_historico_total: 1500,
   colaboradores_activos: 4,

@@ -31,7 +31,7 @@ export function CorteCard({ corte }: { corte: Corte }) {
         </header>
 
         <dl className="grid grid-cols-3 gap-2">
-          <Metrica etiqueta="Comprometidas" valor={corte.comprometidas} />
+          <Metrica etiqueta="Reservadas" valor={corte.reservadas} />
           <Metrica etiqueta="Extras" valor={corte.extras} />
           <Metrica etiqueta="Consumidas" valor={corte.consumidas} />
         </dl>

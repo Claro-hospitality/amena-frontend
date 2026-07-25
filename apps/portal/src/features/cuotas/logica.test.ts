@@ -5,12 +5,12 @@ import {
   consumosLibresDelDia,
   contarComidas,
   estaConsumida,
-  type SeleccionDeclaracion,
+  type SeleccionReserva,
 } from './logica'
 
 describe('construirPayload', () => {
   it('convierte la selección en array y omite comensales sin fechas', () => {
-    const seleccion: SeleccionDeclaracion = {
+    const seleccion: SeleccionReserva = {
       1: new Set(['2026-07-20', '2026-07-21']),
       2: new Set(),
       3: new Set(['2026-07-20']),
@@ -57,7 +57,7 @@ describe('estaConsumida', () => {
 describe('consumosLibresDelDia', () => {
   const F = '2026-07-20'
   const cuotas: CuotaSemana[] = [
-    { id: 1, fecha: F, origen: 'declaracion', colaborador: { id: 1, nombre: 'Ana' } },
+    { id: 1, fecha: F, origen: 'reserva', colaborador: { id: 1, nombre: 'Ana' } },
   ]
 
   it('lista consumos SIN cuota (libre) y agrupa por comensal con su conteo', () => {

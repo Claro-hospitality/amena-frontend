@@ -19,7 +19,7 @@ function fila(over: Partial<ConsumoHoy>): ConsumoHoy {
     registrado_por: 'otro',
     mesero_nombre: 'M',
     metodo: 'qr',
-    origen: 'declaracion',
+    origen: 'reserva',
     ...over,
   }
 }
@@ -27,7 +27,7 @@ function fila(over: Partial<ConsumoHoy>): ConsumoHoy {
 describe('ResumenTurno', () => {
   it('cuenta el total, mis escaneos y los consumos libres', () => {
     consumos = [
-      fila({ registrado_por: 'yo-1', origen: 'declaracion' }),
+      fila({ registrado_por: 'yo-1', origen: 'reserva' }),
       fila({ registrado_por: 'otro', origen: 'libre' }),
       fila({ registrado_por: 'otro', origen: 'libre' }),
     ]
@@ -39,7 +39,7 @@ describe('ResumenTurno', () => {
   })
 
   it('oculta "Consumos libres" cuando no hay ninguno en modo libre', () => {
-    consumos = [fila({ origen: 'declaracion' })]
+    consumos = [fila({ origen: 'reserva' })]
     render(<ResumenTurno miUid="yo-1" />)
     expect(screen.queryByText('Consumos libres')).not.toBeInTheDocument()
   })

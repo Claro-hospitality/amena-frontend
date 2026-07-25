@@ -21,34 +21,33 @@ function renderShell(tipo: TipoUsuarioPortal) {
 // La navegación se renderiza dos veces (nav superior en lg+ y píldora inferior en < lg),
 // ambas en el DOM; por eso se consulta con getAllByRole.
 describe('PortalShell', () => {
-  it('colaborador ve solo los tabs de comensal (Inicio y Mi QR)', () => {
+  it('colaborador ve los tabs de comensal (Inicio, Menú, Mi QR)', () => {
     renderShell('colaborador')
-    expect(screen.getAllByRole('link', { name: 'Inicio' }).length).toBeGreaterThan(0)
-    expect(screen.getAllByRole('link', { name: 'Mi QR' }).length).toBeGreaterThan(0)
-    // No ve gestión ni las rutas viejas.
+    for (const label of ['Inicio', 'Menú', 'Mi QR']) {
+      expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0)
+    }
+    // No ve la gestión de empresa ni las rutas viejas.
     expect(screen.queryAllByRole('link', { name: 'Empresa' }).length).toBe(0)
-    expect(screen.queryAllByRole('link', { name: 'Menú' }).length).toBe(0)
     expect(screen.queryAllByRole('link', { name: 'Historial' }).length).toBe(0)
   })
 
-  it('admin ve los tabs de comensal más "Empresa"', () => {
+  it('admin ve los tabs de comensal más "Empresa" (Inicio, Menú, Empresa, Mi QR)', () => {
     renderShell('admin_empresa')
-    expect(screen.getAllByRole('link', { name: 'Inicio' }).length).toBeGreaterThan(0)
-    expect(screen.getAllByRole('link', { name: 'Mi QR' }).length).toBeGreaterThan(0)
-    expect(screen.getAllByRole('link', { name: 'Empresa' }).length).toBeGreaterThan(0)
+    for (const label of ['Inicio', 'Menú', 'Empresa', 'Mi QR']) {
+      expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0)
+    }
     // La gestión (Colaboradores, Cuotas, Cortes) vive DENTRO de Empresa, no en el nav principal.
     expect(screen.queryAllByRole('link', { name: 'Colaboradores' }).length).toBe(0)
     expect(screen.queryAllByRole('link', { name: 'Cuotas' }).length).toBe(0)
   })
 
-  it('los primeros dos tabs son idénticos entre ambos roles', () => {
+  it('los tabs de comensal (Inicio, Menú, Mi QR) son idénticos entre ambos roles', () => {
     const { unmount } = renderShell('colaborador')
     const colaborador = screen.getAllByRole('link').map((l) => l.textContent)
     unmount()
     renderShell('admin_empresa')
     const admin = screen.getAllByRole('link').map((l) => l.textContent)
-    // "Inicio" y "Mi QR" aparecen en ambos.
-    for (const label of ['Inicio', 'Mi QR']) {
+    for (const label of ['Inicio', 'Menú', 'Mi QR']) {
       expect(colaborador).toContain(label)
       expect(admin).toContain(label)
     }

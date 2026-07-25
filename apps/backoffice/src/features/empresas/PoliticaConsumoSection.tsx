@@ -63,7 +63,7 @@ export function PoliticaConsumoSection({
   // Estado local del formulario (UI). La escritura va por TanStack Query al guardar.
   // Defensivo: un backend sin la migración de política (p. ej. prod aún sin liberar)
   // devuelve estos campos como undefined; se normalizan para no romper el render.
-  const modoConsumo = empresa.modo_consumo ?? 'declaracion'
+  const modoConsumo = empresa.modo_consumo ?? 'reserva'
   const diasPermitidos = empresa.dias_permitidos ?? []
   const limiteDiarioEmpresa = empresa.limite_diario ?? null
 
@@ -81,7 +81,7 @@ export function PoliticaConsumoSection({
   const [errorLimite, setErrorLimite] = useState<string | null>(null)
   const [confirmando, setConfirmando] = useState(false)
 
-  const modo = modoLibre ? 'libre' : 'declaracion'
+  const modo = modoLibre ? 'libre' : 'reserva'
 
   const limiteDiario = useMemo<number | null>(() => {
     if (opcionLimite === 'ilimitado') return null
@@ -139,7 +139,7 @@ export function PoliticaConsumoSection({
   const resumenLectura =
     empresa.modo_consumo === 'libre'
       ? `Consumo libre autorizado: ${resumenPoliticaConsumo(empresa.dias_permitidos, empresa.limite_diario)}`
-      : 'Consumo por declaración previa (sin consumo libre).'
+      : 'Consumo por reserva previa (sin consumo libre).'
 
   const cuerpo = (
     <>
@@ -164,7 +164,7 @@ export function PoliticaConsumoSection({
               <div className="flex flex-col gap-0.5">
                 <Label htmlFor="modo-libre">Modo libre</Label>
                 <span className="text-xs text-muted-foreground">
-                  Los comensales autorizados consumen sin declaración previa.
+                  Los comensales autorizados consumen sin reserva previa.
                 </span>
               </div>
               <Switch
@@ -279,7 +279,7 @@ export function PoliticaConsumoSection({
           <AlertDialogHeader>
             <AlertDialogTitle>¿Actualizar la política de consumo?</AlertDialogTitle>
             <AlertDialogDescription>
-              Los comensales autorizados podrán consumir sin declaración previa; cada consumo se
+              Los comensales autorizados podrán consumir sin reserva previa; cada consumo se
               cobra en el corte.
             </AlertDialogDescription>
           </AlertDialogHeader>

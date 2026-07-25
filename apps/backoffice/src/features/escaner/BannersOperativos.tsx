@@ -3,7 +3,7 @@ import { Alert, AlertDescription, AlertTitle } from '@amena/ui/components/ui/ale
 import { useEstadoOperativo } from './queries'
 
 /**
- * Avisos de borde del turno (no intrusivos): sin menú cargado y/o sin cuotas declaradas para
+ * Avisos de borde del turno (no intrusivos): sin menú cargado y/o sin cuotas reservadas para
  * hoy. Consulta ligera (`estado_operativo_dia`); si todo está bien no muestra nada.
  */
 export function BannersOperativos() {
@@ -24,9 +24,9 @@ export function BannersOperativos() {
       {!data.hay_cuotas && (
         <Alert variant="info">
           <CalendarX />
-          <AlertTitle>Hoy no hay cuotas declaradas</AlertTitle>
+          <AlertTitle>Hoy no hay cuotas reservadas</AlertTitle>
           <AlertDescription>
-            Los QR de modo declaración serán rechazados hasta que se declaren cuotas.
+            Los QR de modo reserva serán rechazados hasta que se reserven cuotas.
           </AlertDescription>
         </Alert>
       )}

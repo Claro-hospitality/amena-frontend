@@ -14,7 +14,7 @@ vi.mock('./queries', () => {
     activo: true,
     created_at: '',
     updated_at: '',
-    modo_consumo: 'declaracion',
+    modo_consumo: 'reserva',
     dias_permitidos: [],
     limite_diario: null,
   }

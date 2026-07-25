@@ -11,7 +11,7 @@ export type Resultado =
       hora: string
       /** En modo libre: cuántas comidas lleva hoy (para "Nª comida de hoy"). */
       consumosHoy?: number
-      modo?: 'declaracion' | 'libre'
+      modo?: 'reserva' | 'libre'
     }
   | { tipo: 'rechazo'; motivo: string; nombre: string | null }
 

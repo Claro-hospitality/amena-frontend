@@ -19,14 +19,14 @@ export interface ConsumoSemana {
   colaborador: { id: number; nombre: string }
 }
 
-/** Un renglón de la declaración: un comensal y las fechas que tendrá comida. */
-export interface ItemDeclaracion {
+/** Un renglón de la reserva: un comensal y las fechas que tendrá comida. */
+export interface ItemReserva {
   comensal_id: number
   fechas: string[]
 }
 
 /** Resumen que devuelve la RPC. */
-export interface ResumenDeclaracion {
+export interface ResumenReserva {
   creadas: number
   reactivadas: number
   ya_existentes: number
@@ -89,19 +89,19 @@ export async function listarConsumosSemana(lunesISO: string): Promise<ConsumoSem
 }
 
 /**
- * Declara cuotas vía la RPC atómica e idempotente `declarar_cuotas`.
- * `origen` = 'declaracion' (viernes) o 'extra' (sobre la marcha).
+ * Reserva cuotas vía la RPC atómica e idempotente `reservar_cuotas`.
+ * `origen` = 'reserva' (viernes) o 'extra' (sobre la marcha).
  */
-export async function declararCuotas(
+export async function reservarCuotas(
   empresaId: number,
-  declaracion: ItemDeclaracion[],
-  origen: OrigenCuota = 'declaracion'
-): Promise<ResumenDeclaracion> {
-  const { data, error } = await supabase.rpc('declarar_cuotas', {
+  reserva: ItemReserva[],
+  origen: OrigenCuota = 'reserva'
+): Promise<ResumenReserva> {
+  const { data, error } = await supabase.rpc('reservar_cuotas', {
     p_empresa_id: empresaId,
-    p_declaracion: declaracion as unknown as Json,
+    p_reserva: reserva as unknown as Json,
     p_origen: origen,
   })
   if (error) throw error
-  return data as unknown as ResumenDeclaracion
+  return data as unknown as ResumenReserva
 }

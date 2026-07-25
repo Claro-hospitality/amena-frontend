@@ -47,10 +47,10 @@ export function CuotasSemanaPage() {
             variant="outline"
             size="sm"
             nativeButton={false}
-            render={<Link to="/empresa/cuotas/declarar" />}
+            render={<Link to="/empresa/cuotas/reservar" />}
           >
             <CalendarPlus className="size-4" />
-            Declarar próxima semana
+            Reservar próxima semana
           </Button>
         </div>
         <NavegadorSemana

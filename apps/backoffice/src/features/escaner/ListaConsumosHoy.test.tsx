@@ -13,7 +13,7 @@ const consumos: ConsumoHoy[] = [
     registrado_por: 'yo-1',
     mesero_nombre: 'Mesero Uno',
     metodo: 'qr',
-    origen: 'declaracion',
+    origen: 'reserva',
   },
   {
     id: 2,

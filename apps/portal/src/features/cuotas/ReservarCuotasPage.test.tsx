@@ -16,14 +16,14 @@ vi.mock('../colaboradores/api', () => colabApi)
 const cuotasApi = vi.hoisted(() => ({
   listarCuotasSemana: vi.fn(),
   listarConsumosSemana: vi.fn(),
-  declararCuotas: vi.fn(),
+  reservarCuotas: vi.fn(),
 }))
 vi.mock('./api', () => cuotasApi)
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 import type { TipoUsuarioPortal } from '../../auth/validarAccesoPortal'
-import { DeclararCuotasPage } from './DeclararCuotasPage'
+import { ReservarCuotasPage } from './ReservarCuotasPage'
 
 const colaborador = {
   id: 1,
@@ -44,7 +44,7 @@ function renderizar(tipo: TipoUsuarioPortal) {
       <MemoryRouter>
         <Routes>
           <Route element={<Outlet context={{ tipo }} />}>
-            <Route index element={<DeclararCuotasPage />} />
+            <Route index element={<ReservarCuotasPage />} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -58,17 +58,17 @@ beforeEach(() => {
   colabApi.obtenerMiEmpresaId.mockResolvedValue(1)
   cuotasApi.listarCuotasSemana.mockResolvedValue([])
   cuotasApi.listarConsumosSemana.mockResolvedValue([])
-  cuotasApi.declararCuotas.mockResolvedValue({ creadas: 5, reactivadas: 0, ya_existentes: 0 })
+  cuotasApi.reservarCuotas.mockResolvedValue({ creadas: 5, reactivadas: 0, ya_existentes: 0 })
 })
 
-describe('DeclararCuotasPage', () => {
-  it('sin selección, el botón Declarar está deshabilitado', async () => {
+describe('ReservarCuotasPage', () => {
+  it('sin selección, el botón Reservar está deshabilitado', async () => {
     renderizar('admin_empresa')
     await screen.findByText('Ana López')
-    expect(screen.getByRole('button', { name: 'Declarar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Reservar' })).toBeDisabled()
   })
 
-  it('"Todos, toda la semana" arma la declaración y la envía por la RPC', async () => {
+  it('"Todos, toda la semana" arma la reserva y la envía por la RPC', async () => {
     const user = userEvent.setup()
     renderizar('admin_empresa')
     await screen.findByText('Ana López')
@@ -78,21 +78,21 @@ describe('DeclararCuotasPage', () => {
     // La próxima semana tiene 5 días hábiles futuros → 5 comidas para 1 colaborador.
     expect(await screen.findByText(/5 comidas · 1 colaborador/i)).toBeInTheDocument()
 
-    const declarar = screen.getByRole('button', { name: 'Declarar' })
-    expect(declarar).toBeEnabled()
-    await user.click(declarar)
+    const reservar = screen.getByRole('button', { name: 'Reservar' })
+    expect(reservar).toBeEnabled()
+    await user.click(reservar)
 
     // Confirmación
     const dialogo = await screen.findByRole('alertdialog')
-    expect(within(dialogo).getByText(/declararás/i)).toBeInTheDocument()
-    await user.click(within(dialogo).getByRole('button', { name: 'Declarar' }))
+    expect(within(dialogo).getByText(/reservarás/i)).toBeInTheDocument()
+    await user.click(within(dialogo).getByRole('button', { name: 'Reservar' }))
 
-    expect(cuotasApi.declararCuotas).toHaveBeenCalledTimes(1)
-    const [empresaId, declaracion] = cuotasApi.declararCuotas.mock.calls[0]
+    expect(cuotasApi.reservarCuotas).toHaveBeenCalledTimes(1)
+    const [empresaId, reserva] = cuotasApi.reservarCuotas.mock.calls[0]
     expect(empresaId).toBe(1)
-    expect(declaracion).toHaveLength(1)
-    expect(declaracion[0]).toMatchObject({ comensal_id: 1 })
-    expect(declaracion[0].fechas).toHaveLength(5)
+    expect(reserva).toHaveLength(1)
+    expect(reserva[0]).toMatchObject({ comensal_id: 1 })
+    expect(reserva[0].fechas).toHaveLength(5)
   })
 
   it('un tipo que no es admin_empresa no ve el módulo', () => {

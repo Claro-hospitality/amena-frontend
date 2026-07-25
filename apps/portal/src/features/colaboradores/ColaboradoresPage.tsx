@@ -232,9 +232,9 @@ function crearColumnasColaboradores({
 }
 
 /** Resumen (solo lectura) de la política de consumo de la empresa. Solo se muestra cuando la
- *  empresa tiene consumo libre; en modo declaración no se muestra nada. */
+ *  empresa tiene consumo libre; en modo reserva no se muestra nada. */
 function PoliticaVigente({ politica }: { politica: PoliticaEmpresa }) {
-  // Modo declaración: no se muestra ninguna tarjeta.
+  // Modo reserva: no se muestra ninguna tarjeta.
   if (politica.modo_consumo !== 'libre') return null
 
   // Modo libre: card destacado con los tonos de marca (salvia), claro sobre qué habilita.
@@ -252,7 +252,7 @@ function PoliticaVigente({ politica }: { politica: PoliticaEmpresa }) {
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">
             Tus colaboradores autorizados piden su comida{' '}
-            <strong className="font-medium text-foreground">sin declararla por adelantado</strong>,
+            <strong className="font-medium text-foreground">sin reservarla por adelantado</strong>,
             dentro de estos límites:
           </p>
         </div>

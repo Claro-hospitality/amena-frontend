@@ -8,26 +8,22 @@ import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { navEmpresa } from '../../layout/navPortal'
 
 /**
- * Sección "Empresa" (solo admin): agrupador de gestión con subnavegación interna
- * (Colaboradores, Cuotas, Cortes). Facturas queda como placeholder deshabilitado hasta
- * que aterrice el módulo 4.8. Re-pasa el contexto de acceso a las rutas hijas.
+ * Sección "Empresa" (solo admin): agrupador de gestión con subnavegación tipo "tabs"
+ * (segmented control) — contenedor en color secondary y la opción seleccionada como pastilla
+ * sólida del secondary principal (verde de marca). Facturas queda como placeholder
+ * deshabilitado hasta el módulo 4.8. Re-pasa el contexto de acceso a las rutas hijas.
  *
- * La subnav es una sola fila con scroll horizontal (móvil y tablet): la opción activa se
- * desliza a la vista al seleccionarla (revela las que no caben). Cada opción tiene su propio
- * subrayado (verde de marca, grueso) que aparece con motion al activarse — no es una línea
- * continua compartida entre tabs.
+ * Una sola fila con scroll horizontal (móvil/tablet): la opción activa se desliza a la vista.
  */
 export function EmpresaLayout() {
   const contexto = useOutletContext<ContextoAcceso>()
   const { pathname } = useLocation()
   const reducirMovimiento = useReducedMotion()
-  const refs = useRef<Record<string, HTMLAnchorElement | null>>({})
+  const contenedorRef = useRef<HTMLDivElement>(null)
 
-  // Al cambiar de subruta, desliza la opción activa hacia el centro (revela las que no caben).
+  // Al cambiar de subruta, desliza la opción activa (aria-current) al centro.
   useEffect(() => {
-    const activo = navEmpresa.find((i) => pathname.startsWith(i.to))
-    // `?.scrollIntoView?.(` — el método no existe en entornos de test (jsdom).
-    refs.current[activo?.to ?? '']?.scrollIntoView?.({
+    contenedorRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({
       inline: 'center',
       block: 'nearest',
       behavior: reducirMovimiento ? 'auto' : 'smooth',
@@ -39,60 +35,68 @@ export function EmpresaLayout() {
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <nav
-        aria-label="Gestión de la empresa"
-        className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      {/* Full-bleed: se sale del padding del shell (-mx) para pegarse a los bordes de la
+          pantalla. El mask de degradado difumina los extremos → los tabs "desaparecen" hacia
+          los lados (ilusión de lejanía). */}
+      <div
+        ref={contenedorRef}
+        className="-mx-4 overflow-x-auto sm:-mx-6 [scrollbar-width:none] [mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%_-_1.5rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_1.5rem,black_calc(100%_-_1.5rem),transparent)] [&::-webkit-scrollbar]:hidden"
       >
-        {navEmpresa.map((item) => {
-          const Icono = item.icon
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              ref={(el) => {
-                refs.current[item.to] = el
-              }}
-              className={({ isActive }) =>
-                cn(
-                  'relative flex shrink-0 items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors',
-                  isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icono className="size-4" />
-                  {item.label}
-                  {isActive && (
-                    <motion.span
-                      className="absolute inset-x-0 bottom-0 h-1 rounded-full bg-salvia-500"
-                      initial={reducirMovimiento ? false : { scaleX: 0, opacity: 0 }}
-                      animate={{ scaleX: 1, opacity: 1 }}
-                      transition={
-                        reducirMovimiento
-                          ? { duration: 0 }
-                          : { type: 'spring', stiffness: 500, damping: 30 }
-                      }
-                    />
-                  )}
-                </>
-              )}
-            </NavLink>
-          )
-        })}
-
-        {/* Facturas: llega en el módulo 4.8. Placeholder no interactivo. */}
-        <span
-          aria-disabled
-          className="flex shrink-0 cursor-not-allowed items-center gap-1.5 px-3 py-2 text-sm font-medium text-muted-foreground/60"
+        <nav
+          aria-label="Gestión de la empresa"
+          className="flex w-max min-w-full items-center gap-1 bg-secondary px-4 py-1.5 sm:px-6"
         >
-          <FileText className="size-4" />
-          Facturas
-          <Badge variant="outline" className="ml-1">
-            Próximamente
-          </Badge>
-        </span>
-      </nav>
+          {navEmpresa.map((item) => {
+            const Icono = item.icon
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  cn(
+                    'relative inline-flex shrink-0 items-center rounded-xl px-3 py-1.5 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'text-primary-foreground'
+                      : 'text-secondary-foreground/80 hover:text-secondary-foreground'
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.span
+                        layoutId="empresa-tab-pastilla"
+                        className="absolute inset-0 rounded-xl bg-salvia-500"
+                        transition={
+                          reducirMovimiento
+                            ? { duration: 0 }
+                            : { type: 'spring', stiffness: 480, damping: 34 }
+                        }
+                      />
+                    )}
+                    <span className="relative z-10 inline-flex items-center gap-1.5">
+                      <Icono className="size-4" strokeWidth={1.75} />
+                      {item.label}
+                    </span>
+                  </>
+                )}
+              </NavLink>
+            )
+          })}
+
+          {/* Facturas: llega en el módulo 4.8. Placeholder no interactivo. */}
+          <span
+            aria-disabled
+            className="inline-flex shrink-0 cursor-not-allowed items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-secondary-foreground/50"
+          >
+            <FileText className="size-4" strokeWidth={1.75} />
+            Facturas
+            <Badge variant="outline" className="ml-0.5">
+              Próximamente
+            </Badge>
+          </span>
+        </nav>
+      </div>
 
       <Outlet context={contexto} />
     </div>

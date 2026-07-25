@@ -51,9 +51,9 @@ describe('empresaSchema', () => {
 })
 
 describe('politicaConsumoSchema', () => {
-  it('modo declaración: acepta sin días y límite null', () => {
+  it('modo reserva: acepta sin días y límite null', () => {
     const r = politicaConsumoSchema.safeParse({
-      modo_consumo: 'declaracion',
+      modo_consumo: 'reserva',
       dias_permitidos: [],
       limite_diario: null,
     })

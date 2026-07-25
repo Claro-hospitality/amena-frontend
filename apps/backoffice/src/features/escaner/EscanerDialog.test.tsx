@@ -22,7 +22,7 @@ vi.mock('./queries', () => ({
         comensalNombre: 'Ana',
         empresaNombre: null,
         consumosHoy: 1,
-        modo: 'declaracion',
+        modo: 'reserva',
         consumo: { created_at: '2026-07-24T13:00:00Z' },
       }),
   }),

@@ -4,25 +4,25 @@ import { ToggleGroup, ToggleGroupItem } from '@amena/ui/components/ui/toggle-gro
 import { aISO, esFechaPasada, etiquetaDiaCorta } from '@amena/utils'
 
 /**
- * Un colaborador con sus toggles de días (L–V). Las fechas ya declaradas van
+ * Un colaborador con sus toggles de días (L–V). Las fechas ya reservadas van
  * pre-seleccionadas y deshabilitadas (la RPC no cancela); solo se agregan nuevas.
  */
-export function FilaColaboradorDeclaracion({
+export function FilaColaboradorReserva({
   colaborador,
   dias,
-  yaDeclaradas,
+  yaReservadas,
   seleccion,
   onCambio,
 }: {
   colaborador: { id: number; nombre: string }
   dias: Date[]
-  yaDeclaradas: Set<string>
+  yaReservadas: Set<string>
   seleccion: Set<string>
   onCambio: (fechas: string[]) => void
 }) {
-  const valor = [...yaDeclaradas, ...seleccion]
+  const valor = [...yaReservadas, ...seleccion]
   const seleccionables = dias
-    .filter((d) => !esFechaPasada(d) && !yaDeclaradas.has(aISO(d)))
+    .filter((d) => !esFechaPasada(d) && !yaReservadas.has(aISO(d)))
     .map(aISO)
 
   return (
@@ -41,13 +41,13 @@ export function FilaColaboradorDeclaracion({
         </div>
         <ToggleGroup
           value={valor}
-          onValueChange={(vals) => onCambio(vals.filter((v) => !yaDeclaradas.has(v)))}
+          onValueChange={(vals) => onCambio(vals.filter((v) => !yaReservadas.has(v)))}
           className="flex-wrap"
           aria-label={`Días de ${colaborador.nombre}`}
         >
           {dias.map((d) => {
             const iso = aISO(d)
-            const bloqueada = esFechaPasada(d) || yaDeclaradas.has(iso)
+            const bloqueada = esFechaPasada(d) || yaReservadas.has(iso)
             return (
               <ToggleGroupItem
                 key={iso}

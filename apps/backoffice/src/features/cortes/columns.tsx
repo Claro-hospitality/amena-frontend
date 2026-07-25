@@ -25,10 +25,10 @@ export function crearColumnasCortes({
       cell: ({ row }) => rangoSemanaLegible(deISO(row.original.semana_inicio)),
     },
     {
-      accessorKey: 'comprometidas',
-      header: 'Comprometidas',
+      accessorKey: 'reservadas',
+      header: 'Reservadas',
       cell: ({ row }) => (
-        <span className="font-mono tabular-nums">{row.original.comprometidas}</span>
+        <span className="font-mono tabular-nums">{row.original.reservadas}</span>
       ),
     },
     {
@@ -54,9 +54,11 @@ export function crearColumnasCortes({
     },
     {
       accessorKey: 'monto_total',
-      header: 'Monto',
+      header: 'Total',
       cell: ({ row }) => (
-        <span className="font-mono tabular-nums">{formatearMoneda(row.original.monto_total)}</span>
+        <span className="font-mono tabular-nums font-semibold text-primary">
+          {formatearMoneda(row.original.monto_total)}
+        </span>
       ),
     },
     {

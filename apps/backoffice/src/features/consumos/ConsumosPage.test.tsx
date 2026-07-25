@@ -15,7 +15,7 @@ const rows: ConsumoRow[] = [
     precio_comida: 100,
     registrado_por: 'u-1',
     mesero_nombre: 'Mesero Uno',
-    origen: 'declaracion',
+    origen: 'reserva',
     total_filtrado: 3,
   },
   {
@@ -118,7 +118,7 @@ describe('ConsumosPage', () => {
     expect(screen.getByText('Ana Ruiz')).toBeInTheDocument()
     expect(screen.getAllByText('Mesero Uno').length).toBeGreaterThan(0)
     // badges de origen
-    expect(screen.getByText('Declarada')).toBeInTheDocument()
+    expect(screen.getByText('Reservada')).toBeInTheDocument()
     expect(screen.getByText('Libre')).toBeInTheDocument()
     expect(screen.getByText('Extra')).toBeInTheDocument()
     // desglose por mesero

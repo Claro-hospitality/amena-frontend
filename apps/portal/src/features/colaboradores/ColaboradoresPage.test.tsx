@@ -73,7 +73,7 @@ describe('ColaboradoresPage', () => {
     expect(screen.queryByText(/aún no hay colaboradores/i)).not.toBeInTheDocument()
   })
 
-  it('empresa en modo declaración: sin política ni toggle de consumo libre', async () => {
+  it('empresa en modo reserva: sin política ni toggle de consumo libre', async () => {
     api.listarColaboradores.mockResolvedValue([crearColaboradorFake({ politica: null })])
     renderizar('admin_empresa')
     await screen.findAllByText('María López')

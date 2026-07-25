@@ -13,7 +13,7 @@ export interface ResultadoConsumo {
   empresaNombre: string | null
   /** Cuántos consumos lleva hoy el comensal (incluye este). */
   consumosHoy: number
-  /** Modo de consumo con el que se registró ('declaracion' | 'libre'). */
+  /** Modo de consumo con el que se registró ('reserva' | 'libre'). */
   modo: ModoConsumo
 }
 
@@ -29,12 +29,12 @@ export interface ConsumoHoy {
   mesero_nombre: string
   /** qr (escaneo) o manual (registro por búsqueda). */
   metodo: MetodoConsumo
-  /** declaracion | extra | libre (para contar los consumos libres del turno). */
+  /** reserva | extra | libre (para contar los consumos libres del turno). */
   origen: string
 }
 
 /**
- * Un comensal en la búsqueda del registro manual, con su estado de hoy. Se declara a mano
+ * Un comensal en la búsqueda del registro manual, con su estado de hoy. Se define a mano
  * (no derivado de los tipos generados) porque el generador marca como no-nulos campos que en
  * runtime sí pueden ser null: `empresa_nombre` (empresas.nombre_comercial), `ultima_hora`
  * (max sin filas) y `limite_diario` (ilimitado).
@@ -71,7 +71,7 @@ function mapearResultado(data: unknown): ResultadoConsumo {
     comensalNombre: payload.comensal_nombre,
     empresaNombre: payload.empresa_nombre ?? null,
     consumosHoy: payload.consumos_hoy ?? 1,
-    modo: payload.modo ?? 'declaracion',
+    modo: payload.modo ?? 'reserva',
   }
 }
 

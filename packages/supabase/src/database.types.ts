@@ -144,7 +144,6 @@ export type Database = {
       }
       cortes_semanales: {
         Row: {
-          comprometidas: number
           consumidas: number
           created_at: string
           empresa_id: number
@@ -154,11 +153,11 @@ export type Database = {
           id: number
           monto_total: number
           precio_unitario: number
+          reservadas: number
           semana_inicio: string
           updated_at: string
         }
         Insert: {
-          comprometidas: number
           consumidas: number
           created_at?: string
           empresa_id: number
@@ -168,11 +167,11 @@ export type Database = {
           id?: number
           monto_total: number
           precio_unitario: number
+          reservadas: number
           semana_inicio: string
           updated_at?: string
         }
         Update: {
-          comprometidas?: number
           consumidas?: number
           created_at?: string
           empresa_id?: number
@@ -182,6 +181,7 @@ export type Database = {
           id?: number
           monto_total?: number
           precio_unitario?: number
+          reservadas?: number
           semana_inicio?: string
           updated_at?: string
         }
@@ -653,14 +653,6 @@ export type Database = {
         Args: { p_comensal_id: number; p_fecha: string }
         Returns: boolean
       }
-      declarar_cuotas: {
-        Args: {
-          p_declaracion: Json
-          p_empresa_id: number
-          p_origen?: Database["public"]["Enums"]["origen_cuota"]
-        }
-        Returns: Json
-      }
       eliminar_usuario_backoffice: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -767,6 +759,14 @@ export type Database = {
         Args: { p_comensal_id: number; p_registrado_por: string }
         Returns: Json
       }
+      reservar_cuotas: {
+        Args: {
+          p_empresa_id: number
+          p_origen?: Database["public"]["Enums"]["origen_cuota"]
+          p_reserva: Json
+        }
+        Returns: Json
+      }
       resumen_consumos: {
         Args: {
           p_desde: string
@@ -786,8 +786,8 @@ export type Database = {
       estado_corte: "abierto" | "cerrado"
       estado_factura: "pendiente" | "pagada" | "cancelada"
       metodo_consumo: "qr" | "manual"
-      modo_consumo: "declaracion" | "libre"
-      origen_cuota: "declaracion" | "extra"
+      modo_consumo: "reserva" | "libre"
+      origen_cuota: "reserva" | "extra"
       rol_backoffice:
         | "super_admin"
         | "mesero"
@@ -929,8 +929,8 @@ export const Constants = {
       estado_corte: ["abierto", "cerrado"],
       estado_factura: ["pendiente", "pagada", "cancelada"],
       metodo_consumo: ["qr", "manual"],
-      modo_consumo: ["declaracion", "libre"],
-      origen_cuota: ["declaracion", "extra"],
+      modo_consumo: ["reserva", "libre"],
+      origen_cuota: ["reserva", "extra"],
       rol_backoffice: [
         "super_admin",
         "mesero",

@@ -169,7 +169,7 @@ function ResumenCards({ resumen }: { resumen: ResumenEmpresa }) {
             </span>
           </div>
           <dl className="grid grid-cols-4 gap-2">
-            <Metrica etiqueta="Comprometidas" valor={en_curso.comprometidas} />
+            <Metrica etiqueta="Reservadas" valor={en_curso.reservadas} />
             <Metrica etiqueta="Consumidas" valor={en_curso.consumidas} />
             <Metrica etiqueta="Faltan" valor={en_curso.faltan} resaltar={en_curso.faltan > 0} />
             <Metrica etiqueta="Extras" valor={en_curso.extras} />

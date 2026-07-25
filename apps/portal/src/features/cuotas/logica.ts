@@ -1,17 +1,17 @@
-import type { ConsumoSemana, CuotaSemana, ItemDeclaracion } from './api'
+import type { ConsumoSemana, CuotaSemana, ItemReserva } from './api'
 
 /** Selección de la grilla: por comensal, el conjunto de fechas marcadas. */
-export type SeleccionDeclaracion = Record<number, Set<string>>
+export type SeleccionReserva = Record<number, Set<string>>
 
 /** Convierte la selección en el payload de la RPC, omitiendo comensales sin fechas. */
-export function construirPayload(seleccion: SeleccionDeclaracion): ItemDeclaracion[] {
+export function construirPayload(seleccion: SeleccionReserva): ItemReserva[] {
   return Object.entries(seleccion)
     .map(([clave, fechas]) => ({ comensal_id: Number(clave), fechas: [...fechas].sort() }))
     .filter((item) => item.fechas.length > 0)
 }
 
-/** Totales para el resumen: "Declararás N comidas para M colaboradores". */
-export function contarComidas(payload: ItemDeclaracion[]): { comidas: number; colaboradores: number } {
+/** Totales para el resumen: "Reservarás N comidas para M colaboradores". */
+export function contarComidas(payload: ItemReserva[]): { comidas: number; colaboradores: number } {
   const comidas = payload.reduce((total, item) => total + item.fechas.length, 0)
   const colaboradores = payload.filter((item) => item.fechas.length > 0).length
   return { comidas, colaboradores }
@@ -35,7 +35,7 @@ export interface ConsumoLibreResumen {
 
 /**
  * Consumos LIBRES de una fecha: los de comensales que consumieron ese día pero NO tienen
- * cuota (modo consumo libre → no hay declaración). Se agrupan por comensal con su conteo,
+ * cuota (modo consumo libre → no hay reserva). Se agrupan por comensal con su conteo,
  * para reflejarlos aunque no exista una cuota que los represente.
  */
 export function consumosLibresDelDia(

@@ -12,7 +12,7 @@ export interface DatosEmpresa {
   rfc: string | null
   precio_comida: number
   ciclo_facturacion: CicloFacturacion
-  /** Política de consumo: 'declaracion' (default) o 'libre'. */
+  /** Política de consumo: 'reserva' (default) o 'libre'. */
   modo_consumo: ModoConsumo
   /** Días permitidos para consumo libre en ISO dow (1=lun … 5=vie). */
   dias_permitidos: number[]

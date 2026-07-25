@@ -27,8 +27,8 @@ import {
 import { aISO, deISO, diasHabiles, esFechaPasada, etiquetaDia } from '@amena/utils'
 import type { Colaborador } from '../colaboradores/api'
 import { useColaboradores, useMiEmpresaId } from '../colaboradores/queries'
-import { mapearErrorDeclaracion } from './errores'
-import { useDeclararCuotas } from './queries'
+import { mapearErrorReserva } from './errores'
+import { useReservarCuotas } from './queries'
 
 export function AgregarExtraDialog({
   lunesISO,
@@ -39,7 +39,7 @@ export function AgregarExtraDialog({
 }) {
   const { data: colaboradores } = useColaboradores()
   const { data: empresaId } = useMiEmpresaId()
-  const declarar = useDeclararCuotas(lunesISO)
+  const reservar = useReservarCuotas(lunesISO)
 
   const activos = (colaboradores ?? []).filter((c) => c.activo)
   const dias = diasHabiles(deISO(lunesISO)).filter((d) => !esFechaPasada(d))
@@ -49,10 +49,10 @@ export function AgregarExtraDialog({
 
   const guardar = () => {
     if (!empresaId || !colaborador || !fecha) return
-    declarar.mutate(
+    reservar.mutate(
       {
         empresaId,
-        declaracion: [{ comensal_id: colaborador.id, fechas: [fecha] }],
+        reserva: [{ comensal_id: colaborador.id, fechas: [fecha] }],
         origen: 'extra',
       },
       {
@@ -64,7 +64,7 @@ export function AgregarExtraDialog({
           )
           onClose()
         },
-        onError: (e) => toast.error(mapearErrorDeclaracion(e)),
+        onError: (e) => toast.error(mapearErrorReserva(e)),
       }
     )
   }
@@ -126,7 +126,7 @@ export function AgregarExtraDialog({
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={guardar} disabled={!colaborador || !fecha} loading={declarar.isPending}>
+          <Button onClick={guardar} disabled={!colaborador || !fecha} loading={reservar.isPending}>
             Agregar extra
           </Button>
         </DialogFooter>

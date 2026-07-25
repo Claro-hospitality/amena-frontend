@@ -18,7 +18,7 @@ const corteConstructora = {
   empresa_id: 'e1',
   factura_id: null,
   semana_inicio: '2026-07-13',
-  comprometidas: 10,
+  reservadas: 10,
   consumidas: 8,
   extras: 2,
   precio_unitario: 85,

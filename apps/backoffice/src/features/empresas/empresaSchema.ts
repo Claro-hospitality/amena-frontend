@@ -33,7 +33,7 @@ export type EmpresaFormData = z.infer<typeof empresaSchema>
  */
 export const politicaConsumoSchema = z
   .object({
-    modo_consumo: z.enum(['declaracion', 'libre']),
+    modo_consumo: z.enum(['reserva', 'libre']),
     dias_permitidos: z
       .array(z.number().int().min(1, 'Día inválido').max(5, 'Día inválido'))
       .refine((ds) => new Set(ds).size === ds.length, 'Días duplicados'),
@@ -43,7 +43,7 @@ export const politicaConsumoSchema = z
       .positive('El límite debe ser mayor a 0')
       .nullable(),
   })
-  .refine((v) => v.modo_consumo === 'declaracion' || v.dias_permitidos.length > 0, {
+  .refine((v) => v.modo_consumo === 'reserva' || v.dias_permitidos.length > 0, {
     message: 'En modo libre debes permitir al menos un día',
     path: ['dias_permitidos'],
   })

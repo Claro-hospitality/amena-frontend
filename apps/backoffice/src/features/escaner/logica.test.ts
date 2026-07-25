@@ -8,7 +8,7 @@ import {
   puedeRegistrar,
 } from './logica'
 
-/** Construye un comensal de búsqueda con valores por defecto (declaración, sin consumo). */
+/** Construye un comensal de búsqueda con valores por defecto (reserva, sin consumo). */
 function comensal(over: Partial<BusquedaComensal> = {}): BusquedaComensal {
   return {
     comensal_id: 1,
@@ -74,7 +74,7 @@ describe('estadoComensalTexto', () => {
     )
     expect(texto).toMatch(/^Ya consumió a las \d{1,2}:\d{2}/)
   })
-  it('declaración con cuota / sin cuota', () => {
+  it('reserva con cuota / sin cuota', () => {
     expect(estadoComensalTexto(comensal({ tiene_cuota: true }))).toBe('Con cuota disponible')
     expect(estadoComensalTexto(comensal({ tiene_cuota: false }))).toBe('Sin cuota para hoy')
   })
@@ -86,7 +86,7 @@ describe('puedeRegistrar', () => {
     expect(puedeRegistrar(comensal({ es_libre: true, consumos_hoy: 2, limite_diario: 2 }))).toBe(false)
     expect(puedeRegistrar(comensal({ es_libre: true, consumos_hoy: 9, limite_diario: null }))).toBe(true)
   })
-  it('declaración: true solo con cuota y sin consumo previo', () => {
+  it('reserva: true solo con cuota y sin consumo previo', () => {
     expect(puedeRegistrar(comensal({ tiene_cuota: true, consumio_hoy: false }))).toBe(true)
     expect(puedeRegistrar(comensal({ tiene_cuota: true, consumio_hoy: true }))).toBe(false)
     expect(puedeRegistrar(comensal({ tiene_cuota: false }))).toBe(false)

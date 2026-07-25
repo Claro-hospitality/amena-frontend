@@ -1,12 +1,12 @@
 import { supabase } from '@amena/supabase'
 
 /** Origen derivado de cada consumo (de la cuota del día, o libre si no hay). */
-export type OrigenConsumo = 'declaracion' | 'extra' | 'libre'
+export type OrigenConsumo = 'reserva' | 'extra' | 'libre'
 
 /**
  * Una fila del historial de consumos, ya enriquecida por el RPC `listar_consumos`:
  * incluye el NOMBRE del mesero que registró (no legible por finanzas/consulta con un join
- * normal), el origen (declarada/extra/libre) y `total_filtrado` (total del filtro, para paginar).
+ * normal), el origen (reservada/extra/libre) y `total_filtrado` (total del filtro, para paginar).
  */
 export interface ConsumoRow {
   id: number

@@ -97,13 +97,6 @@ describe('rutas protegidas del portal', () => {
 
   // Rutas viejas → nuevas (bookmarks/correos que puedan seguir apuntando a los paths previos).
   describe('redirecciones de rutas viejas', () => {
-    it('/menu → /inicio', async () => {
-      auth.obtenerSesion.mockResolvedValue(sesionFake)
-      stub({ empresas: [], comensales: [1] })
-      montar('/menu')
-      expect(await screen.findByRole('heading', { name: 'Inicio' })).toBeInTheDocument()
-    })
-
     it('/historial → /mi-qr', async () => {
       auth.obtenerSesion.mockResolvedValue(sesionFake)
       stub({ empresas: [], comensales: [1] })

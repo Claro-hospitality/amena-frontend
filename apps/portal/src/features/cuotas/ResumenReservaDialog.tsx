@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
 } from '@amena/ui/components/ui/alert-dialog'
 
-export function ResumenDeclaracionDialog({
+export function ResumenReservaDialog({
   comidas,
   colaboradores,
   enviando,
@@ -31,9 +31,9 @@ export function ResumenDeclaracionDialog({
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirmar declaración</AlertDialogTitle>
+          <AlertDialogTitle>Confirmar reserva</AlertDialogTitle>
           <AlertDialogDescription>
-            Declararás <strong>{comidas}</strong> {comidas === 1 ? 'comida' : 'comidas'} para{' '}
+            Reservarás <strong>{comidas}</strong> {comidas === 1 ? 'comida' : 'comidas'} para{' '}
             <strong>{colaboradores}</strong>{' '}
             {colaboradores === 1 ? 'colaborador' : 'colaboradores'}.
           </AlertDialogDescription>
@@ -41,7 +41,7 @@ export function ResumenDeclaracionDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirmar} loading={enviando}>
-            Declarar
+            Reservar
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

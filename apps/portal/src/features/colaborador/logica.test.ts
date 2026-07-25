@@ -21,9 +21,9 @@ describe('resumenSemana', () => {
   )
   it('cuenta asignadas, usadas y restantes', () => {
     const cuotas = [
-      { fecha: '2026-07-13', origen: 'declaracion', activo: true },
-      { fecha: '2026-07-14', origen: 'declaracion', activo: true },
-      { fecha: '2026-07-17', origen: 'declaracion', activo: true },
+      { fecha: '2026-07-13', origen: 'reserva', activo: true },
+      { fecha: '2026-07-14', origen: 'reserva', activo: true },
+      { fecha: '2026-07-17', origen: 'reserva', activo: true },
     ]
     const consumos = [{ fecha: '2026-07-13', created_at: '' }]
     const r = resumenSemana(dias, cuotas, consumos)

@@ -17,11 +17,14 @@ const ColaboradoresPage = lazy(() =>
 const CuotasSemanaPage = lazy(() =>
   import('./features/cuotas/CuotasSemanaPage').then((m) => ({ default: m.CuotasSemanaPage }))
 )
-const DeclararCuotasPage = lazy(() =>
-  import('./features/cuotas/DeclararCuotasPage').then((m) => ({ default: m.DeclararCuotasPage }))
+const ReservarCuotasPage = lazy(() =>
+  import('./features/cuotas/ReservarCuotasPage').then((m) => ({ default: m.ReservarCuotasPage }))
 )
 const MiCredencialPage = lazy(() =>
   import('./features/colaborador/MiCredencialPage').then((m) => ({ default: m.MiCredencialPage }))
+)
+const MenuPage = lazy(() =>
+  import('./features/colaborador/MenuSemanal').then((m) => ({ default: m.MenuSemanal }))
 )
 const CortesPage = lazy(() =>
   import('./features/cortes/CortesPage').then((m) => ({ default: m.CortesPage }))
@@ -59,6 +62,7 @@ export default function App() {
 
         {/* Comunes a colaborador y admin (todo usuario es primero comensal). */}
         <Route path="inicio" element={<InicioPage />} />
+        <Route path="menu" element={<Ruta><MenuPage /></Ruta>} />
         <Route path="mi-qr" element={<Ruta><MiCredencialPage /></Ruta>} />
         <Route path="mi-cuenta" element={<Ruta><MiCuentaPage /></Ruta>} />
 
@@ -67,18 +71,17 @@ export default function App() {
           <Route index element={<Navigate to="/empresa/colaboradores" replace />} />
           <Route path="colaboradores" element={<Ruta><ColaboradoresPage /></Ruta>} />
           <Route path="cuotas" element={<Ruta><CuotasSemanaPage /></Ruta>} />
-          <Route path="cuotas/declarar" element={<Ruta><DeclararCuotasPage /></Ruta>} />
+          <Route path="cuotas/reservar" element={<Ruta><ReservarCuotasPage /></Ruta>} />
           <Route path="cortes" element={<Ruta><CortesPage /></Ruta>} />
           {/* La sección se llamó "cierres": redirige el link viejo dentro de Empresa. */}
           <Route path="cierres" element={<Navigate to="/empresa/cortes" replace />} />
         </Route>
 
         {/* Redirecciones de rutas viejas (bookmarks, correos, enlaces guardados). */}
-        <Route path="menu" element={<Navigate to="/inicio" replace />} />
         <Route path="historial" element={<Navigate to="/mi-qr" replace />} />
         <Route path="colaboradores" element={<Navigate to="/empresa/colaboradores" replace />} />
         <Route path="cuotas" element={<Navigate to="/empresa/cuotas" replace />} />
-        <Route path="cuotas/declarar" element={<Navigate to="/empresa/cuotas/declarar" replace />} />
+        <Route path="cuotas/reservar" element={<Navigate to="/empresa/cuotas/reservar" replace />} />
         <Route path="cierres" element={<Navigate to="/empresa/cortes" replace />} />
       </Route>
 

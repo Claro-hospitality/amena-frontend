@@ -32,8 +32,8 @@ export interface BadgeOrigen {
 /** Mapea el origen derivado del consumo a su etiqueta y variante de badge (sin color hardcodeado). */
 export function badgeOrigen(origen: OrigenConsumo | string): BadgeOrigen {
   switch (origen) {
-    case 'declaracion':
-      return { etiqueta: 'Declarada', variante: 'secondary' }
+    case 'reserva':
+      return { etiqueta: 'Reservada', variante: 'secondary' }
     case 'extra':
       return { etiqueta: 'Extra', variante: 'outline' }
     case 'libre':

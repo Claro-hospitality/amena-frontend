@@ -18,10 +18,10 @@ describe('BannersOperativos', () => {
     expect(screen.queryByText(/no hay cuotas/i)).not.toBeInTheDocument()
   })
 
-  it('avisa cuando no hay cuotas declaradas', () => {
+  it('avisa cuando no hay cuotas reservadas', () => {
     estado = { hay_menu: true, hay_cuotas: false }
     render(<BannersOperativos />)
-    expect(screen.getByText(/no hay cuotas declaradas/i)).toBeInTheDocument()
+    expect(screen.getByText(/no hay cuotas reservadas/i)).toBeInTheDocument()
     expect(screen.queryByText(/no hay menú/i)).not.toBeInTheDocument()
   })
 

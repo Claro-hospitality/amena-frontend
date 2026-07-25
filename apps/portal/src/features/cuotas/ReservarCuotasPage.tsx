@@ -15,12 +15,12 @@ import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { aISO, deISO, diasHabiles, esFechaPasada, lunesDeSemana } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useColaboradores, useMiEmpresaId } from '../colaboradores/queries'
-import { FilaColaboradorDeclaracion } from './FilaColaboradorDeclaracion'
+import { FilaColaboradorReserva } from './FilaColaboradorReserva'
 import { NavegadorSemana } from './NavegadorSemana'
-import { ResumenDeclaracionDialog } from './ResumenDeclaracionDialog'
-import { construirPayload, contarComidas, type SeleccionDeclaracion } from './logica'
-import { mapearErrorDeclaracion } from './errores'
-import { useCuotasSemana, useDeclararCuotas } from './queries'
+import { ResumenReservaDialog } from './ResumenReservaDialog'
+import { construirPayload, contarComidas, type SeleccionReserva } from './logica'
+import { mapearErrorReserva } from './errores'
+import { useCuotasSemana, useReservarCuotas } from './queries'
 
 function proximoLunesISO(): string {
   const lunes = lunesDeSemana(new Date())
@@ -33,16 +33,16 @@ function moverLunes(lunesISO: string, deltaSemanas: number): string {
   return aISO(lunes)
 }
 
-export function DeclararCuotasPage() {
+export function ReservarCuotasPage() {
   const { tipo } = useOutletContext<ContextoAcceso>()
   const [lunesISO, setLunesISO] = useState(proximoLunesISO)
-  const [seleccion, setSeleccion] = useState<SeleccionDeclaracion>({})
+  const [seleccion, setSeleccion] = useState<SeleccionReserva>({})
   const [confirmando, setConfirmando] = useState(false)
 
   const { data: colaboradores, isLoading, isError, refetch } = useColaboradores()
   const { data: empresaId } = useMiEmpresaId()
   const { data: cuotas } = useCuotasSemana(lunesISO)
-  const declarar = useDeclararCuotas(lunesISO)
+  const reservar = useReservarCuotas(lunesISO)
 
   if (tipo !== 'admin_empresa') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -71,23 +71,23 @@ export function DeclararCuotasPage() {
     setSeleccion((prev) => ({ ...prev, [colabId]: new Set(fechas) }))
 
   const todosTodaLaSemana = () => {
-    const next: SeleccionDeclaracion = {}
+    const next: SeleccionReserva = {}
     for (const c of activos) next[c.id] = new Set(seleccionablesDe(c.id))
     setSeleccion(next)
   }
 
   const confirmar = () => {
     if (!empresaId) return
-    declarar.mutate(
-      { empresaId, declaracion: payload },
+    reservar.mutate(
+      { empresaId, reserva: payload },
       {
         onSuccess: (r) => {
           toast.success(
-            `Declaración guardada: ${r.creadas} nuevas, ${r.reactivadas} reactivadas, ${r.ya_existentes} ya existían.`
+            `Reserva guardada: ${r.creadas} nuevas, ${r.reactivadas} reactivadas, ${r.ya_existentes} ya existían.`
           )
           setSeleccion({})
         },
-        onError: (e) => toast.error(mapearErrorDeclaracion(e)),
+        onError: (e) => toast.error(mapearErrorReserva(e)),
       }
     )
     setConfirmando(false)
@@ -118,11 +118,11 @@ export function DeclararCuotasPage() {
           </div>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {activos.map((c) => (
-              <FilaColaboradorDeclaracion
+              <FilaColaboradorReserva
                 key={c.id}
                 colaborador={c}
                 dias={dias}
-                yaDeclaradas={yaPorColaborador[c.id] ?? new Set()}
+                yaReservadas={yaPorColaborador[c.id] ?? new Set()}
                 seleccion={seleccion[c.id] ?? new Set()}
                 onCambio={(fechas) => setColaborador(c.id, fechas)}
               />
@@ -137,19 +137,19 @@ export function DeclararCuotasPage() {
           <p className="text-sm text-muted-foreground">
             {comidas > 0
               ? `${comidas} ${comidas === 1 ? 'comida' : 'comidas'} · ${numColaboradores} ${numColaboradores === 1 ? 'colaborador' : 'colaboradores'}`
-              : 'Sin nada nuevo por declarar'}
+              : 'Sin nada nuevo por reservar'}
           </p>
           <Button onClick={() => setConfirmando(true)} disabled={comidas === 0 || !empresaId}>
-            Declarar
+            Reservar
           </Button>
         </div>
       </div>
 
       {confirmando && (
-        <ResumenDeclaracionDialog
+        <ResumenReservaDialog
           comidas={comidas}
           colaboradores={numColaboradores}
-          enviando={declarar.isPending}
+          enviando={reservar.isPending}
           onConfirmar={confirmar}
           onClose={() => setConfirmando(false)}
         />
@@ -196,7 +196,7 @@ function SinColaboradores() {
         </EmptyMedia>
         <EmptyTitle>Aún no hay colaboradores activos</EmptyTitle>
         <EmptyDescription>
-          Agrega colaboradores para poder declarar sus comidas de la semana.
+          Agrega colaboradores para poder reservar sus comidas de la semana.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
