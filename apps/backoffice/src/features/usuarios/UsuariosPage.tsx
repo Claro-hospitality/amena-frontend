@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { KeyRound, Mail, Power, Shield, Trash2, TriangleAlert, UserPlus } from 'lucide-react'
+import { KeyRound, Power, Shield, Trash2, TriangleAlert, UserPlus } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,12 +47,7 @@ import {
 import { toast } from 'sonner'
 import { useAuth } from '../../auth/useAuth'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import {
-  ETIQUETA_ROL,
-  type MotivoAcceso,
-  type RolBackoffice,
-  type UsuarioBackoffice,
-} from './api'
+import { ETIQUETA_ROL, type RolBackoffice, type UsuarioBackoffice } from './api'
 import { UsuarioFormDialog } from './UsuarioFormDialog'
 import {
   useCambiarRol,
@@ -71,9 +66,7 @@ export function UsuariosPage() {
   const [crear, setCrear] = useState(false)
   const [rolTarget, setRolTarget] = useState<UsuarioBackoffice | null>(null)
   const [estadoTarget, setEstadoTarget] = useState<UsuarioBackoffice | null>(null)
-  const [accesoTarget, setAccesoTarget] = useState<
-    { usuario: UsuarioBackoffice; motivo: MotivoAcceso } | null
-  >(null)
+  const [accesoTarget, setAccesoTarget] = useState<UsuarioBackoffice | null>(null)
   const [eliminarTarget, setEliminarTarget] = useState<UsuarioBackoffice | null>(null)
 
   // Id del último super_admin activo (para bloquear su degradación/desactivación en la UI).
@@ -133,14 +126,9 @@ export function UsuariosPage() {
                 }
               />
               <AccionIcono
-                etiqueta="Reenviar invitación"
-                icon={Mail}
-                onClick={() => setAccesoTarget({ usuario: u, motivo: 'invitacion' })}
-              />
-              <AccionIcono
                 etiqueta="Restablecer contraseña"
                 icon={KeyRound}
-                onClick={() => setAccesoTarget({ usuario: u, motivo: 'restablecer' })}
+                onClick={() => setAccesoTarget(u)}
                 disabled={esYo}
                 motivo="Para tu propia contraseña usa Mi perfil"
               />
@@ -198,11 +186,7 @@ export function UsuariosPage() {
       )}
 
       {accesoTarget && (
-        <ConfirmarAccesoDialog
-          usuario={accesoTarget.usuario}
-          motivo={accesoTarget.motivo}
-          onClose={() => setAccesoTarget(null)}
-        />
+        <ConfirmarResetDialog usuario={accesoTarget} onClose={() => setAccesoTarget(null)} />
       )}
 
       {eliminarTarget && (
@@ -393,30 +377,22 @@ function ConfirmarEstadoDialog({
   )
 }
 
-function ConfirmarAccesoDialog({
+function ConfirmarResetDialog({
   usuario,
-  motivo,
   onClose,
 }: {
   usuario: UsuarioBackoffice
-  motivo: MotivoAcceso
   onClose: () => void
 }) {
   const acceso = useRestablecerAcceso()
-  const esReset = motivo === 'restablecer'
   return (
     <AlertDialog open onOpenChange={(a) => !a && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            {esReset
-              ? `Restablecer la contraseña de ${usuario.nombre}`
-              : `Reenviar la invitación a ${usuario.nombre}`}
-          </AlertDialogTitle>
+          <AlertDialogTitle>Restablecer la contraseña de {usuario.nombre}</AlertDialogTitle>
           <AlertDialogDescription>
-            {esReset
-              ? `Se enviará un correo a ${usuario.email} con un enlace para que defina una contraseña nueva. Nadie ve ni entrega una contraseña.`
-              : `Se reenviará el correo de acceso a ${usuario.email} con el enlace para definir su contraseña.`}
+            Se enviará un correo a {usuario.email} con un enlace para que defina una contraseña
+            nueva. Nadie ve ni entrega una contraseña.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -425,7 +401,7 @@ function ConfirmarAccesoDialog({
             loading={acceso.isPending}
             onClick={async () => {
               try {
-                const r = await acceso.mutateAsync({ email: usuario.email, motivo })
+                const r = await acceso.mutateAsync({ email: usuario.email, motivo: 'restablecer' })
                 if (r.correo_enviado) {
                   toast.success(`Correo enviado a ${usuario.email}.`)
                 } else {
@@ -437,7 +413,7 @@ function ConfirmarAccesoDialog({
               }
             }}
           >
-            {esReset ? 'Restablecer' : 'Reenviar'}
+            Restablecer
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

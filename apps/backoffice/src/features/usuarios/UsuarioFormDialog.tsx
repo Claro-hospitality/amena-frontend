@@ -52,7 +52,7 @@ export function UsuarioFormDialog({ onClose }: { onClose: () => void }) {
         toast.success(`Usuario creado. Se envió la invitación a ${email}.`)
       } else {
         toast.warning(
-          `Usuario creado, pero el correo no salió. Usa "Reenviar invitación" en la lista.`
+          `Usuario creado, pero el correo no salió. Usa "Restablecer contraseña" en la lista para reenviar el acceso.`
         )
       }
       onClose()
