@@ -124,8 +124,8 @@ function ItemPildora({ item }: { item: ItemNav }) {
       onClick={() => setRipples((r) => [...r, (idRef.current += 1)])}
       className={({ isActive }) =>
         cn(
-          'relative flex w-20 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
-          isActive ? 'text-primary' : 'text-primary/70'
+          'relative flex w-20 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-semibold',
+          isActive ? 'text-primary' : 'text-muted-foreground'
         )
       }
     >
