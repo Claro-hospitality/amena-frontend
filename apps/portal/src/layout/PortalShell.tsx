@@ -125,7 +125,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
       className={({ isActive }) =>
         cn(
           'relative flex flex-1 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
-          isActive ? 'text-foreground' : 'text-foreground/60'
+          isActive ? 'text-foreground' : 'text-muted-foreground'
         )
       }
     >
@@ -135,7 +135,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
           {isActive && (
             <motion.span
               layoutId="portal-bn-bubble"
-              className="absolute inset-0 rounded-full bg-foreground/10 ring-1 ring-foreground/5 backdrop-blur-sm"
+              className="absolute inset-0 rounded-full bg-primary/15 ring-1 ring-primary/25 backdrop-blur-sm"
               transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.9 }}
             />
           )}
@@ -150,7 +150,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
                 onAnimationComplete={() => setRipples((r) => r.filter((x) => x !== id))}
-                className="pointer-events-none absolute inset-0 rounded-full bg-foreground/10"
+                className="pointer-events-none absolute inset-0 rounded-full bg-primary/20"
               />
             ))}
           </AnimatePresence>
@@ -161,7 +161,11 @@ function ItemPildora({ item }: { item: ItemNav }) {
             transition={{ duration: 0.35, ease: 'easeOut' }}
             className="relative z-10 flex flex-col items-center gap-0.5"
           >
-            <Icono className="size-5" strokeWidth={1.5} aria-hidden />
+            <Icono
+              className={cn('size-5', isActive ? 'text-primary' : 'text-primary/70')}
+              strokeWidth={1.5}
+              aria-hidden
+            />
             <span>{item.label}</span>
           </motion.div>
         </>
