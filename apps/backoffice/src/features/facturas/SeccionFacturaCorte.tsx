@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Download, Receipt, RotateCcw, TriangleAlert } from 'lucide-react'
+import { Download, Eye, Receipt, RotateCcw, TriangleAlert } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -17,11 +17,12 @@ import { toast } from 'sonner'
 import type { CorteConEmpresa } from '../cortes/api'
 import { datosFiscalesCompletos, type DatosFiscales } from '../empresas/api'
 import { useDatosFiscalesEmpresa } from '../empresas/queries'
-import { AMBIENTE_FACTURAMA, descargarArchivoFactura, type Factura } from './api'
+import { AMBIENTE_FACTURAMA, descargarFacturaZip, type Factura, urlFirmadaFactura } from './api'
 import { BadgeEstadoFactura } from './BadgeEstadoFactura'
 import { useFacturaDeCorte, useFacturarCorte } from './queries'
 
 const IVA_RATE = 0.16
+const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100
 
 /** Badge del ambiente de timbrado activo (read-only). Prod se destaca en warning. */
 function BadgeAmbiente() {
@@ -39,9 +40,10 @@ export function SeccionFacturaCorte({ corte }: { corte: CorteConEmpresa }) {
   const [confirmar, setConfirmar] = useState(false)
   const facturar = useFacturarCorte(corte.id)
 
-  const subtotal = corte.consumidas * corte.precio_unitario
-  const iva = subtotal * IVA_RATE
-  const total = subtotal + iva
+  // El monto del corte es el TOTAL con IVA incluido; se desglosa hacia dentro (igual que la EF).
+  const total = round2(corte.consumidas * corte.precio_unitario)
+  const subtotal = round2(total / (1 + IVA_RATE))
+  const iva = round2(total - subtotal)
 
   function emitir() {
     facturar.mutate(undefined, {
@@ -121,6 +123,33 @@ export function SeccionFacturaCorte({ corte }: { corte: CorteConEmpresa }) {
 }
 
 function FacturaEmitida({ factura }: { factura: Factura }) {
+  const [descargando, setDescargando] = useState(false)
+  const [cargandoVer, setCargandoVer] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+
+  async function descargar() {
+    setDescargando(true)
+    try {
+      await descargarFacturaZip(factura)
+    } catch {
+      toast.error('No se pudo descargar la factura.')
+    } finally {
+      setDescargando(false)
+    }
+  }
+
+  async function ver() {
+    if (!factura.pdf_url) return
+    setCargandoVer(true)
+    try {
+      setPdfUrl(await urlFirmadaFactura(factura.pdf_url))
+    } catch {
+      toast.error('No se pudo abrir la factura.')
+    } finally {
+      setCargandoVer(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-2 text-sm">
       <div className="flex items-center justify-between gap-4">
@@ -137,28 +166,41 @@ function FacturaEmitida({ factura }: { factura: Factura }) {
           {factura.uuid_sat}
         </span>
       </div>
-      <div className="mt-1 flex gap-2">
+      <div className="mt-1 flex flex-wrap gap-2">
         {factura.pdf_url && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => descargarArchivoFactura(factura.pdf_url!, `factura-${factura.folio}.pdf`)}
-          >
-            <Download className="size-4" />
-            PDF
+          <Button variant="outline" size="sm" onClick={ver} loading={cargandoVer}>
+            <Eye className="size-4" />
+            Ver factura
           </Button>
         )}
-        {factura.xml_url && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => descargarArchivoFactura(factura.xml_url!, `factura-${factura.folio}.xml`)}
-          >
+        {(factura.pdf_url || factura.xml_url) && (
+          <Button variant="outline" size="sm" onClick={descargar} loading={descargando}>
             <Download className="size-4" />
-            XML
+            Descargar
           </Button>
         )}
       </div>
+
+      {/* Vista del PDF en la misma página (no descarga). */}
+      <Dialog open={pdfUrl !== null} onOpenChange={(o) => !o && setPdfUrl(null)}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              Factura {factura.serie}
+              {factura.serie ? '-' : ''}
+              {factura.folio}
+            </DialogTitle>
+            <DialogDescription>Vista previa del PDF timbrado.</DialogDescription>
+          </DialogHeader>
+          {pdfUrl && (
+            <iframe
+              src={pdfUrl}
+              title="Vista previa de la factura"
+              className="h-[70vh] w-full rounded-md border border-border"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -233,9 +275,7 @@ function DialogConfirmar({
             <dd>{rangoSemanaLegible(deISO(corte.semana_inicio))}</dd>
           </div>
           <div className="flex items-center justify-between gap-4 border-b border-border py-2">
-            <dt className="text-muted-foreground">
-              Consumidas × {formatearMoneda(corte.precio_unitario)}
-            </dt>
+            <dt className="text-muted-foreground">Subtotal</dt>
             <dd className="font-mono tabular-nums">{formatearMoneda(subtotal)}</dd>
           </div>
           <div className="flex items-center justify-between gap-4 border-b border-border py-2">
@@ -243,7 +283,12 @@ function DialogConfirmar({
             <dd className="font-mono tabular-nums">{formatearMoneda(iva)}</dd>
           </div>
           <div className="flex items-center justify-between gap-4 py-2">
-            <dt className="font-semibold">Total</dt>
+            <dt className="font-semibold">
+              Total{' '}
+              <span className="font-normal text-muted-foreground">
+                ({corte.consumidas} × {formatearMoneda(corte.precio_unitario)}, IVA incl.)
+              </span>
+            </dt>
             <dd className="font-mono font-semibold tabular-nums text-primary">
               {formatearMoneda(total)}
             </dd>

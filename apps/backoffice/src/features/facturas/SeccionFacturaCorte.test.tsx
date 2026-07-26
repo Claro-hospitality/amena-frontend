@@ -95,8 +95,8 @@ describe('SeccionFacturaCorte', () => {
     renderizar()
     expect(screen.getByText('A-123')).toBeInTheDocument()
     expect(screen.getByText('UUID-1')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'PDF' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'XML' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ver factura/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /descargar/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^facturar$/i })).not.toBeInTheDocument()
   })
 
