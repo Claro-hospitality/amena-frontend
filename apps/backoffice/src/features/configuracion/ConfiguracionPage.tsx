@@ -169,17 +169,6 @@ function FormDiaCorte({ diaActual }: { diaActual: DiaSemana }) {
   )
 }
 
-const METODOS_PAGO: Array<{ valor: string; label: string }> = [
-  { valor: 'PPD', label: 'Pago en parcialidades o diferido (PPD)' },
-  { valor: 'PUE', label: 'Pago en una exhibición (PUE)' },
-]
-const FORMAS_PAGO: Array<{ valor: string; label: string }> = [
-  { valor: '99', label: '99 — Por definir' },
-  { valor: '01', label: '01 — Efectivo' },
-  { valor: '03', label: '03 — Transferencia electrónica' },
-  { valor: '04', label: '04 — Tarjeta de crédito' },
-]
-
 function SeccionFacturacion() {
   const { data: config, isLoading, isError, refetch } = useConfigFacturacion()
 
@@ -188,12 +177,23 @@ function SeccionFacturacion() {
       <CardHeader>
         <CardTitle>Facturación</CardTitle>
         <CardDescription>
-          Parámetros del timbrado CFDI. Cambiarlos afecta las próximas facturas que se emitan.
+          Serie de las facturas que se emiten. Las claves SAT y el método de pago son fijos; el CP
+          del emisor lo administra Amena en su cuenta de Facturama.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
+        {/* Aviso de ambiente — informativo del entorno técnico, fuera del formulario. */}
+        <div className="flex items-center justify-between gap-2 rounded-md bg-muted px-3 py-2 text-sm">
+          <span className="text-muted-foreground">Ambiente de timbrado (según el entorno)</span>
+          {AMBIENTE_FACTURAMA === 'prod' ? (
+            <Badge className="bg-warning text-warning-foreground">PRODUCCIÓN</Badge>
+          ) : (
+            <Badge variant="secondary">Sandbox</Badge>
+          )}
+        </div>
+
         {isLoading ? (
-          <Skeleton className="h-40 w-full max-w-md" />
+          <Skeleton className="h-24 w-full max-w-xs" />
         ) : isError || !config ? (
           <div className="flex flex-col items-start gap-3">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -213,107 +213,31 @@ function SeccionFacturacion() {
 }
 
 function FormFacturacion({ config }: { config: ConfigFacturacion }) {
-  const [valores, setValores] = useState<ConfigFacturacion>(config)
+  const [serie, setSerie] = useState(config.serie_facturas_default)
   const [confirmando, setConfirmando] = useState(false)
   const actualizar = useActualizarConfigFacturacion()
 
-  const sinCambios = (Object.keys(config) as Array<keyof ConfigFacturacion>).every(
-    (k) => valores[k] === config[k],
-  )
-  const set = (k: keyof ConfigFacturacion, v: string) => setValores((prev) => ({ ...prev, [k]: v }))
+  const sinCambios = serie === config.serie_facturas_default
 
   function guardar() {
-    actualizar.mutate(valores, {
-      onSuccess: () => {
-        toast.success('Configuración de facturación actualizada.')
-        setConfirmando(false)
+    actualizar.mutate(
+      { serie_facturas_default: serie },
+      {
+        onSuccess: () => {
+          toast.success('Serie de facturación actualizada.')
+          setConfirmando(false)
+        },
+        onError: () => toast.error('No se pudo guardar. Intenta de nuevo.'),
       },
-      onError: () => toast.error('No se pudo guardar. Intenta de nuevo.'),
-    })
+    )
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor="serie">Serie por default</FieldLabel>
-          <Input
-            id="serie"
-            value={valores.serie_facturas_default}
-            onChange={(e) => set('serie_facturas_default', e.target.value)}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="lugar">Lugar de expedición (CP emisor)</FieldLabel>
-          <Input
-            id="lugar"
-            inputMode="numeric"
-            value={valores.lugar_expedicion}
-            onChange={(e) => set('lugar_expedicion', e.target.value)}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="prodserv">Clave ProdServ SAT</FieldLabel>
-          <Input
-            id="prodserv"
-            value={valores.clave_prod_serv_sat}
-            onChange={(e) => set('clave_prod_serv_sat', e.target.value)}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="unidad">Clave de unidad SAT</FieldLabel>
-          <Input
-            id="unidad"
-            value={valores.clave_unidad_sat}
-            onChange={(e) => set('clave_unidad_sat', e.target.value)}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="metodo">Método de pago</FieldLabel>
-          <Select
-            value={valores.metodo_pago_default}
-            onValueChange={(v) => set('metodo_pago_default', v ?? '')}
-          >
-            <SelectTrigger id="metodo" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {METODOS_PAGO.map((m) => (
-                <SelectItem key={m.valor} value={m.valor}>
-                  {m.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="forma">Forma de pago</FieldLabel>
-          <Select
-            value={valores.forma_pago_default}
-            onValueChange={(v) => set('forma_pago_default', v ?? '')}
-          >
-            <SelectTrigger id="forma" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FORMAS_PAGO.map((f) => (
-                <SelectItem key={f.valor} value={f.valor}>
-                  {f.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-      </div>
-
-      <div className="flex items-center justify-between gap-2 rounded-md bg-muted px-3 py-2 text-sm">
-        <span className="text-muted-foreground">Ambiente de timbrado (según el entorno)</span>
-        {AMBIENTE_FACTURAMA === 'prod' ? (
-          <Badge className="bg-warning text-warning-foreground">PRODUCCIÓN</Badge>
-        ) : (
-          <Badge variant="secondary">Sandbox</Badge>
-        )}
-      </div>
+      <Field className="max-w-xs">
+        <FieldLabel htmlFor="serie">Serie por default</FieldLabel>
+        <Input id="serie" value={serie} onChange={(e) => setSerie(e.target.value)} />
+      </Field>
 
       <div>
         <Button
@@ -333,10 +257,9 @@ function FormFacturacion({ config }: { config: ConfigFacturacion }) {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Guardar la configuración de facturación?</AlertDialogTitle>
+            <AlertDialogTitle>¿Guardar la serie de facturación?</AlertDialogTitle>
             <AlertDialogDescription>
-              Estos valores se usan al timbrar los CFDI. Un dato incorrecto puede provocar rechazos
-              del SAT. Las facturas ya emitidas no cambian.
+              La serie se usará en las próximas facturas. Las ya emitidas no cambian.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

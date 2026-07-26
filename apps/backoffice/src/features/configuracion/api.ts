@@ -41,15 +41,11 @@ export async function actualizarDiaCorte(dia: DiaSemana): Promise<void> {
   if (error) throw error
 }
 
-/** Parámetros fiscales editables (claves de `configuracion_sistema`, valores jsonb string). */
-export const CLAVES_FACTURACION = [
-  'serie_facturas_default',
-  'clave_prod_serv_sat',
-  'clave_unidad_sat',
-  'metodo_pago_default',
-  'forma_pago_default',
-  'lugar_expedicion',
-] as const
+/**
+ * Único parámetro fiscal editable: la serie. Los demás (claves SAT, método/forma de pago) son
+ * constantes cerradas en el backend; el CP del emisor lo administra Amena en su cuenta de Facturama.
+ */
+export const CLAVES_FACTURACION = ['serie_facturas_default'] as const
 export type ClaveFacturacion = (typeof CLAVES_FACTURACION)[number]
 export type ConfigFacturacion = Record<ClaveFacturacion, string>
 

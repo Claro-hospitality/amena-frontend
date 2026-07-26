@@ -91,4 +91,17 @@ describe('ConfiguracionPage', () => {
 
     expect(api.actualizarDiaCorte).toHaveBeenCalledWith('lunes')
   })
+
+  it('Facturación: solo el campo Serie y el aviso de ambiente (sin campos SAT ni CP)', async () => {
+    renderizar('super_admin')
+    expect(await screen.findByLabelText('Serie por default')).toBeInTheDocument()
+    // El aviso de ambiente está presente (fuera del formulario).
+    expect(screen.getByText(/ambiente de timbrado/i)).toBeInTheDocument()
+    // Los campos que pasaron a ser constantes/eliminados ya no están:
+    expect(screen.queryByLabelText(/lugar de expedición/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/clave prodserv sat/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/clave de unidad sat/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/método de pago/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/forma de pago/i)).not.toBeInTheDocument()
+  })
 })
