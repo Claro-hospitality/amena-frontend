@@ -13,9 +13,16 @@ const db = vi.hoisted(() => ({ rpc: vi.fn() }))
 vi.mock('@amena/supabase/auth', () => auth)
 vi.mock('@amena/supabase', () => ({ supabase: { rpc: db.rpc } }))
 
-// El inicio del colaborador es pesado (QR/queries); para el test de ruteo basta un stub.
-vi.mock('../features/colaborador/InicioColaboradorPage', () => ({
-  InicioColaboradorPage: () => <h1>Mi espacio</h1>,
+// Inicio y Mi QR son pesados (menú/QR/queries); para el test de RUTEO basta un stub que
+// marque a qué página aterriza cada tipo.
+vi.mock('../features/inicio/InicioPage', () => ({
+  InicioPage: () => <h1>Inicio</h1>,
+}))
+vi.mock('../features/colaborador/MiCredencialPage', () => ({
+  MiCredencialPage: () => <h1>Mi QR</h1>,
+}))
+vi.mock('../features/colaboradores/ColaboradoresPage', () => ({
+  ColaboradoresPage: () => <h1>Colaboradores</h1>,
 }))
 
 import App from '../App'
@@ -56,18 +63,18 @@ describe('rutas protegidas del portal', () => {
     expect(screen.getByText('Portal de empresas')).toBeInTheDocument()
   })
 
-  it('admin_empresa llega a /inicio', async () => {
+  it('admin_empresa aterriza en /inicio', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
     stub({ empresas: [1] })
     montar('/')
-    expect(await screen.findByText(/panel de la empresa/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Inicio' })).toBeInTheDocument()
   })
 
-  it('colaborador es redirigido a su inicio', async () => {
+  it('colaborador aterriza en /mi-qr', async () => {
     auth.obtenerSesion.mockResolvedValue(sesionFake)
     stub({ empresas: [], comensales: [1] })
     montar('/')
-    expect(await screen.findByRole('heading', { name: 'Mi espacio' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Mi QR' })).toBeInTheDocument()
   })
 
   it('usuario sin acceso → pantalla sin acceso', async () => {
@@ -86,5 +93,22 @@ describe('rutas protegidas del portal', () => {
     montar('/')
     expect(await screen.findByRole('button', { name: /guardar contraseña/i })).toBeInTheDocument()
     expect(screen.getByText(/cambia tu contraseña/i)).toBeInTheDocument()
+  })
+
+  // Rutas viejas → nuevas (bookmarks/correos que puedan seguir apuntando a los paths previos).
+  describe('redirecciones de rutas viejas', () => {
+    it('/historial → /mi-qr', async () => {
+      auth.obtenerSesion.mockResolvedValue(sesionFake)
+      stub({ empresas: [], comensales: [1] })
+      montar('/historial')
+      expect(await screen.findByRole('heading', { name: 'Mi QR' })).toBeInTheDocument()
+    })
+
+    it('/colaboradores → /empresa/colaboradores', async () => {
+      auth.obtenerSesion.mockResolvedValue(sesionFake)
+      stub({ empresas: [1] })
+      montar('/colaboradores')
+      expect(await screen.findByRole('heading', { name: 'Colaboradores' })).toBeInTheDocument()
+    })
   })
 })

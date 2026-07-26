@@ -14,13 +14,13 @@ describe('presetsRango', () => {
 
 describe('badgeOrigen', () => {
   it('mapea cada origen a su etiqueta legible', () => {
-    expect(badgeOrigen('declaracion').etiqueta).toBe('Declarada')
+    expect(badgeOrigen('reserva').etiqueta).toBe('Reservada')
     expect(badgeOrigen('extra').etiqueta).toBe('Extra')
     expect(badgeOrigen('libre').etiqueta).toBe('Libre')
   })
 
   it('asigna una variante de badge a cada origen', () => {
-    expect(badgeOrigen('declaracion').variante).toBe('secondary')
+    expect(badgeOrigen('reserva').variante).toBe('secondary')
     expect(badgeOrigen('extra').variante).toBe('outline')
     expect(badgeOrigen('libre').variante).toBe('default')
   })

@@ -10,23 +10,21 @@ vi.mock('./queries', () => ({
 import type { Empresa } from './api'
 import { PoliticaConsumoSection } from './PoliticaConsumoSection'
 
-const empresaDeclaracion: Empresa = {
+const empresaReserva: Empresa = {
   id: 1,
   nombre_comercial: 'Constructora Norte',
-  razon_social: 'Constructora Norte S.A. de C.V.',
-  rfc: null,
   precio_comida: 100,
   ciclo_facturacion: 'mensual',
   activo: true,
   created_at: '',
   updated_at: '',
-  modo_consumo: 'declaracion',
+  modo_consumo: 'reserva',
   dias_permitidos: [],
   limite_diario: null,
 }
 
 const empresaLibre: Empresa = {
-  ...empresaDeclaracion,
+  ...empresaReserva,
   modo_consumo: 'libre',
   dias_permitidos: [1, 2, 3, 4, 5],
   limite_diario: 2,
@@ -44,17 +42,17 @@ describe('PoliticaConsumoSection', () => {
   })
 
   it('finanzas (sin permiso) no ve controles de edición', () => {
-    render(<PoliticaConsumoSection empresa={empresaDeclaracion} puedeGestionar={false} />)
+    render(<PoliticaConsumoSection empresa={empresaReserva} puedeGestionar={false} />)
     expect(screen.queryByRole('switch', { name: /modo libre/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /guardar política/i })).not.toBeInTheDocument()
   })
 
   it('super_admin ve el switch de modo libre; los días/límite aparecen al activarlo', async () => {
     const user = userEvent.setup()
-    render(<PoliticaConsumoSection empresa={empresaDeclaracion} puedeGestionar />)
+    render(<PoliticaConsumoSection empresa={empresaReserva} puedeGestionar />)
     const modo = screen.getByRole('switch', { name: /modo libre/i })
     expect(modo).toBeInTheDocument()
-    // En declaración no se ven días.
+    // En modo reserva no se ven días.
     expect(screen.queryByLabelText(/días permitidos/i)).not.toBeInTheDocument()
     await user.click(modo)
     expect(screen.getByLabelText(/días permitidos/i)).toBeInTheDocument()
@@ -63,7 +61,7 @@ describe('PoliticaConsumoSection', () => {
 
   it('arma dias_permitidos (ISO) y limite_diario y guarda tras confirmar', async () => {
     const user = userEvent.setup()
-    render(<PoliticaConsumoSection empresa={empresaDeclaracion} puedeGestionar />)
+    render(<PoliticaConsumoSection empresa={empresaReserva} puedeGestionar />)
     await user.click(screen.getByRole('switch', { name: /modo libre/i }))
 
     // Selecciona lunes y miércoles (ISO 1 y 3) — verifica el mapeo día → ISO dow.
@@ -75,7 +73,7 @@ describe('PoliticaConsumoSection', () => {
     await user.click(screen.getByRole('button', { name: /guardar política/i }))
     // Confirmación con el efecto comercial.
     const dialog = await screen.findByRole('alertdialog')
-    expect(within(dialog).getByText(/sin declaración previa/i)).toBeInTheDocument()
+    expect(within(dialog).getByText(/sin reserva previa/i)).toBeInTheDocument()
     await user.click(within(dialog).getByRole('button', { name: /guardar cambios/i }))
 
     expect(mutate).toHaveBeenCalledTimes(1)

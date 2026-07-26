@@ -1,3 +1,6 @@
+import { horaCorta } from '@amena/utils'
+import type { BusquedaComensal } from './api'
+
 const RE_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /** El contenido del QR debe ser un UUID (el colaborador_id). */
@@ -23,6 +26,31 @@ export function mapearMotivoRechazo(error: unknown): string {
     return original || 'Límite diario alcanzado'
   if (msg.includes('cuota')) return 'Sin cuota para hoy'
   return 'No se pudo registrar'
+}
+
+/**
+ * Texto del estado de HOY de un comensal para el registro manual:
+ * "Libre: N de M hoy" / "Ya consumió a las HH:MM" / "Con cuota disponible" / "Sin cuota para hoy".
+ */
+export function estadoComensalTexto(c: BusquedaComensal): string {
+  if (c.es_libre) {
+    const tope = c.limite_diario == null ? '∞' : String(c.limite_diario)
+    return `Libre: ${c.consumos_hoy} de ${tope} hoy`
+  }
+  if (c.consumio_hoy) {
+    const hora = c.ultima_hora ? horaCorta(new Date(c.ultima_hora)) : ''
+    return hora ? `Ya consumió a las ${hora}` : 'Ya consumió hoy'
+  }
+  return c.tiene_cuota ? 'Con cuota disponible' : 'Sin cuota para hoy'
+}
+
+/**
+ * ¿El registro manual pasaría ahora mismo? Es una previsualización para la UI; la RPC
+ * `registrar_consumo_manual` revalida (fuente de verdad) y puede rechazar por una carrera.
+ */
+export function puedeRegistrar(c: BusquedaComensal): boolean {
+  if (c.es_libre) return c.limite_diario == null || c.consumos_hoy < c.limite_diario
+  return c.tiene_cuota && !c.consumio_hoy
 }
 
 /** Anti-doble-lectura: ignora el mismo QR si se releyó dentro de la ventana. */

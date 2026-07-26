@@ -10,15 +10,15 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { TooltipProvider } from '@amena/ui/components/ui/tooltip'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import type { Empresa } from './api'
+import { datosFiscalesCompletos, type Empresa } from './api'
 import { ConfirmarEstadoDialog } from './ConfirmarEstadoDialog'
 import { EmpresaCard } from './EmpresaCard'
 import { EmpresaFormDialog } from './EmpresaFormDialog'
-import { useEmpresas } from './queries'
+import { useDatosFiscales, useEmpresas } from './queries'
 
 type Dialogo = { tipo: 'form'; empresa: Empresa | null } | { tipo: 'estado'; empresa: Empresa }
 
@@ -26,18 +26,24 @@ export function EmpresasPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
   const navigate = useNavigate()
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
+  const { data: datosFiscales } = useDatosFiscales()
   const [busqueda, setBusqueda] = useState('')
   const [dialogo, setDialogo] = useState<Dialogo | null>(null)
 
   const puedeGestionar = rol === 'super_admin'
 
+  // Completitud fiscal por empresa_id (para el badge "Facturable" / "Sin datos fiscales").
+  const facturablePorEmpresa = useMemo(() => {
+    const map = new Map<number, boolean>()
+    for (const df of datosFiscales ?? []) map.set(df.empresa_id, datosFiscalesCompletos(df))
+    return map
+  }, [datosFiscales])
+
   const filtradas = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
     const base = empresas ?? []
     return q
-      ? base.filter((e) =>
-          `${e.nombre_comercial ?? ''} ${e.razon_social ?? ''}`.toLowerCase().includes(q)
-        )
+      ? base.filter((e) => `${e.nombre_comercial ?? ''}`.toLowerCase().includes(q))
       : base
   }, [empresas, busqueda])
 
@@ -70,7 +76,7 @@ export function EmpresasPage() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            <Input
+            <SearchInput
               placeholder="Buscar por nombre…"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
@@ -83,6 +89,7 @@ export function EmpresasPage() {
                   <EmpresaCard
                     key={empresa.id}
                     empresa={empresa}
+                    facturable={facturablePorEmpresa.get(empresa.id) ?? false}
                     puedeGestionar={puedeGestionar}
                     onVer={(e) => navigate(`/empresas/${e.id}`)}
                     onEditar={(e) => setDialogo({ tipo: 'form', empresa: e })}

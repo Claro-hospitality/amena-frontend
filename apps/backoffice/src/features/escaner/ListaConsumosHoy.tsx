@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Link, useOutletContext } from 'react-router-dom'
-import { ArrowLeft, TriangleAlert, UtensilsCrossed } from 'lucide-react'
+import { useOutletContext } from 'react-router-dom'
+import { TriangleAlert, UtensilsCrossed } from 'lucide-react'
+import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import {
   Empty,
@@ -9,26 +10,19 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { horaCorta } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { useAuth } from '../../auth/useAuth'
 import { useConsumosHoy } from './queries'
 
 export function ListaConsumosHoy() {
   const { rol } = useOutletContext<ContextoAcceso>()
-  const { session } = useAuth()
   const { data, isLoading, isError, refetch } = useConsumosHoy()
   const [busqueda, setBusqueda] = useState('')
 
-  const miUid = session?.user?.id ?? ''
   const consumos = useMemo(() => data ?? [], [data])
   const totalDia = consumos.length
-  const misEscaneos = useMemo(
-    () => consumos.filter((c) => c.registrado_por === miUid).length,
-    [consumos, miUid]
-  )
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
     if (!q) return consumos
@@ -40,27 +34,11 @@ export function ListaConsumosHoy() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
-      <header className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="icon-sm"
-          nativeButton={false}
-          render={<Link to="/escaner" />}
-          aria-label="Volver al escáner"
-        >
-          <ArrowLeft className="size-4" />
-        </Button>
-        {!isLoading && !isError && (
-          <span className="ml-auto text-sm text-muted-foreground">
-            Tus escaneos hoy: <span className="font-semibold text-foreground">{misEscaneos}</span>
-            {' · '}Total del día: <span className="font-semibold text-foreground">{totalDia}</span>
-          </span>
-        )}
-      </header>
+    <div className="flex w-full flex-col gap-4">
+      <h2 className="text-sm font-semibold tracking-tight">Comidas de hoy</h2>
 
       {!isLoading && !isError && totalDia > 0 && (
-        <Input
+        <SearchInput
           placeholder="Buscar por nombre…"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
@@ -102,14 +80,21 @@ export function ListaConsumosHoy() {
           Ningún consumo coincide con la búsqueda.
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-border overflow-y-auto rounded-lg border border-border">
+        <ul className="flex max-h-[45vh] flex-col divide-y divide-border overflow-y-auto rounded-lg border border-border">
           {filtrados.map((c) => (
             <li key={c.id} className="flex items-center gap-3 px-4 py-3">
               <span className="w-14 shrink-0 font-mono text-sm tabular-nums text-muted-foreground">
                 {horaCorta(new Date(c.created_at))}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{c.comensal_nombre || 'Comensal'}</p>
+                <p className="flex items-center gap-2 truncate font-medium">
+                  <span className="truncate">{c.comensal_nombre || 'Comensal'}</span>
+                  {c.metodo === 'manual' && (
+                    <Badge variant="outline" className="shrink-0">
+                      Manual
+                    </Badge>
+                  )}
+                </p>
                 <p className="truncate text-xs text-muted-foreground">
                   Registró: {c.mesero_nombre || '—'}
                 </p>

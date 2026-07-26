@@ -1,8 +1,10 @@
 import {
+  Building2,
   CalendarDays,
   ClipboardCheck,
-  History,
+  FileText,
   Home,
+  QrCode,
   UtensilsCrossed,
   Users,
   type LucideIcon,
@@ -16,20 +18,28 @@ export interface ItemNav {
 }
 
 /**
- * Items de navegación por tipo de usuario.
- * - admin_empresa: administra su empresa y sus colaboradores.
- * - colaborador: ve su QR y su historial de consumos.
+ * Navegación principal del portal. Todo usuario es primero COMENSAL: ambos roles ven
+ * "Inicio", "Menú" y "Mi QR". El admin de empresa intercala "Empresa" (gestión) entre
+ * Menú y Mi QR.
  */
 export const navPorTipo: Record<TipoUsuarioPortal, ItemNav[]> = {
-  admin_empresa: [
-    { to: '/inicio', label: 'Inicio', icon: Home },
-    { to: '/colaboradores', label: 'Colaboradores', icon: Users },
-    { to: '/cuotas', label: 'Cuotas', icon: CalendarDays },
-    { to: '/cierres', label: 'Cierres', icon: ClipboardCheck },
-  ],
   colaborador: [
     { to: '/inicio', label: 'Inicio', icon: Home },
     { to: '/menu', label: 'Menú', icon: UtensilsCrossed },
-    { to: '/historial', label: 'Historial', icon: History },
+    { to: '/mi-qr', label: 'Mi QR', icon: QrCode },
+  ],
+  admin_empresa: [
+    { to: '/inicio', label: 'Inicio', icon: Home },
+    { to: '/menu', label: 'Menú', icon: UtensilsCrossed },
+    { to: '/empresa', label: 'Empresa', icon: Building2 },
+    { to: '/mi-qr', label: 'Mi QR', icon: QrCode },
   ],
 }
+
+/** Subnavegación interna de la sección Empresa (solo admin). Rutas anidadas `/empresa/*`. */
+export const navEmpresa: ItemNav[] = [
+  { to: '/empresa/colaboradores', label: 'Colaboradores', icon: Users },
+  { to: '/empresa/cuotas', label: 'Cuotas', icon: CalendarDays },
+  { to: '/empresa/cortes', label: 'Cortes', icon: ClipboardCheck },
+  { to: '/empresa/facturas', label: 'Facturas', icon: FileText },
+]

@@ -37,6 +37,32 @@ export async function cambiarPassword(nueva: string): Promise<void> {
   if (error) throw error
 }
 
+/**
+ * Verifica el token de un enlace de acceso (tipo `recovery`) y abre la sesión.
+ * Es el paso 1 de /definir-contrasena. Lanza si el enlace venció o ya se usó.
+ */
+export async function verificarTokenAcceso(tokenHash: string): Promise<Session> {
+  const { data, error } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: 'recovery',
+  })
+  if (error) throw error
+  if (!data.session) throw new Error('El enlace no es válido.')
+  return data.session
+}
+
+/**
+ * Define la contraseña (primer acceso o restablecimiento) y limpia los flags de
+ * "debe definir/cambiar" en el metadata. Requiere sesión activa (tras verificarTokenAcceso).
+ */
+export async function definirPasswordAcceso(nueva: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({
+    password: nueva,
+    data: { must_change_password: false, debe_definir_password: false },
+  })
+  if (error) throw error
+}
+
 /** Devuelve la sesión actual (o null si no hay). */
 export async function obtenerSesion(): Promise<Session | null> {
   const { data } = await supabase.auth.getSession()

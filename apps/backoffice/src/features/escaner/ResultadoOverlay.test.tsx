@@ -37,7 +37,7 @@ describe('ResultadoOverlay', () => {
     expect(screen.getByText('2ª comida de hoy')).toBeInTheDocument()
   })
 
-  it('en modo declaración NO muestra el conteo del día', () => {
+  it('en modo reserva NO muestra el conteo del día', () => {
     render(
       <ResultadoOverlay
         resultado={{
@@ -45,7 +45,7 @@ describe('ResultadoOverlay', () => {
           nombre: 'Juan Pérez',
           empresa: 'Constructora',
           hora: '13:05',
-          modo: 'declaracion',
+          modo: 'reserva',
           consumosHoy: 2,
         }}
         onCerrar={() => {}}

@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { LogOut, QrCode, UserCog } from 'lucide-react'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
-import { Button } from '@amena/ui/components/ui/button'
 import { useIsMobile } from '@amena/ui/hooks/use-mobile'
 import { cn } from '@amena/ui/lib/utils'
 import { Breadcrumbs } from './Breadcrumbs'
-import { useAuth } from '../auth/useAuth'
+import { UsuarioMenu } from './UsuarioMenu'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
 import { navPorTipo, type ItemNav } from './navPortal'
 
@@ -15,24 +13,18 @@ import { navPorTipo, type ItemNav } from './navPortal'
  * Shell del portal (mobile-first):
  * - móvil y tablet (< lg): navegación en una píldora inferior fija (icono + etiqueta).
  * - lg+: navegación en línea en el header.
+ *
+ * Ambos roles ven "Inicio" y "Mi QR"; el admin suma "Empresa". La gestión (colaboradores,
+ * cuotas, cortes) vive dentro de la sección Empresa, no en el nav principal.
  */
 export function PortalShell({
   tipo,
-  esComensal = false,
   children,
 }: {
   tipo: TipoUsuarioPortal
-  /** Un admin que además es comensal ve un acceso extra a su propio QR. */
-  esComensal?: boolean
   children: ReactNode
 }) {
-  const { cerrarSesion } = useAuth()
-
-  // El admin que también come ve "Mi QR" (el colaborador ya lo tiene en su Inicio).
-  const items: ItemNav[] =
-    tipo === 'admin_empresa' && esComensal
-      ? [...navPorTipo[tipo], { to: '/mi-qr', label: 'Mi QR', icon: QrCode }]
-      : navPorTipo[tipo]
+  const items = navPorTipo[tipo]
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -59,15 +51,8 @@ export function PortalShell({
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 lg:ml-0">
-          <Button variant="ghost" size="sm" nativeButton={false} render={<NavLink to="/mi-cuenta" />}>
-            <UserCog className="size-4" />
-            <span className="hidden sm:inline">Mi cuenta</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => cerrarSesion()}>
-            <LogOut className="size-4" />
-            <span className="hidden sm:inline">Cerrar sesión</span>
-          </Button>
+        <div className="ml-auto flex items-center lg:ml-0">
+          <UsuarioMenu />
         </div>
       </header>
 
@@ -118,7 +103,7 @@ function NavInferior({ items }: { items: ItemNav[] }) {
       // Solo se oculta en móvil; en tablet (≥768) queda fija. Spring = deslizamiento fluido.
       animate={{ y: esMovil && oculto ? '150%' : '0%' }}
       transition={{ type: 'spring', stiffness: 220, damping: 30, mass: 0.9 }}
-      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex max-w-md items-stretch justify-around gap-1 rounded-3xl border border-border bg-card p-1.5 lg:hidden"
+      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex w-fit items-stretch gap-1 rounded-3xl border border-border/40 bg-card/70 p-1.5 shadow-lg ring-1 ring-foreground/5 backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-card/40 lg:hidden"
     >
       {items.map((item) => (
         <ItemPildora key={item.to} item={item} />
@@ -139,7 +124,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
       onClick={() => setRipples((r) => [...r, (idRef.current += 1)])}
       className={({ isActive }) =>
         cn(
-          'relative flex flex-1 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-medium',
+          'relative flex w-20 flex-col items-center gap-0.5 overflow-hidden rounded-full px-2 py-1.5 text-[11px] font-semibold',
           isActive ? 'text-primary' : 'text-muted-foreground'
         )
       }
@@ -150,7 +135,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
           {isActive && (
             <motion.span
               layoutId="portal-bn-bubble"
-              className="absolute inset-0 rounded-full bg-primary/10"
+              className="absolute inset-0 rounded-full bg-primary/15 ring-1 ring-primary/25 backdrop-blur-sm"
               transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.9 }}
             />
           )}
@@ -165,7 +150,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.45, ease: 'easeOut' }}
                 onAnimationComplete={() => setRipples((r) => r.filter((x) => x !== id))}
-                className="pointer-events-none absolute inset-0 rounded-full bg-primary/40"
+                className="pointer-events-none absolute inset-0 rounded-full bg-primary/20"
               />
             ))}
           </AnimatePresence>
@@ -176,7 +161,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
             transition={{ duration: 0.35, ease: 'easeOut' }}
             className="relative z-10 flex flex-col items-center gap-0.5"
           >
-            <Icono className="size-5" aria-hidden />
+            <Icono className="size-5" strokeWidth={1.5} aria-hidden />
             <span>{item.label}</span>
           </motion.div>
         </>

@@ -13,11 +13,21 @@ export interface UsuarioBackoffice {
   debe_cambiar_password: boolean
 }
 
-/** Resultado del alta / reset: credenciales para entregar (contraseña temporal una sola vez). */
-export interface CredencialesAlta {
-  email: string
-  yaTeniaCuenta: boolean
-  tempPassword?: string
+/** Resultado del alta: la persona recibe la invitación por correo (sin contraseña). */
+export interface ResultadoAltaUsuario {
+  usuario_id: string
+  creado: boolean
+  correo_enviado: boolean
+  correo_error?: string
+}
+
+/** invitacion = reenviar el enlace de primer acceso; restablecer = cambiar contraseña. */
+export type MotivoAcceso = 'invitacion' | 'restablecer'
+
+/** Resultado de reenviar/restablecer el acceso por correo. */
+export interface ResultadoAcceso {
+  correo_enviado: boolean
+  correo_error?: string
 }
 
 export const ETIQUETA_ROL: Record<RolBackoffice, string> = {
@@ -35,9 +45,9 @@ export async function listarUsuarios(): Promise<UsuarioBackoffice[]> {
   return (data ?? []) as UsuarioBackoffice[]
 }
 
-/** Invoca la Edge Function de gestión y normaliza el error (extrae el {error} del body). */
-async function invocar(body: Record<string, unknown>): Promise<CredencialesAlta> {
-  const { data, error } = await supabase.functions.invoke('alta-usuario-backoffice', { body })
+/** Invoca una Edge Function y normaliza el error (extrae el {error} del body). */
+async function invocar<T>(fn: string, body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke(fn, { body })
   if (error) {
     let mensaje = 'No se pudo completar la operación. Intenta de nuevo.'
     const resp = (error as { context?: Response }).context
@@ -51,19 +61,25 @@ async function invocar(body: Record<string, unknown>): Promise<CredencialesAlta>
     }
     throw new Error(mensaje)
   }
-  return data as CredencialesAlta
+  return data as T
 }
 
+/** Crea el usuario interno y le envía la invitación por correo (no genera contraseña). */
 export function crearUsuario(datos: {
   nombre: string
   email: string
   rol: RolBackoffice
-}): Promise<CredencialesAlta> {
-  return invocar({ accion: 'crear', ...datos })
+}): Promise<ResultadoAltaUsuario> {
+  return invocar<ResultadoAltaUsuario>('alta-usuario-backoffice', datos)
 }
 
-export function resetearPassword(userId: string): Promise<CredencialesAlta> {
-  return invocar({ accion: 'resetear_password', user_id: userId })
+/** Reenvía la invitación o manda el correo de restablecimiento (vía restablecer-acceso). */
+export function restablecerAcceso(email: string, motivo: MotivoAcceso): Promise<ResultadoAcceso> {
+  return invocar<ResultadoAcceso>('restablecer-acceso', {
+    email,
+    plataforma: 'backoffice',
+    motivo,
+  })
 }
 
 export async function cambiarRol(userId: string, rol: RolBackoffice): Promise<void> {

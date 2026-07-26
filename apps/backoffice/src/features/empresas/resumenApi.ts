@@ -1,9 +1,9 @@
 import { supabase } from '@amena/supabase'
 import type { CicloFacturacion } from './api'
 
-/** Métricas de la semana en curso (aún sin cierre). */
+/** Métricas de la semana en curso (aún sin corte). */
 export interface EnCurso {
-  comprometidas: number
+  reservadas: number
   extras: number
   consumidas: number
   faltan: number

@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  declararCuotas,
+  reservarCuotas,
   listarConsumosSemana,
   listarCuotasSemana,
-  type ItemDeclaracion,
+  type ItemReserva,
   type OrigenCuota,
 } from './api'
 
@@ -21,14 +21,14 @@ export function useConsumosSemana(lunesISO: string) {
   })
 }
 
-export function useDeclararCuotas(lunesISO: string) {
+export function useReservarCuotas(lunesISO: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (vars: {
       empresaId: number
-      declaracion: ItemDeclaracion[]
+      reserva: ItemReserva[]
       origen?: OrigenCuota
-    }) => declararCuotas(vars.empresaId, vars.declaracion, vars.origen),
+    }) => reservarCuotas(vars.empresaId, vars.reserva, vars.origen),
     onSuccess: () => qc.invalidateQueries({ queryKey: claveCuotas(lunesISO) }),
   })
 }

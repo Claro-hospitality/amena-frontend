@@ -30,7 +30,7 @@ export { CredencialesAcceso as Credenciales } from '@amena/ui/components/ui/cred
 
 type Errores = Partial<Record<keyof typeof colaboradorSchema.shape, string[]>>
 
-const etiquetaEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'Empresa sin nombre'
+const etiquetaEmpresa = (e: Empresa) => e.nombre_comercial ?? 'Empresa sin nombre'
 const etiquetaRol = (v: string) => (v === 'admin' ? 'Administrador de empresa' : 'Colaborador')
 
 /**

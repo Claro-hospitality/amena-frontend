@@ -30,12 +30,13 @@ export function ConfirmarAccesoColaborador({
     cambiar.mutate(
       { usuarioId: colaborador.usuario_id, activo: !colaborador.accesoActivo },
       {
-        onSuccess: () =>
-          toast.success(desactivando ? 'Acceso desactivado' : 'Acceso reactivado'),
+        onSuccess: () => {
+          toast.success(desactivando ? 'Acceso desactivado' : 'Acceso reactivado')
+          onClose()
+        },
         onError: () => toast.error('No se pudo cambiar el acceso. Intenta de nuevo.'),
       }
     )
-    onClose()
   }
 
   return (
@@ -62,6 +63,7 @@ export function ConfirmarAccesoColaborador({
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={confirmar}
+            loading={cambiar.isPending}
             className={
               desactivando
                 ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
@@ -92,11 +94,13 @@ export function ConfirmarEliminarColaborador({
 
   function confirmar() {
     eliminar.mutate(colaborador.usuario_id, {
-      onSuccess: () => toast.success('Colaborador eliminado'),
+      onSuccess: () => {
+        toast.success('Colaborador eliminado')
+        onClose()
+      },
       onError: (e) =>
         toast.error(e instanceof Error ? e.message : 'No se pudo eliminar. Intenta de nuevo.'),
     })
-    onClose()
   }
 
   return (
@@ -118,6 +122,7 @@ export function ConfirmarEliminarColaborador({
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={confirmar}
+            loading={eliminar.isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             Eliminar

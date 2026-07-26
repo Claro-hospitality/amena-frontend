@@ -15,7 +15,7 @@ const rows: ConsumoRow[] = [
     precio_comida: 100,
     registrado_por: 'u-1',
     mesero_nombre: 'Mesero Uno',
-    origen: 'declaracion',
+    origen: 'reserva',
     total_filtrado: 3,
   },
   {
@@ -56,6 +56,10 @@ const resumen: ResumenConsumos = {
     { registrado_por: 'u-1', nombre: 'Mesero Uno', comidas: 2 },
     { registrado_por: 'u-2', nombre: 'Mesero Dos', comidas: 1 },
   ],
+  por_empresa: [
+    { empresa_id: 1, nombre: 'Acme', comidas: 2 },
+    { empresa_id: 2, nombre: 'Beta', comidas: 1 },
+  ],
   top_comensales: [
     { comensal_id: 10, nombre: 'Juan Pérez', comidas: 2 },
     { comensal_id: 20, nombre: 'Ana Ruiz', comidas: 1 },
@@ -77,6 +81,7 @@ vi.mock('recharts', () => ({
   Bar: () => null,
   BarChart: () => null,
   CartesianGrid: () => null,
+  Cell: () => null,
   XAxis: () => null,
   YAxis: () => null,
 }))
@@ -113,7 +118,7 @@ describe('ConsumosPage', () => {
     expect(screen.getByText('Ana Ruiz')).toBeInTheDocument()
     expect(screen.getAllByText('Mesero Uno').length).toBeGreaterThan(0)
     // badges de origen
-    expect(screen.getByText('Declarada')).toBeInTheDocument()
+    expect(screen.getByText('Reservada')).toBeInTheDocument()
     expect(screen.getByText('Libre')).toBeInTheDocument()
     expect(screen.getByText('Extra')).toBeInTheDocument()
     // desglose por mesero

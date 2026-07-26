@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { Maximize2, QrCode, TriangleAlert } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -9,13 +10,24 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
+import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { CredencialImprimible } from '../colaboradores/CredencialImprimible'
+import { HistorialComidas } from './HistorialComidas'
 import { QrPantallaCompleta } from './QrPantallaCompleta'
 import { useMiColaborador } from './queries'
 
-/** Página "Mi QR" (ruta /mi-qr). Envuelve la credencial reutilizable. */
+/**
+ * Página "Mi QR" (ruta /mi-qr), común a colaborador y admin: la credencial QR arriba
+ * (protagonista) y, para quien es comensal, su historial de comidas debajo.
+ */
 export function MiCredencialPage() {
-  return <MiCredencial />
+  const { esComensal } = useOutletContext<ContextoAcceso>()
+  return (
+    <>
+      <MiCredencial />
+      {esComensal && <HistorialComidas />}
+    </>
+  )
 }
 
 /**

@@ -8,7 +8,7 @@ import { aISO, diasHabiles, lunesDeSemana } from '@amena/utils'
 const cuotasApi = vi.hoisted(() => ({
   listarCuotasSemana: vi.fn(),
   listarConsumosSemana: vi.fn(),
-  declararCuotas: vi.fn(),
+  reservarCuotas: vi.fn(),
 }))
 vi.mock('./api', () => cuotasApi)
 
@@ -30,7 +30,7 @@ const dias = diasHabiles(lunesDeSemana(new Date())).map(aISO)
 const dia0 = dias[0]
 
 const cuotas = [
-  { id: 1, fecha: dia0, origen: 'declaracion', colaborador: { id: 1, nombre: 'Ana López' } },
+  { id: 1, fecha: dia0, origen: 'reserva', colaborador: { id: 1, nombre: 'Ana López' } },
   { id: 2, fecha: dia0, origen: 'extra', colaborador: { id: 2, nombre: 'Beto Ruiz' } },
 ]
 

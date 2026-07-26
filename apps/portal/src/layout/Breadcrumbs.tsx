@@ -14,7 +14,8 @@ import { RUTAS_BREADCRUMB } from './rutasBreadcrumb'
 /**
  * Migas de pan calculadas desde la ruta actual. La última (página actual) se
  * destaca como título de la pantalla; las anteriores son la traza navegable.
- * En móvil y tablet (< lg) se muestra SOLO la página actual (sin traza ni separadores).
+ * En móvil y tablet (< xl) se muestra SOLO la página actual como título (sin traza ni
+ * separadores); el breadcrumb completo aparece solo en PC (xl+).
  * Sin fondo ni borde: el espaciado y los márgenes los da el contenedor del shell
  * (estandarizado para todas las pages).
  */
@@ -27,7 +28,7 @@ export function Breadcrumbs() {
       <BreadcrumbList className="gap-1.5 sm:gap-2">
         {migas.map((miga, i) => (
           <Fragment key={miga.to}>
-            <BreadcrumbItem className={miga.esActual ? undefined : 'hidden lg:flex'}>
+            <BreadcrumbItem className={miga.esActual ? undefined : 'hidden xl:flex'}>
               {miga.esActual ? (
                 <BreadcrumbPage className="text-xl font-semibold tracking-tight text-foreground">
                   {miga.label}
@@ -40,7 +41,7 @@ export function Breadcrumbs() {
               )}
             </BreadcrumbItem>
             {i < migas.length - 1 && (
-              <BreadcrumbSeparator className="hidden text-muted-foreground/50 lg:block" />
+              <BreadcrumbSeparator className="hidden text-muted-foreground/50 xl:block" />
             )}
           </Fragment>
         ))}

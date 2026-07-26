@@ -35,7 +35,7 @@ const filaMiguel = {
     telefono: null,
     empresa: {
       nombre: 'Constructora Norte',
-      modo_consumo: 'declaracion',
+      modo_consumo: 'reserva',
       dias_permitidos: [],
       limite_diario: null,
     },

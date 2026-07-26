@@ -5,7 +5,6 @@ import { InicioPorRol } from './auth/InicioPorRol'
 import { RutaProtegida } from './auth/RutaProtegida'
 import { RutaErrorBoundary } from './components/RutaErrorBoundary'
 import { LoginPage } from './features/auth/LoginPage'
-import { Placeholder } from './features/Placeholder'
 import { SinAccesoPage } from './features/auth/SinAccesoPage'
 import { InicioPage } from './features/inicio/InicioPage'
 
@@ -34,11 +33,11 @@ const ConsumosPage = lazy(() =>
 const EscanerPage = lazy(() =>
   import('./features/escaner/EscanerPage').then((m) => ({ default: m.EscanerPage }))
 )
-const ListaConsumosHoy = lazy(() =>
-  import('./features/escaner/ListaConsumosHoy').then((m) => ({ default: m.ListaConsumosHoy }))
+const CortesPage = lazy(() =>
+  import('./features/cortes/CortesPage').then((m) => ({ default: m.CortesPage }))
 )
-const CierresPage = lazy(() =>
-  import('./features/cierres/CierresPage').then((m) => ({ default: m.CierresPage }))
+const FacturasPage = lazy(() =>
+  import('./features/facturas/FacturasPage').then((m) => ({ default: m.FacturasPage }))
 )
 const ConfiguracionPage = lazy(() =>
   import('./features/configuracion/ConfiguracionPage').then((m) => ({
@@ -57,6 +56,11 @@ const UsuariosPage = lazy(() =>
 const MiPerfilPage = lazy(() =>
   import('./features/cuenta/MiPerfilPage').then((m) => ({ default: m.MiPerfilPage }))
 )
+const DefinirContrasenaPage = lazy(() =>
+  import('./features/acceso/DefinirContrasenaPage').then((m) => ({
+    default: m.DefinirContrasenaPage,
+  }))
+)
 
 function CargandoRuta() {
   return (
@@ -71,6 +75,14 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/sin-acceso" element={<SinAccesoPage />} />
+      <Route
+        path="/definir-contrasena"
+        element={
+          <Suspense fallback={<CargandoRuta />}>
+            <DefinirContrasenaPage />
+          </Suspense>
+        }
+      />
 
       {/* Todo lo demás es privado: RutaProtegida exige sesión + acceso, y "/" redirige por rol. */}
       <Route element={<RutaProtegida />}>
@@ -82,16 +94,6 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <EscanerPage />
-              </Suspense>
-            </RutaErrorBoundary>
-          }
-        />
-        <Route
-          path="escaner/hoy"
-          element={
-            <RutaErrorBoundary>
-              <Suspense fallback={<CargandoRuta />}>
-                <ListaConsumosHoy />
               </Suspense>
             </RutaErrorBoundary>
           }
@@ -157,17 +159,27 @@ export default function App() {
           }
         />
         <Route
-          path="cierres"
+          path="cortes"
           element={
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
-                <CierresPage />
+                <CortesPage />
               </Suspense>
             </RutaErrorBoundary>
           }
         />
-        {/* Compatibilidad: la sección se llamó "Cortes"; redirige links viejos a /cierres. */}
-        <Route path="cortes" element={<Navigate to="/cierres" replace />} />
+        {/* Compatibilidad: la sección se llamó "Cierres"; redirige links viejos a /cortes. */}
+        <Route path="cierres" element={<Navigate to="/cortes" replace />} />
+        <Route
+          path="facturas"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <FacturasPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
         <Route
           path="configuracion"
           element={
@@ -178,7 +190,6 @@ export default function App() {
             </RutaErrorBoundary>
           }
         />
-        <Route path="facturas" element={<Placeholder titulo="Facturas" />} />
         <Route
           path="usuarios"
           element={

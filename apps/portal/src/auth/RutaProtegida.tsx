@@ -53,7 +53,7 @@ export function RutaProtegida() {
 
   const contexto: ContextoAcceso = { tipo: acceso.tipo, esComensal: acceso.esComensal }
   return (
-    <PortalShell tipo={acceso.tipo} esComensal={acceso.esComensal}>
+    <PortalShell tipo={acceso.tipo}>
       <Outlet context={contexto} />
     </PortalShell>
   )

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { Building2, Settings, TriangleAlert } from 'lucide-react'
+import { Building2, FileText, Settings, TriangleAlert } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
@@ -20,15 +20,16 @@ import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useSetTituloDetalle } from '../../layout/tituloDetalle'
 import { UsuariosEmpresa } from '../colaboradores/UsuariosEmpresa'
-import type { CierreConEmpresa } from '../cierres/api'
-import { CierreDetalleDialog } from '../cierres/CierreDetalleDialog'
-import { crearColumnasCierres } from '../cierres/columns'
-import { useCierres } from '../cierres/queries'
-import type { Empresa } from './api'
-import { useEmpresas, useResumenEmpresa } from './queries'
+import type { CorteConEmpresa } from '../cortes/api'
+import { CorteDetalleDialog } from '../cortes/CorteDetalleDialog'
+import { crearColumnasCortes } from '../cortes/columns'
+import { useCortes } from '../cortes/queries'
+import { FacturasSeccion } from '../facturas/FacturasSeccion'
+import { datosFiscalesCompletos, type Empresa } from './api'
+import { useDatosFiscalesEmpresa, useEmpresas, useResumenEmpresa } from './queries'
 import type { ResumenEmpresa } from './resumenApi'
 
-const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? e.razon_social ?? 'Empresa'
+const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? 'Empresa'
 
 export function EmpresaDetallePage() {
   const { rol } = useOutletContext<ContextoAcceso>()
@@ -39,7 +40,7 @@ export function EmpresaDetallePage() {
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
   const empresa = empresas?.find((e) => e.id === id)
 
-  const [detalleCierre, setDetalleCierre] = useState<CierreConEmpresa | null>(null)
+  const [detalleCorte, setDetalleCorte] = useState<CorteConEmpresa | null>(null)
 
   // El breadcrumb del shell muestra el nombre de la empresa como paso final.
   useSetTituloDetalle(empresa ? nombreEmpresa(empresa) : null)
@@ -77,8 +78,6 @@ export function EmpresaDetallePage() {
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                {empresa.razon_social && <span>{empresa.razon_social}</span>}
-                <span aria-hidden>·</span>
                 <span className="font-mono tabular-nums">
                   {formatearMoneda(empresa.precio_comida)} / comida
                 </span>
@@ -102,23 +101,30 @@ export function EmpresaDetallePage() {
         {/* Métricas */}
         <ResumenSeccion empresaId={id} />
 
+        {/* Información de facturación (datos fiscales) */}
+        <FacturacionSeccion empresaId={id} puedeGestionar={puedeGestionar} />
+
         {/* Tabs: cada tabla ocupa el alto restante de la pantalla en desktop */}
         <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
           <TabsList>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
-            <TabsTrigger value="cierres">Cierres semanales</TabsTrigger>
+            <TabsTrigger value="cortes">Cortes semanales</TabsTrigger>
+            <TabsTrigger value="facturas">Facturas</TabsTrigger>
           </TabsList>
           <TabsContent value="usuarios" className="flex min-h-0 flex-col">
             <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} fillHeight />
           </TabsContent>
-          <TabsContent value="cierres" className="flex min-h-0 flex-col">
-            <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCierre} fillHeight />
+          <TabsContent value="cortes" className="flex min-h-0 flex-col">
+            <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCorte} fillHeight />
+          </TabsContent>
+          <TabsContent value="facturas" className="flex min-h-0 flex-col">
+            <FacturasSeccion empresaId={id} fillHeight />
           </TabsContent>
         </Tabs>
       </div>
 
-      {detalleCierre && (
-        <CierreDetalleDialog cierre={detalleCierre} onClose={() => setDetalleCierre(null)} />
+      {detalleCorte && (
+        <CorteDetalleDialog corte={detalleCorte} onClose={() => setDetalleCorte(null)} />
       )}
     </TooltipProvider>
   )
@@ -169,7 +175,7 @@ function ResumenCards({ resumen }: { resumen: ResumenEmpresa }) {
             </span>
           </div>
           <dl className="grid grid-cols-4 gap-2">
-            <Metrica etiqueta="Comprometidas" valor={en_curso.comprometidas} />
+            <Metrica etiqueta="Reservadas" valor={en_curso.reservadas} />
             <Metrica etiqueta="Consumidas" valor={en_curso.consumidas} />
             <Metrica etiqueta="Faltan" valor={en_curso.faltan} resaltar={en_curso.faltan > 0} />
             <Metrica etiqueta="Extras" valor={en_curso.extras} />
@@ -224,7 +230,105 @@ function MetricaDinero({ etiqueta, valor }: { etiqueta: string; valor: number })
   )
 }
 
-/* ----- Histórico de cierres de la empresa ----- */
+/* ----- Información de facturación (datos fiscales) ----- */
+
+function FacturacionSeccion({
+  empresaId,
+  puedeGestionar,
+}: {
+  empresaId: number
+  puedeGestionar: boolean
+}) {
+  const navigate = useNavigate()
+  const { data: fiscal, isLoading, isError, refetch } = useDatosFiscalesEmpresa(empresaId)
+
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
+          Información de facturación
+        </h2>
+        {datosFiscalesCompletos(fiscal) ? (
+          <Badge className="bg-success text-success-foreground">Facturable</Badge>
+        ) : (
+          <Badge variant="secondary">Sin datos fiscales</Badge>
+        )}
+      </div>
+
+      <Card className="shadow-none">
+        <CardContent className="p-5">
+          {isLoading ? (
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-6 w-full" />
+              ))}
+            </div>
+          ) : isError ? (
+            <div className="flex flex-col items-start gap-3">
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <TriangleAlert className="size-4" />
+                No se pudieron cargar los datos fiscales.
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Reintentar
+              </Button>
+            </div>
+          ) : fiscal ? (
+            <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
+              <DatoFiscal etiqueta="Razón social" valor={fiscal.razon_social} />
+              <DatoFiscal etiqueta="RFC" valor={fiscal.rfc} mono />
+              <DatoFiscal etiqueta="Código postal fiscal" valor={fiscal.codigo_postal_fiscal} mono />
+              <DatoFiscal etiqueta="Régimen fiscal" valor={fiscal.regimen_fiscal} />
+              <DatoFiscal etiqueta="Uso de CFDI" valor={fiscal.uso_cfdi} mono />
+              <DatoFiscal etiqueta="Correo de facturación" valor={fiscal.email_facturacion} />
+            </dl>
+          ) : (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <FileText className="size-6" />
+                </EmptyMedia>
+                <EmptyTitle>Sin datos fiscales</EmptyTitle>
+                <EmptyDescription>
+                  Configura los datos fiscales para poder facturar a esta empresa.
+                </EmptyDescription>
+              </EmptyHeader>
+              {puedeGestionar && (
+                <EmptyContent>
+                  <Button onClick={() => navigate(`/empresas/${empresaId}/configurar`)}>
+                    Configurar datos fiscales
+                  </Button>
+                </EmptyContent>
+              )}
+            </Empty>
+          )}
+        </CardContent>
+      </Card>
+    </section>
+  )
+}
+
+function DatoFiscal({
+  etiqueta,
+  valor,
+  mono,
+}: {
+  etiqueta: string
+  valor: string
+  mono?: boolean
+}) {
+  const vacio = !valor || valor.trim() === ''
+  return (
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-xs text-muted-foreground">{etiqueta}</dt>
+      <dd className={`text-sm ${vacio ? 'text-muted-foreground italic' : ''} ${mono ? 'font-mono' : ''}`}>
+        {vacio ? 'Por completar' : valor}
+      </dd>
+    </div>
+  )
+}
+
+/* ----- Histórico de cortes de la empresa ----- */
 
 function HistoricoSeccion({
   empresaId,
@@ -232,30 +336,30 @@ function HistoricoSeccion({
   fillHeight = false,
 }: {
   empresaId: number
-  onVerDetalle: (cierre: CierreConEmpresa) => void
+  onVerDetalle: (corte: CorteConEmpresa) => void
   /** En tab: ocupa el alto restante y la tabla hace scroll interno. */
   fillHeight?: boolean
 }) {
-  const { data: cierres, isLoading, isError, refetch } = useCierres()
+  const { data: cortes, isLoading, isError, refetch } = useCortes()
 
   const columnas = useMemo(
     () =>
-      crearColumnasCierres({ onVerDetalle }).filter(
+      crearColumnasCortes({ onVerDetalle }).filter(
         (col) => !('accessorKey' in col && col.accessorKey === 'empresa')
       ),
     [onVerDetalle]
   )
 
-  const cierresEmpresa = useMemo(
-    () => (cierres ?? []).filter((c) => c.empresa_id === empresaId),
-    [cierres, empresaId]
+  const cortesEmpresa = useMemo(
+    () => (cortes ?? []).filter((c) => c.empresa_id === empresaId),
+    [cortes, empresaId]
   )
 
   return (
     <section className={`flex flex-col gap-3 ${fillHeight ? 'min-h-0 flex-1' : ''}`}>
       {!fillHeight && (
         <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-          Cierres semanales
+          Cortes semanales
         </h2>
       )}
       {isLoading ? (
@@ -269,7 +373,7 @@ function HistoricoSeccion({
           <CardContent className="flex flex-col items-start gap-3 p-5">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <TriangleAlert className="size-4" />
-              No se pudieron cargar los cierres.
+              No se pudieron cargar los cortes.
             </p>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               Reintentar
@@ -279,9 +383,9 @@ function HistoricoSeccion({
       ) : (
         <DataTable
           columns={columnas}
-          data={cierresEmpresa}
+          data={cortesEmpresa}
           fillHeight={fillHeight}
-          emptyMessage="Aún no hay cierres para esta empresa."
+          emptyMessage="Aún no hay cortes para esta empresa."
         />
       )}
     </section>

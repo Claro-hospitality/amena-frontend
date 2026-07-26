@@ -34,66 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      cierres_semanales: {
-        Row: {
-          comprometidas: number
-          consumidas: number
-          created_at: string
-          empresa_id: number
-          estado: Database["public"]["Enums"]["estado_cierre"]
-          extras: number
-          factura_id: number | null
-          id: number
-          monto_total: number
-          precio_unitario: number
-          semana_inicio: string
-          updated_at: string
-        }
-        Insert: {
-          comprometidas: number
-          consumidas: number
-          created_at?: string
-          empresa_id: number
-          estado?: Database["public"]["Enums"]["estado_cierre"]
-          extras: number
-          factura_id?: number | null
-          id?: number
-          monto_total: number
-          precio_unitario: number
-          semana_inicio: string
-          updated_at?: string
-        }
-        Update: {
-          comprometidas?: number
-          consumidas?: number
-          created_at?: string
-          empresa_id?: number
-          estado?: Database["public"]["Enums"]["estado_cierre"]
-          extras?: number
-          factura_id?: number | null
-          id?: number
-          monto_total?: number
-          precio_unitario?: number
-          semana_inicio?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cierres_semanales_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cierres_semanales_factura_id_fkey"
-            columns: ["factura_id"]
-            isOneToOne: false
-            referencedRelation: "facturas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       comensales: {
         Row: {
           activo: boolean
@@ -157,6 +97,7 @@ export type Database = {
           empresa_id: number
           fecha: string
           id: number
+          metodo: Database["public"]["Enums"]["metodo_consumo"]
           registrado_por: string | null
         }
         Insert: {
@@ -165,6 +106,7 @@ export type Database = {
           empresa_id: number
           fecha?: string
           id?: number
+          metodo?: Database["public"]["Enums"]["metodo_consumo"]
           registrado_por?: string | null
         }
         Update: {
@@ -173,6 +115,7 @@ export type Database = {
           empresa_id?: number
           fecha?: string
           id?: number
+          metodo?: Database["public"]["Enums"]["metodo_consumo"]
           registrado_por?: string | null
         }
         Relationships: [
@@ -196,6 +139,56 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "usuarios_backoffice"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cortes_semanales: {
+        Row: {
+          consumidas: number
+          created_at: string
+          empresa_id: number
+          estado: Database["public"]["Enums"]["estado_corte"]
+          extras: number
+          id: number
+          monto_total: number
+          precio_unitario: number
+          reservadas: number
+          semana_inicio: string
+          updated_at: string
+        }
+        Insert: {
+          consumidas: number
+          created_at?: string
+          empresa_id: number
+          estado?: Database["public"]["Enums"]["estado_corte"]
+          extras: number
+          id?: number
+          monto_total: number
+          precio_unitario: number
+          reservadas: number
+          semana_inicio: string
+          updated_at?: string
+        }
+        Update: {
+          consumidas?: number
+          created_at?: string
+          empresa_id?: number
+          estado?: Database["public"]["Enums"]["estado_corte"]
+          extras?: number
+          id?: number
+          monto_total?: number
+          precio_unitario?: number
+          reservadas?: number
+          semana_inicio?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cortes_semanales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -272,6 +265,56 @@ export type Database = {
           },
         ]
       }
+      datos_fiscales: {
+        Row: {
+          activo: boolean
+          codigo_postal_fiscal: string
+          created_at: string
+          email_facturacion: string
+          empresa_id: number
+          id: number
+          razon_social: string
+          regimen_fiscal: string
+          rfc: string
+          updated_at: string
+          uso_cfdi: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo_postal_fiscal: string
+          created_at?: string
+          email_facturacion: string
+          empresa_id: number
+          id?: number
+          razon_social: string
+          regimen_fiscal: string
+          rfc: string
+          updated_at?: string
+          uso_cfdi?: string
+        }
+        Update: {
+          activo?: boolean
+          codigo_postal_fiscal?: string
+          created_at?: string
+          email_facturacion?: string
+          empresa_id?: number
+          id?: number
+          razon_social?: string
+          regimen_fiscal?: string
+          rfc?: string
+          updated_at?: string
+          uso_cfdi?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "datos_fiscales_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: true
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           activo: boolean
@@ -283,8 +326,6 @@ export type Database = {
           modo_consumo: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial: string | null
           precio_comida: number
-          razon_social: string | null
-          rfc: string | null
           updated_at: string
         }
         Insert: {
@@ -297,8 +338,6 @@ export type Database = {
           modo_consumo?: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial?: string | null
           precio_comida: number
-          razon_social?: string | null
-          rfc?: string | null
           updated_at?: string
         }
         Update: {
@@ -311,8 +350,6 @@ export type Database = {
           modo_consumo?: Database["public"]["Enums"]["modo_consumo"]
           nombre_comercial?: string | null
           precio_comida?: number
-          razon_social?: string | null
-          rfc?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -320,41 +357,91 @@ export type Database = {
       facturas: {
         Row: {
           activo: boolean
+          corte_id: number
           created_at: string
+          datos_fiscales_id: number | null
           empresa_id: number
           estado: Database["public"]["Enums"]["estado_factura"]
+          facturado_en: string | null
+          facturado_por: string | null
+          folio: string
           id: number
-          monto: number
+          intentos_timbrado: number
+          iva: number
+          mensaje_error: string | null
           pdf_url: string | null
           periodo_fin: string
           periodo_inicio: string
+          serie: string
+          subtotal: number
+          total: number
           updated_at: string
+          uuid_sat: string | null
+          xml_url: string | null
         }
         Insert: {
           activo?: boolean
+          corte_id: number
           created_at?: string
+          datos_fiscales_id?: number | null
           empresa_id: number
           estado?: Database["public"]["Enums"]["estado_factura"]
+          facturado_en?: string | null
+          facturado_por?: string | null
+          folio: string
           id?: number
-          monto: number
+          intentos_timbrado?: number
+          iva?: number
+          mensaje_error?: string | null
           pdf_url?: string | null
           periodo_fin: string
           periodo_inicio: string
+          serie?: string
+          subtotal?: number
+          total: number
           updated_at?: string
+          uuid_sat?: string | null
+          xml_url?: string | null
         }
         Update: {
           activo?: boolean
+          corte_id?: number
           created_at?: string
+          datos_fiscales_id?: number | null
           empresa_id?: number
           estado?: Database["public"]["Enums"]["estado_factura"]
+          facturado_en?: string | null
+          facturado_por?: string | null
+          folio?: string
           id?: number
-          monto?: number
+          intentos_timbrado?: number
+          iva?: number
+          mensaje_error?: string | null
           pdf_url?: string | null
           periodo_fin?: string
           periodo_inicio?: string
+          serie?: string
+          subtotal?: number
+          total?: number
           updated_at?: string
+          uuid_sat?: string | null
+          xml_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "facturas_corte_id_fkey"
+            columns: ["corte_id"]
+            isOneToOne: true
+            referencedRelation: "cortes_semanales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_datos_fiscales_id_fkey"
+            columns: ["datos_fiscales_id"]
+            isOneToOne: false
+            referencedRelation: "datos_fiscales"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "facturas_empresa_id_fkey"
             columns: ["empresa_id"]
@@ -398,6 +485,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notificaciones_log: {
+        Row: {
+          asunto: string | null
+          codigo_error: number | null
+          created_at: string
+          destinatario: string
+          error: string | null
+          estado: string
+          id: number
+          message_id: string | null
+          metadata: Json | null
+          plantilla: string | null
+          reintentable: boolean
+          tipo: string
+        }
+        Insert: {
+          asunto?: string | null
+          codigo_error?: number | null
+          created_at?: string
+          destinatario: string
+          error?: string | null
+          estado: string
+          id?: never
+          message_id?: string | null
+          metadata?: Json | null
+          plantilla?: string | null
+          reintentable?: boolean
+          tipo: string
+        }
+        Update: {
+          asunto?: string | null
+          codigo_error?: number | null
+          created_at?: string
+          destinatario?: string
+          error?: string | null
+          estado?: string
+          id?: never
+          message_id?: string | null
+          metadata?: Json | null
+          plantilla?: string | null
+          reintentable?: boolean
+          tipo?: string
+        }
+        Relationships: []
       }
       platillos: {
         Row: {
@@ -549,9 +681,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      notificaciones_fallidas_24h: {
+        Row: {
+          codigo_error: number | null
+          permanentes: number | null
+          plantilla: string | null
+          reintentables: number | null
+          tipo: string | null
+          ultimo_intento: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      _registrar_consumo_core: {
+        Args: {
+          p_comensal_id: number
+          p_metodo: Database["public"]["Enums"]["metodo_consumo"]
+          p_registrado_por: string
+        }
+        Returns: Json
+      }
       asignar_rol_unico: {
         Args: {
           p_rol: Database["public"]["Enums"]["rol_portal"]
@@ -560,6 +710,20 @@ export type Database = {
         Returns: Json
       }
       auth_user_id_por_email: { Args: { p_email: string }; Returns: string }
+      buscar_comensales_consumo: {
+        Args: { p_limit?: number; p_q: string }
+        Returns: {
+          comensal_id: number
+          consumio_hoy: boolean
+          consumos_hoy: number
+          empresa_nombre: string
+          es_libre: boolean
+          limite_diario: number
+          nombre: string
+          tiene_cuota: boolean
+          ultima_hora: string
+        }[]
+      }
       cambiar_rol_backoffice: {
         Args: {
           p_rol: Database["public"]["Enums"]["rol_backoffice"]
@@ -572,14 +736,6 @@ export type Database = {
       cuota_disponible: {
         Args: { p_comensal_id: number; p_fecha: string }
         Returns: boolean
-      }
-      declarar_cuotas: {
-        Args: {
-          p_declaracion: Json
-          p_empresa_id: number
-          p_origen?: Database["public"]["Enums"]["origen_cuota"]
-        }
-        Returns: Json
       }
       eliminar_usuario_backoffice: {
         Args: { p_user_id: string }
@@ -618,11 +774,12 @@ export type Database = {
         }
         Returns: Json
       }
-      generar_cierre_semanal: {
+      estado_operativo_dia: { Args: never; Returns: Json }
+      generar_corte_semanal: {
         Args: { p_empresa_id: number; p_semana_inicio: string }
         Returns: Json
       }
-      generar_cierres_pendientes: { Args: { p_fecha: string }; Returns: Json }
+      generar_cortes_pendientes: { Args: { p_fecha: string }; Returns: Json }
       get_config: { Args: { p_clave: string }; Returns: Json }
       listar_consumos: {
         Args: {
@@ -643,6 +800,7 @@ export type Database = {
           fecha: string
           id: number
           mesero_nombre: string
+          metodo: Database["public"]["Enums"]["metodo_consumo"]
           origen: string
           precio_comida: number
           registrado_por: string
@@ -657,6 +815,8 @@ export type Database = {
           empresa_nombre: string
           id: number
           mesero_nombre: string
+          metodo: Database["public"]["Enums"]["metodo_consumo"]
+          origen: string
           registrado_por: string
         }[]
       }
@@ -679,6 +839,18 @@ export type Database = {
         Args: { p_qr_token: string; p_registrado_por: string }
         Returns: Json
       }
+      registrar_consumo_manual: {
+        Args: { p_comensal_id: number; p_registrado_por: string }
+        Returns: Json
+      }
+      reservar_cuotas: {
+        Args: {
+          p_empresa_id: number
+          p_origen?: Database["public"]["Enums"]["origen_cuota"]
+          p_reserva: Json
+        }
+        Returns: Json
+      }
       resumen_consumos: {
         Args: {
           p_desde: string
@@ -690,15 +862,20 @@ export type Database = {
         Returns: Json
       }
       resumen_empresa: { Args: { p_empresa_id: number }; Returns: Json }
+      siguiente_folio_dia: {
+        Args: { p_fecha: string; p_serie: string }
+        Returns: string
+      }
       tiene_algun_rol: { Args: never; Returns: boolean }
       usuarios_de_mis_empresas: { Args: never; Returns: number[] }
     }
     Enums: {
       ciclo_facturacion: "semanal" | "mensual"
-      estado_cierre: "abierto" | "cerrado"
-      estado_factura: "pendiente" | "pagada" | "cancelada"
-      modo_consumo: "declaracion" | "libre"
-      origen_cuota: "declaracion" | "extra"
+      estado_corte: "abierto" | "cerrado"
+      estado_factura: "borrador" | "emitida" | "error" | "pagada" | "cancelada"
+      metodo_consumo: "qr" | "manual"
+      modo_consumo: "reserva" | "libre"
+      origen_cuota: "reserva" | "extra"
       rol_backoffice:
         | "super_admin"
         | "mesero"
@@ -837,10 +1014,11 @@ export const Constants = {
   public: {
     Enums: {
       ciclo_facturacion: ["semanal", "mensual"],
-      estado_cierre: ["abierto", "cerrado"],
-      estado_factura: ["pendiente", "pagada", "cancelada"],
-      modo_consumo: ["declaracion", "libre"],
-      origen_cuota: ["declaracion", "extra"],
+      estado_corte: ["abierto", "cerrado"],
+      estado_factura: ["borrador", "emitida", "error", "pagada", "cancelada"],
+      metodo_consumo: ["qr", "manual"],
+      modo_consumo: ["reserva", "libre"],
+      origen_cuota: ["reserva", "extra"],
       rol_backoffice: [
         "super_admin",
         "mesero",

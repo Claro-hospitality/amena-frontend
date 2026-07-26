@@ -38,7 +38,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
 import type { Empresa } from '../empresas/api'
@@ -275,12 +275,14 @@ export function UsuariosEmpresa({
     })
   }
 
-  const cambiarComida = (u: UsuarioEmpresa, activo: boolean) => {
+  const cambiarComida = (u: UsuarioEmpresa, activo: boolean, onDone?: () => void) => {
     establecerComida.mutate(
       { usuarioId: u.id, activo },
       {
-        onSuccess: () =>
-          toast.success(activo ? `Comida activada para ${u.nombre}` : `Comida desactivada para ${u.nombre}`),
+        onSuccess: () => {
+          toast.success(activo ? `Comida activada para ${u.nombre}` : `Comida desactivada para ${u.nombre}`)
+          onDone?.()
+        },
         onError: () => toast.error('No se pudo cambiar la comida. Intenta de nuevo.'),
       }
     )
@@ -348,7 +350,7 @@ export function UsuariosEmpresa({
           fillHeight={fillHeight}
           rowClassName={(u) => (u.activo ? undefined : 'opacity-60')}
           toolbar={
-            <Input
+            <SearchInput
               placeholder="Buscar por nombre o correo…"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
@@ -389,9 +391,10 @@ export function UsuariosEmpresa({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
+              loading={establecerComida.isPending}
               onClick={() => {
-                if (desactivandoComida) cambiarComida(desactivandoComida, false)
-                setDesactivandoComida(null)
+                if (desactivandoComida)
+                  cambiarComida(desactivandoComida, false, () => setDesactivandoComida(null))
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

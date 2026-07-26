@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, TriangleAlert, UtensilsCrossed } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
@@ -20,7 +20,7 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Field, FieldLabel } from '@amena/ui/components/ui/field'
-import { Input } from '@amena/ui/components/ui/input'
+import { SearchInput } from '@amena/ui/components/ui/search-input'
 import {
   Select,
   SelectContent,
@@ -39,6 +39,15 @@ import { useConsumos, useEmpresas, useResumenConsumos } from './queries'
 const CHART_CONFIG: ChartConfig = {
   comidas: { label: 'Comidas', color: 'var(--secondary-foreground)' },
 }
+
+/** Paleta para diferenciar empresas en la gráfica comparativa. */
+const PALETA_EMPRESAS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+]
 
 const columnas: ColumnDef<ConsumoRow>[] = [
   {
@@ -141,9 +150,15 @@ export function ConsumosPage() {
   const total = lista.data?.total ?? 0
   const resumen = resumenQ.data
   const meseros = resumen?.por_mesero ?? []
-  const top = useMemo(
-    () => (resumen?.top_comensales ?? []).map((t) => ({ nombre: t.nombre, comidas: t.comidas })),
-    [resumen]
+  // Sin filtro de empresa → comparativa por empresa; con empresa elegida → personas de esa empresa.
+  const porEmpresaMode = empresaSel === ''
+  const datosGrafica = useMemo(
+    () =>
+      (porEmpresaMode ? (resumen?.por_empresa ?? []) : (resumen?.top_comensales ?? [])).map((x) => ({
+        nombre: x.nombre,
+        comidas: x.comidas,
+      })),
+    [resumen, porEmpresaMode]
   )
 
   const totalPaginas = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -244,22 +259,34 @@ export function ConsumosPage() {
           </Card>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            {/* Gráfica: quién comió más */}
+            {/* Gráfica: por empresa (todas) o por persona (empresa elegida) */}
             <Card className="shadow-none">
               <CardContent className="flex flex-col gap-3 p-5">
-                <h2 className="text-sm font-semibold tracking-tight">Quién comió más</h2>
-                {top.length === 0 ? (
+                <h2 className="text-sm font-semibold tracking-tight">
+                  {porEmpresaMode ? 'Consumos por empresa' : 'Quién comió más'}
+                </h2>
+                {datosGrafica.length === 0 ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">
                     Sin consumos en el período seleccionado.
                   </p>
                 ) : (
                   <ChartContainer config={CHART_CONFIG} className="h-64 w-full">
-                    <BarChart accessibilityLayer data={top} layout="vertical" margin={{ left: 12, right: 16 }}>
+                    <BarChart
+                      accessibilityLayer
+                      data={datosGrafica}
+                      layout="vertical"
+                      margin={{ left: 12, right: 16 }}
+                    >
                       <CartesianGrid horizontal={false} />
                       <XAxis type="number" dataKey="comidas" allowDecimals={false} />
                       <YAxis type="category" dataKey="nombre" width={120} tickLine={false} axisLine={false} />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="comidas" fill="var(--color-comidas)" radius={4} />
+                      <Bar dataKey="comidas" fill="var(--color-comidas)" radius={4}>
+                        {porEmpresaMode &&
+                          datosGrafica.map((_, i) => (
+                            <Cell key={i} fill={PALETA_EMPRESAS[i % PALETA_EMPRESAS.length]} />
+                          ))}
+                      </Bar>
                     </BarChart>
                   </ChartContainer>
                 )}
@@ -301,7 +328,7 @@ export function ConsumosPage() {
                 data={rows}
                 emptyMessage="Ningún consumo coincide con la búsqueda."
                 toolbar={
-                  <Input
+                  <SearchInput
                     placeholder="Buscar comensal…"
                     value={busqueda}
                     onChange={(e) => setBusqueda(e.target.value)}

@@ -73,7 +73,7 @@ describe('ColaboradoresPage', () => {
     expect(screen.queryByText(/aún no hay colaboradores/i)).not.toBeInTheDocument()
   })
 
-  it('empresa en modo declaración: sin política ni toggle de consumo libre', async () => {
+  it('empresa en modo reserva: sin política ni toggle de consumo libre', async () => {
     api.listarColaboradores.mockResolvedValue([crearColaboradorFake({ politica: null })])
     renderizar('admin_empresa')
     await screen.findAllByText('María López')
@@ -89,8 +89,9 @@ describe('ColaboradoresPage', () => {
     ])
     renderizar('admin_empresa')
     await screen.findAllByText('María López')
-    expect(screen.getByText(/consumo libre:/i)).toBeInTheDocument()
-    expect(screen.getByText(/L-V, máx 2\/día/i)).toBeInTheDocument()
+    expect(screen.getByText(/consumo libre activo/i)).toBeInTheDocument()
+    expect(screen.getByText(/lunes a viernes/i)).toBeInTheDocument()
+    expect(screen.getByText(/hasta 2 al día/i)).toBeInTheDocument()
     // Toggle visible (móvil + tabla renderizan ambos; basta con que exista).
     expect(screen.getAllByRole('switch', { name: /consumo libre/i }).length).toBeGreaterThan(0)
   })

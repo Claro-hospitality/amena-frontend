@@ -25,7 +25,7 @@ export interface ItemNav {
 /**
  * Items del sidebar por rol (rutas placeholder por ahora).
  * - super_admin: todo el backoffice.
- * - finanzas: consultas de cierres y facturas.
+ * - finanzas: consultas de cortes y facturas.
  * - mesero: solo el escáner.
  */
 export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
@@ -36,7 +36,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
     { to: '/menu', label: 'Menú', icon: CalendarDays },
     { to: '/consumos', label: 'Consumos', icon: Receipt },
-    { to: '/cierres', label: 'Cierres semanales', icon: ClipboardCheck },
+    { to: '/cortes', label: 'Cortes semanales', icon: ClipboardCheck },
     { to: '/facturas', label: 'Facturas', icon: FileText },
     { to: '/usuarios', label: 'Usuarios', icon: Users },
     { to: '/configuracion', label: 'Configuración', icon: Settings },
@@ -45,7 +45,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/inicio', label: 'Inicio', icon: Home },
     { to: '/empresas', label: 'Empresas', icon: Building2 },
     { to: '/consumos', label: 'Consumos', icon: Receipt },
-    { to: '/cierres', label: 'Cierres semanales', icon: ClipboardCheck },
+    { to: '/cortes', label: 'Cortes semanales', icon: ClipboardCheck },
     { to: '/facturas', label: 'Facturas', icon: FileText },
   ],
   mesero: [{ to: '/escaner', label: 'Escáner', icon: ScanLine }],
@@ -56,8 +56,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
     { to: '/menu', label: 'Menú', icon: CalendarDays },
     { to: '/consumos', label: 'Consumos', icon: Receipt },
-    { to: '/cierres', label: 'Cierres semanales', icon: ClipboardCheck },
-    { to: '/facturas', label: 'Facturas', icon: FileText },
+    { to: '/cortes', label: 'Cortes semanales', icon: ClipboardCheck },
   ],
   // Capitán de meseros: opera el escáner y ve platillos/menú (lectura). Nada más.
   capitan_meseros: [

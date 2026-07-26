@@ -13,7 +13,6 @@ import {
 } from '@amena/ui/components/ui/alert-dialog'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
-import { CredencialesAcceso } from '@amena/ui/components/ui/credenciales-acceso'
 import { DataTable, type ColumnDef } from '@amena/ui/components/data-table'
 import {
   Dialog,
@@ -48,18 +47,13 @@ import {
 import { toast } from 'sonner'
 import { useAuth } from '../../auth/useAuth'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import {
-  ETIQUETA_ROL,
-  type CredencialesAlta,
-  type RolBackoffice,
-  type UsuarioBackoffice,
-} from './api'
+import { ETIQUETA_ROL, type RolBackoffice, type UsuarioBackoffice } from './api'
 import { UsuarioFormDialog } from './UsuarioFormDialog'
 import {
   useCambiarRol,
   useEliminarUsuario,
   useEstablecerEstado,
-  useResetearPassword,
+  useRestablecerAcceso,
   useUsuarios,
 } from './queries'
 
@@ -72,9 +66,8 @@ export function UsuariosPage() {
   const [crear, setCrear] = useState(false)
   const [rolTarget, setRolTarget] = useState<UsuarioBackoffice | null>(null)
   const [estadoTarget, setEstadoTarget] = useState<UsuarioBackoffice | null>(null)
-  const [resetTarget, setResetTarget] = useState<UsuarioBackoffice | null>(null)
+  const [accesoTarget, setAccesoTarget] = useState<UsuarioBackoffice | null>(null)
   const [eliminarTarget, setEliminarTarget] = useState<UsuarioBackoffice | null>(null)
-  const [credsReset, setCredsReset] = useState<CredencialesAlta | null>(null)
 
   // Id del último super_admin activo (para bloquear su degradación/desactivación en la UI).
   const ultimoSuperAdminId = useMemo(() => {
@@ -135,7 +128,7 @@ export function UsuariosPage() {
               <AccionIcono
                 etiqueta="Restablecer contraseña"
                 icon={KeyRound}
-                onClick={() => setResetTarget(u)}
+                onClick={() => setAccesoTarget(u)}
                 disabled={esYo}
                 motivo="Para tu propia contraseña usa Mi perfil"
               />
@@ -192,23 +185,8 @@ export function UsuariosPage() {
         <ConfirmarEstadoDialog usuario={estadoTarget} onClose={() => setEstadoTarget(null)} />
       )}
 
-      {resetTarget && (
-        <ConfirmarResetDialog
-          usuario={resetTarget}
-          onClose={() => setResetTarget(null)}
-          onListo={(creds) => {
-            setResetTarget(null)
-            setCredsReset(creds)
-          }}
-        />
-      )}
-
-      {credsReset && (
-        <Dialog open onOpenChange={(a) => !a && setCredsReset(null)}>
-          <DialogContent>
-            <CredencialesAcceso credenciales={credsReset} onClose={() => setCredsReset(null)} />
-          </DialogContent>
-        </Dialog>
+      {accesoTarget && (
+        <ConfirmarResetDialog usuario={accesoTarget} onClose={() => setAccesoTarget(null)} />
       )}
 
       {eliminarTarget && (
@@ -239,6 +217,7 @@ function ConfirmarEliminarDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
+            loading={eliminar.isPending}
             onClick={async () => {
               try {
                 await eliminar.mutateAsync(usuario.user_id)
@@ -334,7 +313,8 @@ function CambiarRolDialog({
             Cancelar
           </Button>
           <Button
-            disabled={rol === usuario.rol || cambiar.isPending}
+            disabled={rol === usuario.rol}
+            loading={cambiar.isPending}
             onClick={async () => {
               try {
                 await cambiar.mutateAsync({ userId: usuario.user_id, rol })
@@ -378,6 +358,7 @@ function ConfirmarEstadoDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
+            loading={estado.isPending}
             onClick={async () => {
               try {
                 await estado.mutateAsync({ userId: usuario.user_id, activo: !usuario.activo })
@@ -399,31 +380,36 @@ function ConfirmarEstadoDialog({
 function ConfirmarResetDialog({
   usuario,
   onClose,
-  onListo,
 }: {
   usuario: UsuarioBackoffice
   onClose: () => void
-  onListo: (creds: CredencialesAlta) => void
 }) {
-  const reset = useResetearPassword()
+  const acceso = useRestablecerAcceso()
   return (
     <AlertDialog open onOpenChange={(a) => !a && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Restablecer la contraseña de {usuario.nombre}</AlertDialogTitle>
           <AlertDialogDescription>
-            Se generará una contraseña temporal (se mostrará una sola vez) y el usuario deberá
-            cambiarla en su próximo inicio de sesión.
+            Se enviará un correo a {usuario.email} con un enlace para que defina una contraseña
+            nueva. Nadie ve ni entrega una contraseña.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
+            loading={acceso.isPending}
             onClick={async () => {
               try {
-                onListo(await reset.mutateAsync(usuario.user_id))
+                const r = await acceso.mutateAsync({ email: usuario.email, motivo: 'restablecer' })
+                if (r.correo_enviado) {
+                  toast.success(`Correo enviado a ${usuario.email}.`)
+                } else {
+                  toast.warning('No se pudo enviar el correo. Intenta de nuevo.')
+                }
+                onClose()
               } catch (e) {
-                toast.error(e instanceof Error ? e.message : 'No se pudo restablecer la contraseña.')
+                toast.error(e instanceof Error ? e.message : 'No se pudo enviar el correo.')
               }
             }}
           >

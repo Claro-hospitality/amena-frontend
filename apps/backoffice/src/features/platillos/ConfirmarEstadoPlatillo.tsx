@@ -26,12 +26,13 @@ export function ConfirmarEstadoPlatillo({
     cambiar.mutate(
       { id: platillo.id, activo: !platillo.activo },
       {
-        onSuccess: () =>
-          toast.success(desactivando ? 'Platillo desactivado' : 'Platillo reactivado'),
+        onSuccess: () => {
+          toast.success(desactivando ? 'Platillo desactivado' : 'Platillo reactivado')
+          onClose()
+        },
         onError: () => toast.error('No se pudo cambiar el estado. Intenta de nuevo.'),
       }
     )
-    onClose()
   }
 
   return (
@@ -56,6 +57,7 @@ export function ConfirmarEstadoPlatillo({
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={confirmar}
+            loading={cambiar.isPending}
             className={
               desactivando
                 ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'

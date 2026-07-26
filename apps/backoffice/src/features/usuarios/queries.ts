@@ -5,7 +5,8 @@ import {
   eliminarUsuario,
   establecerEstado,
   listarUsuarios,
-  resetearPassword,
+  type MotivoAcceso,
+  restablecerAcceso,
   type RolBackoffice,
 } from './api'
 
@@ -24,11 +25,10 @@ export function useCrearUsuario() {
   })
 }
 
-export function useResetearPassword() {
-  const qc = useQueryClient()
+export function useRestablecerAcceso() {
   return useMutation({
-    mutationFn: (userId: string) => resetearPassword(userId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: CLAVE }),
+    mutationFn: ({ email, motivo }: { email: string; motivo: MotivoAcceso }) =>
+      restablecerAcceso(email, motivo),
   })
 }
 

@@ -8,14 +8,19 @@ const empresasApi = vi.hoisted(() => ({
   crearEmpresa: vi.fn(),
   actualizarEmpresa: vi.fn(),
   cambiarEstadoEmpresa: vi.fn(),
+  obtenerDatosFiscales: vi.fn(),
+  listarDatosFiscales: vi.fn(),
 }))
-vi.mock('./api', () => empresasApi)
+vi.mock('./api', async (importActual) => {
+  const actual = await importActual<typeof import('./api')>()
+  return { ...empresasApi, datosFiscalesCompletos: actual.datosFiscalesCompletos }
+})
 
 const resumenApi = vi.hoisted(() => ({ obtenerResumenEmpresa: vi.fn() }))
 vi.mock('./resumenApi', () => resumenApi)
 
-const cierresApi = vi.hoisted(() => ({ listarCierres: vi.fn(), ejecutarCierreManual: vi.fn() }))
-vi.mock('../cierres/api', () => cierresApi)
+const cortesApi = vi.hoisted(() => ({ listarCortes: vi.fn(), ejecutarCorteManual: vi.fn() }))
+vi.mock('../cortes/api', () => cortesApi)
 
 const colaboradoresApi = vi.hoisted(() => ({
   listarColaboradores: vi.fn(),
@@ -31,14 +36,12 @@ import { EmpresaDetallePage } from './EmpresaDetallePage'
 const empresaFake = {
   id: 1,
   nombre_comercial: 'Constructora Norte',
-  razon_social: 'Constructora Norte S.A. de C.V.',
-  rfc: null,
   precio_comida: 100,
   ciclo_facturacion: 'mensual' as const,
   activo: true,
   created_at: '',
   updated_at: '',
-  modo_consumo: 'declaracion' as const,
+  modo_consumo: 'reserva' as const,
   dias_permitidos: [] as number[],
   limite_diario: null,
 }
@@ -47,7 +50,7 @@ const resumenFake = {
   semana_inicio: '2026-07-20',
   precio_comida: 100,
   ciclo_facturacion: 'mensual' as const,
-  en_curso: { comprometidas: 5, extras: 1, consumidas: 3, faltan: 2, gasto: 300 },
+  en_curso: { reservadas: 5, extras: 1, consumidas: 3, faltan: 2, gasto: 300 },
   gasto_periodo: 800,
   gasto_historico_total: 1500,
   colaboradores_activos: 4,
@@ -71,8 +74,10 @@ function renderizar(rol: RolBackoffice, empresaId = '1') {
 beforeEach(() => {
   vi.clearAllMocks()
   empresasApi.listarEmpresas.mockResolvedValue([empresaFake])
+  empresasApi.obtenerDatosFiscales.mockResolvedValue(null)
+  empresasApi.listarDatosFiscales.mockResolvedValue([])
   resumenApi.obtenerResumenEmpresa.mockResolvedValue(resumenFake)
-  cierresApi.listarCierres.mockResolvedValue([])
+  cortesApi.listarCortes.mockResolvedValue([])
   colaboradoresApi.listarUsuariosEmpresa.mockResolvedValue([
     { id: 1, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true },
     { id: 2, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false },
@@ -91,9 +96,9 @@ describe('EmpresaDetallePage', () => {
 
   it('lista todos los usuarios de la empresa (admins + colaboradores)', async () => {
     renderizar('super_admin')
-    // Tabs de Usuarios y Cierres semanales; la de Usuarios está activa por defecto.
+    // Tabs de Usuarios y Cortes semanales; la de Usuarios está activa por defecto.
     expect(await screen.findByRole('tab', { name: 'Usuarios' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Cierres semanales' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Cortes semanales' })).toBeInTheDocument()
     expect(await screen.findByText('Juan Pérez')).toBeInTheDocument()
     expect(screen.getByText('Adriana Ruiz')).toBeInTheDocument() // admin también aparece
   })

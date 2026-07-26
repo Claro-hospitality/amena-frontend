@@ -1,11 +1,33 @@
 ---
 name: amena-ui
-description: Estándares obligatorios de UI/UX para el frontend de Amena. Usar SIEMPRE que se implementen componentes, pantallas, features de interfaz, formularios, tablas, obtención de datos, o cualquier cambio visual en apps/backoffice o apps/portal. Cubre: componentes de @amena/ui (shadcn sobre Base UI), tokens del tema, estado de servidor (TanStack Query), formularios (Base UI + zod + useActionState), patrones de UX (carga/vacío/error), manejo de errores con Sentry, testing de UI, estrategia responsive (portal = mobile-first, backoffice = desktop-first) y referencias a la doc oficial de shadcn (variante Base UI).
+description: LEER/INVOCAR ANTES de crear una pantalla nueva o modificar una existente en el frontend de Amena (apps/backoffice o apps/portal) — paso 0 obligatorio, no opcional. Estándares de UI/UX de Amena: identidad y sistema de color propios (naranja #F68D2E + salvia #92A271 + terciarios de estado), estilo cálido y plano (sin sombras/gradientes/negro puro), dispositivos objetivo (portal = móvil, backoffice = escritorio + tablet del mesero). Cubre: componentes reutilizables de @amena/ui (shadcn sobre Base UI), tokens del tema, estado de servidor (TanStack Query), formularios (Base UI + zod + useActionState), patrones de UX (carga/vacío/error), manejo de errores con Sentry, testing de UI, estrategia responsive y referencias a la doc oficial de shadcn (variante Base UI).
 ---
 
 # Estándares de UI/UX — Amena Frontend
 
 > Stack real: React 19.2 · Vite 8 · TypeScript 6 · Tailwind 4 · React Router 7 · TanStack Query · Vitest 3 + Testing Library · Sentry. Kit `@amena/ui` = shadcn (estilo base-rhea) sobre **`@base-ui/react`** (Base UI, no Radix).
+
+## 0. Cuándo y cómo — invocación obligatoria
+
+**Antes de crear una pantalla nueva o modificar una del front (`apps/backoffice` o `apps/portal`), esta skill debe haberse leído/invocado.** No es "solo si tengo dudas": es el **paso 0** para tomar contexto y garantizar que se usan los **componentes reutilizables** de `@amena/ui`, los **colores/tokens** correctos y los **patrones de UX** del proyecto.
+
+> ⚠️ **Amena tiene identidad propia.** No reutilizar estilos, componentes, colores ni convenciones de otros proyectos (p. ej. CLARO): son sistemas de diseño distintos. Todo sale del brand book y los tokens de Amena (`packages/ui/src/theme.css`).
+
+### El "look" de Amena (estilo visual)
+
+- **Cálido y plano.** Página en crema (`bg-background`); contenedores blancos (`bg-card`) con **borde** (`border-border`). La jerarquía se logra con **superficie + borde**, **nunca con sombra ni gradiente** — cero `shadow-*`, cero `bg-gradient-*` (detalle en §2).
+- **Encabezado responsive — título en móvil/tablet, breadcrumb en PC.** En pantallas **no-PC** (móvil y tablet, `< xl`) cada vista muestra **solo un título claro** (`text-xl font-semibold tracking-tight`), sin migas ni separadores. En **PC** (`xl+`) se muestra el breadcrumb completo (la última miga hace de título). Ya lo resuelve el componente `Breadcrumbs` del shell de cada app — **no** re-implementar el título por pantalla.
+- **Neutros cálidos.** Para texto y superficies, tokens del tema (`text-foreground`, `text-muted-foreground`, escala `tinta-*`), no negro puro `#000`. (`bg-black` solo para fondos de media, p. ej. el video de la cámara del escáner.)
+- **Dos colores de marca** (§2): **primario naranja `#F68D2E`** (`bg-primary`) y **secundario verde salvia `#92A271`** (`bg-salvia-500`; el token `secondary` es solo un **tinte claro** para badges neutros). **Terciarios de estado**: `success` · `warning` · `destructive` (alias `error`) · `info`, cada uno con su `-foreground`.
+- **Tipografía Geist** (UI) y **Geist Mono** (montos, folios, IDs); no importar otras fuentes.
+- **Esquinas suaves** (`--radius`) = calidez de marca.
+- 🧭 **Fuente de verdad visual navegable:** backoffice → **Desarrollo → Branding** (principales, tonalidades y terciarios en vivo).
+
+### Dispositivos objetivo
+
+- **portal → móvil primero** (colaboradores y admins de empresa lo usan desde el teléfono).
+- **backoffice → escritorio primero** (personal de Amena) **+ tablet** (mesero/escáner: la experiencia en tablet **debe ser excelente**).
+- Estrategia y orden de verificación por app en §6.
 
 ## 1. Componentes: solo @amena/ui
 
@@ -20,8 +42,13 @@ description: Estándares obligatorios de UI/UX para el frontend de Amena. Usar S
 ## 2. Tema: tokens siempre, valores nunca
 
 - Colores SOLO vía tokens del tema (`bg-primary`, `text-muted-foreground`, `border-border`, `bg-success`, `bg-warning`...). Prohibido hardcodear hex, rgb, o clases de paleta Tailwind cruda (`bg-orange-500` ❌).
-- Las escalas de marca (`naranja-*`, `salvia-*`, `crema-*`, `tinta-*`) existen para casos donde los tokens semánticos no alcanzan (gráficas custom, ilustraciones) — preferir siempre el token semántico.
-- Estados de negocio: validado/pagado/activo → `success`; advertencias/por vencer → `warning`; errores/rechazos/destructivo → `destructive`.
+- **Sistema de color (fuente única: `theme.css`, y visible en Desarrollo → Branding).** Dos colores PRINCIPALES de marca, cada uno con su escala de tonalidades:
+  - **Primario — Naranja Acento `#F68D2E`** = `naranja-500`. Es lo que consume `primary`/`ring` (`bg-primary`). Escala `naranja-50…900`.
+  - **Secundario — Verde Salvia `#92A271`** = `salvia-500` → usar `bg-salvia-500` cuando se quiera el verde de marca sólido. ⚠️ El token `secondary` NO es este verde: es un **tinte salvia claro** para badges/botones secundarios neutros. Escala `salvia-50…900`.
+  - **Fondos/superficies** derivan de la Crema Base `#F4EFE3` (`crema-*`); el **texto** del neutro cálido `tinta-*`.
+  - Las escalas crudas (`naranja-*`, `salvia-*`, `crema-*`, `tinta-*`) solo cuando el token semántico no alcanza (gráficas, ilustraciones, acentos de marca) — preferir siempre el token semántico.
+- **Colores TERCIARIOS de estado** (hues semánticos fijos, cada uno con su `-foreground`): `success` (validado/pagado/activo) · `warning` (advertencias/por vencer) · `destructive` (errores/destructivo; alias `error`) · `info` (información neutra). Ejemplos reales: escáner (éxito/rechazo), cierres, facturas.
+- ⚠️ **Gotcha: `secondary` es un tinte, no el verde de marca.** No lo cambies a `#92A271` sólido: lo consumen ~15 badges neutros ("Inactiva", "Desactivado", roles…) que se volverían verdes y confundirían el estado. Para el verde de marca sólido usa `bg-salvia-500`.
 - Los inputs son "filled" por el override global del tema — no agregar bordes ni fondos custom a campos de formulario.
 - Tipografía: la del tema (Geist). Montos, folios e IDs en `font-mono`. No importar fuentes.
 - `theme.css` es intocable desde tareas de features.
@@ -172,3 +199,13 @@ Consultar SIEMPRE antes de construir un componente o una pantalla nueva. Al impl
 2. WebFetch la doc `/base/<componente>` de cada uno para ver props y composición correctas.
 3. Si es una pantalla nueva, revisa `shadcnexamples.com/blocks` para el layout y adáptalo a los estándares de este skill.
 4. Verifica el API contra el componente local antes de escribir código.
+
+## 11. Patrones y componentes estándar del proyecto
+
+- **Menú de usuario del navbar:** ambas apps usan el componente `UsuarioMenu` (avatar con iniciales + dropdown con el correo y las acciones "Mi cuenta"/"Mi perfil" y "Cerrar sesión"). **No** poner botones sueltos de cuenta/sesión en el header — reusar/replicar ese patrón.
+- **Botones de carga = circular progress (estándar duro, ver §5):** todo botón de acción asíncrona usa la prop **`loading`** (spinner). En **diálogos de confirmación** (`AlertDialogAction`) el patrón es: `loading={mut.isPending}` **y cerrar en `onSuccess`** — nunca `mutate()` seguido de `onClose()`/reset síncrono (el diálogo se cerraría antes de que el spinner se vea, y en error quedaría cerrado). Así el spinner es visible y, si falla, el diálogo sigue abierto para reintentar. Los `Switch`/`RadioGroup` en carga van con **`disabled`** (no spinner: el circular progress es solo para botones).
+- **Tamaño de diálogos:** `DialogContent` topa por defecto en `sm:max-w-md`; para diálogos más anchos (p. ej. la cámara del escáner) sobreescribir con `sm:max-w-lg`/`xl`/`2xl`. El escáner debe verse grande y legible en **tablet**.
+- **Animación (motion) — con propósito, nunca decorativa:**
+  - Entradas/salidas de overlays y feedback breve → utilidades de **`tw-animate-css`** (`animate-in fade-in zoom-in-95`, `slide-in-from-*`, `duration-*`, `delay-*`). Ej.: el resultado del escáner (`ResultadoOverlay`).
+  - Navegación/gestos con estado compartido (barra inferior del portal: burbuja deslizante, ripple, spring) → **framer-motion** (`layoutId`, `type: 'spring'`).
+  - **Respetar `prefers-reduced-motion`**: en clases, neutralizar con la variante `motion-reduce:animate-none`; en framer-motion, usar el hook `useReducedMotion()` para desactivar el desplazamiento. La animación orienta o confirma (validar un QR, cambiar de tab), no distrae.

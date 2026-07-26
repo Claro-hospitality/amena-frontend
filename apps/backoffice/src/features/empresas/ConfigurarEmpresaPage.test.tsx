@@ -7,14 +7,12 @@ vi.mock('./queries', () => {
   const empresa = {
     id: 1,
     nombre_comercial: 'Constructora Norte',
-    razon_social: 'Constructora Norte S.A. de C.V.',
-    rfc: null,
     precio_comida: 100,
     ciclo_facturacion: 'mensual',
     activo: true,
     created_at: '',
     updated_at: '',
-    modo_consumo: 'declaracion',
+    modo_consumo: 'reserva',
     dias_permitidos: [],
     limite_diario: null,
   }

@@ -271,7 +271,7 @@ function Combinaciones() {
             </div>
             <div className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground">
               <Receipt className="size-5" />
-              Cierres
+              Cortes
             </div>
           </div>
         </div>

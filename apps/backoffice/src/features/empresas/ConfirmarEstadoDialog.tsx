@@ -27,12 +27,13 @@ export function ConfirmarEstadoDialog({
     cambiar.mutate(
       { id: empresa.id, activo: !empresa.activo },
       {
-        onSuccess: () =>
-          toast.success(desactivando ? 'Empresa desactivada' : 'Empresa reactivada'),
+        onSuccess: () => {
+          toast.success(desactivando ? 'Empresa desactivada' : 'Empresa reactivada')
+          onClose()
+        },
         onError: () => toast.error('No se pudo cambiar el estado. Intenta de nuevo.'),
       }
     )
-    onClose()
   }
 
   return (
@@ -46,8 +47,8 @@ export function ConfirmarEstadoDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>
             {desactivando
-              ? `¿Desactivar ${empresa.nombre_comercial ?? empresa.razon_social}?`
-              : `¿Reactivar ${empresa.nombre_comercial ?? empresa.razon_social}?`}
+              ? `¿Desactivar ${empresa.nombre_comercial ?? 'empresa'}?`
+              : `¿Reactivar ${empresa.nombre_comercial ?? 'empresa'}?`}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {desactivando
@@ -59,6 +60,7 @@ export function ConfirmarEstadoDialog({
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={confirmar}
+            loading={cambiar.isPending}
             className={
               desactivando
                 ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'

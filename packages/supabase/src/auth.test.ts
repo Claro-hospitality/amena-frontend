@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mockeamos el cliente para no tocar red ni env. index.ts nunca ejecuta createClient.
-// vi.hoisted evita el TDZ: vitest sube vi.mock por encima de las declaraciones.
+// vi.hoisted evita el TDZ: vitest sube vi.mock por encima del resto del módulo.
 const mocks = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   signOut: vi.fn(),
