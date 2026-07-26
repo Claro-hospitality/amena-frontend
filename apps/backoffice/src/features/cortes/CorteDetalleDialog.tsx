@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Check, TriangleAlert } from "lucide-react";
+import type { ComponentType } from "react";
+import { Check, Plus, TriangleAlert } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,22 +12,51 @@ import { SeccionFacturaCorte } from "../facturas/SeccionFacturaCorte";
 import type { CorteConEmpresa } from "./api";
 import { BadgeEstadoCorte } from "./BadgeEstadoCorte";
 
-function Dato({
+type Tono = "success" | "info" | "warning";
+
+const TONO_CHIP: Record<Tono, string> = {
+  success: "bg-success/10 text-success",
+  info: "bg-info/10 text-info",
+  warning: "bg-warning/10 text-warning",
+};
+const TONO_BARRA: Record<Tono, string> = {
+  success: "bg-success",
+  info: "bg-info",
+  warning: "bg-warning",
+};
+
+/** Una métrica del desglose de consumo: ícono en color de tono + etiqueta + conteo. */
+function Metrica({
+  tono,
+  icono: Icono,
   etiqueta,
-  children,
+  nota,
+  valor,
 }: {
+  tono: Tono;
+  icono: ComponentType<{ className?: string }>;
   etiqueta: string;
-  children: ReactNode;
+  nota?: string;
+  valor: number;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-border py-2 last:border-0">
-      <dt className="text-sm text-muted-foreground">{etiqueta}</dt>
-      <dd className="text-sm font-medium">{children}</dd>
+    <div className="flex items-center gap-3">
+      <span
+        className={`flex size-7 shrink-0 items-center justify-center rounded-full ${TONO_CHIP[tono]}`}
+        aria-hidden
+      >
+        <Icono className="size-4" />
+      </span>
+      <span className="flex-1 text-sm">
+        {etiqueta}
+        {nota && <span className="text-muted-foreground"> · {nota}</span>}
+      </span>
+      <span className="font-mono text-base font-semibold tabular-nums">{valor}</span>
     </div>
   );
 }
 
-/** Detalle completo de un corte (solo lectura). */
+/** Detalle completo de un corte (solo lectura) con desglose visual de consumo. */
 export function CorteDetalleDialog({
   corte,
   onClose,
@@ -35,6 +64,12 @@ export function CorteDetalleDialog({
   corte: CorteConEmpresa;
   onClose: () => void;
 }) {
+  // Desglose de las consumidas (no hay enlace consumo↔reserva; se infiere: primero se consumen
+  // las reservas). consumidas = reservadosConsumidos + extrasLibres; reservadas = reservadosConsumidos + sinConsumir.
+  const reservadosConsumidos = Math.min(corte.reservadas, corte.consumidas);
+  const reservadosSinConsumir = Math.max(corte.reservadas - corte.consumidas, 0);
+  const extrasLibres = Math.max(corte.consumidas - corte.reservadas, 0);
+
   return (
     <Dialog
       open
@@ -44,59 +79,83 @@ export function CorteDetalleDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{corte.empresa?.nombre ?? "Corte"}</DialogTitle>
+          <div className="flex items-center justify-between gap-3 pr-6">
+            <DialogTitle>{corte.empresa?.nombre ?? "Corte"}</DialogTitle>
+            <BadgeEstadoCorte estado={corte.estado} />
+          </div>
           <DialogDescription>
             Semana {rangoSemanaLegible(deISO(corte.semana_inicio))}
           </DialogDescription>
         </DialogHeader>
 
-        {(() => {
-          // Reservadas que nadie consumió: se cobran igual (la reserva es el cobro).
-          const sinConsumir = Math.max(corte.reservadas - corte.consumidas, 0);
-          return (
-            <dl>
-              <Dato etiqueta="Reservadas">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono tabular-nums">
-                    {corte.reservadas}
-                  </span>
-                  {sinConsumir > 0 ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
-                      <TriangleAlert className="size-3.5" />
-                      {sinConsumir} sin consumir · se cobran
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
-                      <Check className="size-3.5" />
-                      Todas consumidas
-                    </span>
-                  )}
-                </div>
-              </Dato>
-              <Dato etiqueta="Extras">
-                <span className="font-mono tabular-nums">{corte.extras}</span>
-              </Dato>
-              <Dato etiqueta="Consumidas">
-                <span className="font-mono tabular-nums">
-                  {corte.consumidas}
-                </span>
-              </Dato>
-              <Dato etiqueta="Precio unitario">
-                <span className="font-mono tabular-nums">
-                  {formatearMoneda(corte.precio_unitario)}
-                </span>
-              </Dato>
-              <Dato etiqueta="Monto total">
-                <span className="font-mono tabular-nums">
-                  {formatearMoneda(corte.monto_total)}
-                </span>
-              </Dato>
-              <Dato etiqueta="Estado">
-                <BadgeEstadoCorte estado={corte.estado} />
-              </Dato>
-            </dl>
-          );
-        })()}
+        {/* Desglose de consumo */}
+        <section className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <h3 className="text-sm font-semibold">Consumo de la semana</h3>
+            <span className="text-sm text-muted-foreground">
+              <span className="font-mono text-lg font-semibold tabular-nums text-foreground">
+                {corte.consumidas}
+              </span>{" "}
+              consumidas
+            </span>
+          </div>
+
+          {/* Barra: cómo se compone lo consumido (reservado vs extra/libre). */}
+          {corte.consumidas > 0 && (
+            <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted">
+              {reservadosConsumidos > 0 && (
+                <div className={TONO_BARRA.success} style={{ flexGrow: reservadosConsumidos }} />
+              )}
+              {extrasLibres > 0 && (
+                <div className={TONO_BARRA.info} style={{ flexGrow: extrasLibres }} />
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <Metrica
+              tono="success"
+              icono={Check}
+              etiqueta="Reservados consumidos"
+              valor={reservadosConsumidos}
+            />
+            <Metrica tono="info" icono={Plus} etiqueta="Extras y libres" valor={extrasLibres} />
+            {reservadosSinConsumir > 0 && (
+              <Metrica
+                tono="warning"
+                icono={TriangleAlert}
+                etiqueta="Reservados sin consumir"
+                nota="se cobran igual"
+                valor={reservadosSinConsumir}
+              />
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-x-5 gap-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
+            <span>
+              Reservados:{" "}
+              <span className="font-mono tabular-nums text-foreground">{corte.reservadas}</span>
+            </span>
+            <span>
+              Extras (cuotas):{" "}
+              <span className="font-mono tabular-nums text-foreground">{corte.extras}</span>
+            </span>
+          </div>
+        </section>
+
+        {/* Montos */}
+        <dl className="flex flex-col rounded-lg border border-border p-3 text-sm">
+          <div className="flex items-center justify-between py-1">
+            <dt className="text-muted-foreground">Precio unitario</dt>
+            <dd className="font-mono tabular-nums">{formatearMoneda(corte.precio_unitario)}</dd>
+          </div>
+          <div className="flex items-center justify-between py-1">
+            <dt className="font-semibold">Monto total</dt>
+            <dd className="font-mono font-semibold tabular-nums text-primary">
+              {formatearMoneda(corte.monto_total)}
+            </dd>
+          </div>
+        </dl>
 
         <SeccionFacturaCorte corte={corte} />
       </DialogContent>
