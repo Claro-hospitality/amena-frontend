@@ -24,7 +24,6 @@ import type { CorteConEmpresa } from '../cortes/api'
 import { CorteDetalleDialog } from '../cortes/CorteDetalleDialog'
 import { crearColumnasCortes } from '../cortes/columns'
 import { useCortes } from '../cortes/queries'
-import { FacturasSeccion } from '../facturas/FacturasSeccion'
 import { datosFiscalesCompletos, type Empresa } from './api'
 import { useDatosFiscalesEmpresa, useEmpresas, useResumenEmpresa } from './queries'
 import type { ResumenEmpresa } from './resumenApi'
@@ -109,16 +108,12 @@ export function EmpresaDetallePage() {
           <TabsList>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
             <TabsTrigger value="cortes">Cortes semanales</TabsTrigger>
-            <TabsTrigger value="facturas">Facturas</TabsTrigger>
           </TabsList>
           <TabsContent value="usuarios" className="flex min-h-0 flex-col">
             <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} fillHeight />
           </TabsContent>
           <TabsContent value="cortes" className="flex min-h-0 flex-col">
             <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCorte} fillHeight />
-          </TabsContent>
-          <TabsContent value="facturas" className="flex min-h-0 flex-col">
-            <FacturasSeccion empresaId={id} fillHeight />
           </TabsContent>
         </Tabs>
       </div>

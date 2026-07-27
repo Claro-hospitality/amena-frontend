@@ -4,7 +4,6 @@ import { zipSync } from 'fflate'
 
 export type Factura = Database['public']['Tables']['facturas']['Row']
 export type EstadoFactura = Database['public']['Enums']['estado_factura']
-export type FacturaConEmpresa = Factura & { empresa: { nombre: string } | null }
 
 /**
  * Ambiente de timbrado activo, derivado del Supabase al que apunta el front (mismo criterio que el
@@ -15,29 +14,6 @@ export const AMBIENTE_FACTURAMA: 'sandbox' | 'prod' = /localhost|127\.0\.0\.1|ko
 )
   ? 'sandbox'
   : 'prod'
-
-const SELECT_EMPRESA = '*, empresa:empresas(nombre:nombre_comercial)'
-
-/** Lista global de facturas (super_admin/finanzas; la RLS del backend filtra), más recientes primero. */
-export async function listarFacturas(): Promise<FacturaConEmpresa[]> {
-  const { data, error } = await supabase
-    .from('facturas')
-    .select(SELECT_EMPRESA)
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data as unknown as FacturaConEmpresa[]
-}
-
-/** Facturas de una empresa (más recientes primero). */
-export async function listarFacturasEmpresa(empresaId: number): Promise<FacturaConEmpresa[]> {
-  const { data, error } = await supabase
-    .from('facturas')
-    .select(SELECT_EMPRESA)
-    .eq('empresa_id', empresaId)
-    .order('created_at', { ascending: false })
-  if (error) throw error
-  return data as unknown as FacturaConEmpresa[]
-}
 
 /** Factura de un corte (1:1). `null` si el corte aún no se ha facturado. */
 export async function facturaDeCorte(corteId: number): Promise<Factura | null> {
@@ -86,18 +62,6 @@ export async function urlFirmadaFactura(path: string): Promise<string> {
   const { data, error } = await supabase.storage.from('facturas').createSignedUrl(path, 120)
   if (error) throw error
   return data.signedUrl
-}
-
-/** Descarga un archivo del bucket `facturas` (PDF/XML) vía URL firmada. */
-export async function descargarArchivoFactura(path: string, nombre: string): Promise<void> {
-  const url = await urlFirmadaFactura(path)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = nombre
-  a.rel = 'noopener'
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
 }
 
 /** Baja los bytes de un objeto del bucket vía su URL firmada. */
