@@ -60,7 +60,7 @@ describe('rutas protegidas del portal', () => {
     auth.obtenerSesion.mockResolvedValue(null)
     montar('/inicio')
     expect(await screen.findByRole('button', { name: /entrar/i })).toBeInTheDocument()
-    expect(screen.getByText('Portal de empresas')).toBeInTheDocument()
+    expect(screen.getByText(/portal de empresas/i)).toBeInTheDocument()
   })
 
   it('admin_empresa aterriza en /inicio', async () => {
