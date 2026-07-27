@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { buttonVariants } from '@amena/ui/components/ui/button'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
@@ -33,30 +33,9 @@ function BarraSuperior() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-5 sm:px-8">
-        <div className="flex items-center gap-2.5">
-          <LogotipoAmena className="h-5 w-auto text-primary" />
-          <span className="hidden text-xs font-medium uppercase tracking-widest text-muted-foreground sm:inline">
-            Conoce Amena
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <nav className="hidden gap-1 md:flex" aria-label="Secciones">
-            {[
-              ['#que-es', 'Qué es'],
-              ['#para-que', 'Para qué sirve'],
-              ['#publico', 'Para quién'],
-              ['#como-funciona', 'Cómo funciona'],
-              ['#administracion', 'Cómo se administra'],
-            ].map(([href, label]) => (
-              <a
-                key={href}
-                href={href}
-                className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
+        <LogotipoAmena className="h-5 w-auto text-primary" />
+        <div className="flex items-center gap-2">
+          <NavTabs />
           <Link to="/login" className={`${buttonVariants({ size: 'sm' })} ml-1`}>
             Iniciar sesión
           </Link>
@@ -66,10 +45,113 @@ function BarraSuperior() {
   )
 }
 
+const TABS = [
+  { id: 'que-es', label: 'Qué es' },
+  { id: 'para-que', label: 'Para qué sirve' },
+  { id: 'publico', label: 'Para quién' },
+  { id: 'como-funciona', label: 'Cómo funciona' },
+  { id: 'administracion', label: 'Cómo se administra' },
+]
+
+/** ¿El usuario pidió menos movimiento? (respeta prefers-reduced-motion). */
+function usePrefiereMenosMovimiento() {
+  const [reduce, setReduce] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const on = () => setReduce(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return reduce
+}
+
+/**
+ * Tabs de sección con una "pastilla" que se DESLIZA suavemente al tab activo (transiciones CSS,
+ * sin dependencias). El activo se sincroniza con el scroll (IntersectionObserver) y al presionar
+ * un tab hace scroll suave a su sección. Solo en pantallas medianas+.
+ */
+function NavTabs() {
+  const [activo, setActivo] = useState(TABS[0].id)
+  const refs = useRef<Record<string, HTMLAnchorElement | null>>({})
+  const pastillaRef = useRef<HTMLSpanElement>(null)
+  const reduce = usePrefiereMenosMovimiento()
+
+  // Mide y coloca la pastilla bajo el tab activo (imperativo, sin setState → sin re-render).
+  // La transición CSS de `left`/`width` produce el deslizamiento suave.
+  useLayoutEffect(() => {
+    const medir = () => {
+      const el = refs.current[activo]
+      const pill = pastillaRef.current
+      if (el && pill) {
+        pill.style.left = `${el.offsetLeft}px`
+        pill.style.width = `${el.offsetWidth}px`
+        pill.style.opacity = '1'
+      }
+    }
+    medir()
+    window.addEventListener('resize', medir)
+    return () => window.removeEventListener('resize', medir)
+  }, [activo])
+
+  // Scroll-spy: marca activo el tab de la sección visible.
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        if (visible[0]) setActivo(visible[0].target.id)
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: [0, 0.25, 0.5, 1] }
+    )
+    for (const t of TABS) {
+      const s = document.getElementById(t.id)
+      if (s) obs.observe(s)
+    }
+    return () => obs.disconnect()
+  }, [])
+
+  function ir(e: React.MouseEvent, id: string) {
+    e.preventDefault()
+    setActivo(id) // la pastilla se desliza de inmediato al presionar
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+  }
+
+  return (
+    <nav className="relative hidden md:flex" aria-label="Secciones">
+      <span
+        ref={pastillaRef}
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-0 w-0 rounded-lg bg-secondary opacity-0 transition-[left,width] duration-300 ease-out motion-reduce:transition-none"
+      />
+      {TABS.map((t) => (
+        <a
+          key={t.id}
+          ref={(el) => {
+            refs.current[t.id] = el
+          }}
+          href={`#${t.id}`}
+          onClick={(e) => ir(e, t.id)}
+          aria-current={activo === t.id ? 'true' : undefined}
+          className={`relative z-10 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-[color,transform] duration-150 active:scale-95 ${
+            activo === t.id ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {t.label}
+        </a>
+      ))}
+    </nav>
+  )
+}
+
 function Hero() {
   return (
     <section className="py-14 sm:py-20">
-      <Eyebrow>El comedor corporativo del edificio Mutuo Vive</Eyebrow>
+      <Eyebrow>Social Kitchen</Eyebrow>
       <h1 className="mt-5">
         <LogotipoAmena className="h-12 w-auto text-primary sm:h-16" />
       </h1>
@@ -77,16 +159,15 @@ function Hero() {
         Comer en el trabajo, simple y bien organizado.
       </p>
       <p className="mt-6 max-w-2xl text-pretty text-base text-foreground sm:text-lg">
-        Amena es el servicio de comedor del edificio <strong>Mutuo Vive</strong> (Guadalajara) y la
-        plataforma que lo organiza. Las empresas del edificio le dan de comer a su equipo en el
-        restaurante, y Amena se encarga de todo lo demás: <strong>reservar</strong> las comidas de la
-        semana, <strong>registrar</strong> quién come con un simple código QR y llevar la{' '}
-        <strong>cuenta clara</strong> para facturar. Sin vales, sin listas en papel y sin filas
-        lentas.
+        Amena es el servicio de comedor <strong>Social Kitchen</strong> y la plataforma que lo
+        organiza. Las empresas le dan de comer a su equipo en el restaurante, y Amena se encarga de
+        todo lo demás: <strong>reservar</strong> las comidas de la semana, <strong>registrar</strong>{' '}
+        quién come con un simple código QR y llevar la <strong>cuenta clara</strong> para facturar. Sin
+        vales, sin listas en papel y sin filas lentas.
       </p>
       <div className="mt-7 flex flex-wrap gap-2">
         <Chip tono="primary">En funcionamiento</Chip>
-        <Chip>Edificio Mutuo Vive · GDL</Chip>
+        <Chip>Social Kitchen</Chip>
         <Chip>Para empresas y su equipo</Chip>
         <Chip>Todo desde el celular</Chip>
       </div>
@@ -98,15 +179,15 @@ function QueEs() {
   return (
     <Seccion id="que-es" num="01" titulo="¿Qué es Amena?">
       <p className="mb-6 max-w-2xl text-muted-foreground">
-        Amena es, al mismo tiempo, un <strong>restaurante dentro del edificio</strong> y una{' '}
+        Amena es, al mismo tiempo, un <strong>restaurante</strong> y una{' '}
         <strong>plataforma digital</strong> que ordena cómo las empresas dan de comer a su gente. En
         lugar de vales, cobros a mano o apuntar nombres en una hoja, todo el proceso vive en un solo
         lugar.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Tarjeta k="Un comedor para el edificio">
-          El restaurante de Mutuo Vive donde comen los equipos de las empresas del edificio. Cada
-          empresa acuerda con Amena un precio por comida y un plan a su medida.
+        <Tarjeta k="Un comedor para las empresas">
+          El restaurante donde comen los equipos de las empresas. Cada empresa acuerda con Amena un
+          precio por comida y un plan a su medida.
         </Tarjeta>
         <Tarjeta k="Una plataforma que lo ordena">
           Dos aplicaciones web sencillas conectan a las empresas con el comedor: se reservan las
@@ -153,8 +234,8 @@ function ParaQue() {
 function Publico() {
   const items: [string, string][] = [
     [
-      'Las empresas del edificio',
-      'Compañías con oficinas en Mutuo Vive que contratan el servicio de comedor para su gente.',
+      'Las empresas',
+      'Compañías que contratan el servicio de comedor Social Kitchen para su gente.',
     ],
     [
       'Sus colaboradores',
@@ -311,7 +392,7 @@ function Pie() {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div className="flex items-center gap-2">
           <LogotipoAmena className="h-4 w-auto text-muted-foreground" aria-hidden />
-          <span>Planes de alimentación corporativa · Mutuo Vive, Guadalajara</span>
+          <span>Social Kitchen · Planes de alimentación para empresas</span>
         </div>
         <span>Comer en el trabajo, simple y bien organizado.</span>
       </div>
