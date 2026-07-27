@@ -1,18 +1,22 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
 import { zipSync } from 'fflate'
+import { obtenerMiEmpresaId } from '../../lib/empresaActual'
 
 export type Factura = Database['public']['Tables']['facturas']['Row']
 export type EstadoFactura = Database['public']['Enums']['estado_factura']
 
 /**
- * Facturas de la empresa del admin, más recientes primero. La RLS del backend restringe a su
- * empresa automáticamente (el admin solo ve las de su empresa). Solo lectura.
+ * Facturas de la empresa del admin, más recientes primero. Se acota explícitamente por
+ * `empresa_id` (no basta la RLS: una cuenta con rol de backoffice vería todas las empresas).
+ * Solo lectura.
  */
 export async function listarMisFacturas(): Promise<Factura[]> {
+  const empresaId = await obtenerMiEmpresaId()
   const { data, error } = await supabase
     .from('facturas')
     .select('*')
+    .eq('empresa_id', empresaId)
     .order('created_at', { ascending: false })
   if (error) throw error
   return data
