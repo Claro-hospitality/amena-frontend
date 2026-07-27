@@ -4,6 +4,7 @@ import {
   ClipboardCheck,
   FileText,
   Home,
+  Info,
   QrCode,
   UtensilsCrossed,
   Users,
@@ -36,8 +37,13 @@ export const navPorTipo: Record<TipoUsuarioPortal, ItemNav[]> = {
   ],
 }
 
-/** Subnavegación interna de la sección Empresa (solo admin). Rutas anidadas `/empresa/*`. */
+/**
+ * Subnavegación interna de la sección Empresa (solo admin), como tabs. Rutas anidadas `/empresa/*`.
+ * "General" (índice `/empresa`) muestra los datos generales de la empresa; el resto son las
+ * secciones hijas.
+ */
 export const navEmpresa: ItemNav[] = [
+  { to: '/empresa', label: 'General', icon: Info },
   { to: '/empresa/colaboradores', label: 'Colaboradores', icon: Users },
   { to: '/empresa/cuotas', label: 'Cuotas', icon: CalendarDays },
   { to: '/empresa/cortes', label: 'Cortes', icon: ClipboardCheck },

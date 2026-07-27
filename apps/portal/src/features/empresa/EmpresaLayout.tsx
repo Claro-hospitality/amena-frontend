@@ -8,8 +8,8 @@ import { navEmpresa } from '../../layout/navPortal'
 /**
  * Sección "Empresa" (solo admin): agrupador de gestión con subnavegación tipo "tabs"
  * (segmented control) — contenedor en color secondary y la opción seleccionada como pastilla
- * sólida del secondary principal (verde de marca). Facturas queda como placeholder
- * deshabilitado hasta el módulo 4.8. Re-pasa el contexto de acceso a las rutas hijas.
+ * sólida del secondary principal (verde de marca). "General" (índice) muestra los datos generales
+ * de la empresa; el resto son las secciones hijas. Re-pasa el contexto de acceso a las rutas hijas.
  *
  * Una sola fila con scroll horizontal (móvil/tablet): la opción activa se desliza a la vista.
  */
@@ -50,6 +50,8 @@ export function EmpresaLayout() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                // "General" (índice /empresa) solo activo en la ruta exacta, no en las hijas.
+                end={item.to === '/empresa'}
                 className={({ isActive }) =>
                   cn(
                     'relative inline-flex shrink-0 items-center rounded-xl px-3 py-1.5 text-sm font-medium transition-colors',

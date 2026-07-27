@@ -702,6 +702,10 @@ export type Database = {
         }
         Returns: Json
       }
+      actualizar_nombre_comercial: {
+        Args: { p_empresa_id: number; p_nombre: string }
+        Returns: undefined
+      }
       asignar_rol_unico: {
         Args: {
           p_rol: Database["public"]["Enums"]["rol_portal"]

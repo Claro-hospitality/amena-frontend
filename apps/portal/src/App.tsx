@@ -29,6 +29,9 @@ const MenuPage = lazy(() =>
 const CortesPage = lazy(() =>
   import('./features/cortes/CortesPage').then((m) => ({ default: m.CortesPage }))
 )
+const EmpresaGeneralPage = lazy(() =>
+  import('./features/empresa/EmpresaGeneralPage').then((m) => ({ default: m.EmpresaGeneralPage }))
+)
 const FacturasEmpresaPage = lazy(() =>
   import('./features/facturas/FacturasEmpresaPage').then((m) => ({
     default: m.FacturasEmpresaPage,
@@ -73,7 +76,7 @@ export default function App() {
 
         {/* Gestión de empresa (solo admin): agrupador con subnav interna. */}
         <Route path="empresa" element={<EmpresaLayout />}>
-          <Route index element={<Navigate to="/empresa/colaboradores" replace />} />
+          <Route index element={<Ruta><EmpresaGeneralPage /></Ruta>} />
           <Route path="colaboradores" element={<Ruta><ColaboradoresPage /></Ruta>} />
           <Route path="cuotas" element={<Ruta><CuotasSemanaPage /></Ruta>} />
           <Route path="cuotas/reservar" element={<Ruta><ReservarCuotasPage /></Ruta>} />
