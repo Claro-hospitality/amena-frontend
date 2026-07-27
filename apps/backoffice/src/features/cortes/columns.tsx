@@ -1,8 +1,10 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { Eye } from 'lucide-react'
+import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
 import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
+import { BadgeEstadoFactura } from '../facturas/BadgeEstadoFactura'
 import type { CorteConEmpresa } from './api'
 import { BadgeEstadoCorte } from './BadgeEstadoCorte'
 
@@ -25,23 +27,36 @@ export function crearColumnasCortes({
       cell: ({ row }) => rangoSemanaLegible(deISO(row.original.semana_inicio)),
     },
     {
-      accessorKey: 'reservadas',
-      header: 'Reservadas',
-      cell: ({ row }) => (
-        <span className="font-mono tabular-nums">{row.original.reservadas}</span>
-      ),
+      id: 'consumos',
+      header: 'Consumos',
+      cell: ({ row }) => {
+        const c = row.original
+        return (
+          <div className="flex flex-col gap-0.5 leading-tight">
+            <span>
+              <span className="font-mono font-medium tabular-nums">{c.consumidas}</span>{' '}
+              <span className="text-muted-foreground">consumidas</span>
+            </span>
+            <span className="text-xs text-muted-foreground">
+              <span className="font-mono tabular-nums text-foreground">{c.reservadas}</span>{' '}
+              reservadas ·{' '}
+              <span className="font-mono tabular-nums text-foreground">{c.extras}</span> extras
+            </span>
+          </div>
+        )
+      },
     },
     {
-      accessorKey: 'extras',
-      header: 'Extras',
-      cell: ({ row }) => <span className="font-mono tabular-nums">{row.original.extras}</span>,
-    },
-    {
-      accessorKey: 'consumidas',
-      header: 'Consumidas',
-      cell: ({ row }) => (
-        <span className="font-mono tabular-nums">{row.original.consumidas}</span>
-      ),
+      id: 'facturada',
+      header: 'Facturada',
+      cell: ({ row }) => {
+        const factura = row.original.factura
+        return factura ? (
+          <BadgeEstadoFactura estado={factura.estado} />
+        ) : (
+          <Badge variant="secondary">Sin facturar</Badge>
+        )
+      },
     },
     {
       accessorKey: 'precio_unitario',

@@ -3,7 +3,6 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
-  FileText,
   Home,
   Palette,
   Receipt,
@@ -25,7 +24,7 @@ export interface ItemNav {
 /**
  * Items del sidebar por rol (rutas placeholder por ahora).
  * - super_admin: todo el backoffice.
- * - finanzas: consultas de cortes y facturas.
+ * - finanzas: consultas de cortes (las facturas se ven en el detalle del corte).
  * - mesero: solo el escáner.
  */
 export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
@@ -37,7 +36,6 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/menu', label: 'Menú', icon: CalendarDays },
     { to: '/consumos', label: 'Consumos', icon: Receipt },
     { to: '/cortes', label: 'Cortes semanales', icon: ClipboardCheck },
-    { to: '/facturas', label: 'Facturas', icon: FileText },
     { to: '/usuarios', label: 'Usuarios', icon: Users },
     { to: '/configuracion', label: 'Configuración', icon: Settings },
   ],
@@ -46,7 +44,6 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/empresas', label: 'Empresas', icon: Building2 },
     { to: '/consumos', label: 'Consumos', icon: Receipt },
     { to: '/cortes', label: 'Cortes semanales', icon: ClipboardCheck },
-    { to: '/facturas', label: 'Facturas', icon: FileText },
   ],
   mesero: [{ to: '/escaner', label: 'Escáner', icon: ScanLine }],
   // Consulta: solo lectura de todo lo operativo. Sin escáner, sin configuración, sin usuarios.

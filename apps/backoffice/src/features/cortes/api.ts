@@ -2,19 +2,35 @@ import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
 
 export type Corte = Database['public']['Tables']['cortes_semanales']['Row']
-export type CorteConEmpresa = Corte & { empresa: { nombre: string } | null }
+export type EstadoFactura = Database['public']['Enums']['estado_factura']
+export type CorteConEmpresa = Corte & {
+  empresa: { nombre: string } | null
+  /** Factura del corte (1:1) si existe; `null` si aún no se ha facturado. */
+  factura: { estado: EstadoFactura } | null
+}
 
 /**
  * Lista todos los cortes visibles para el usuario (super_admin: todos; finanzas: todos —
- * RLS del backend hace el filtrado real), del más reciente al más antiguo.
+ * RLS del backend hace el filtrado real), del más reciente al más antiguo. Embebe la factura
+ * (1:1) para mostrar su estado en el listado.
  */
 export async function listarCortes(): Promise<CorteConEmpresa[]> {
   const { data, error } = await supabase
     .from('cortes_semanales')
-    .select('*, empresa:empresas(nombre:nombre_comercial)')
+    .select('*, empresa:empresas(nombre:nombre_comercial), factura:facturas(estado)')
     .order('semana_inicio', { ascending: false })
   if (error) throw error
-  return data as unknown as CorteConEmpresa[]
+  const filas = (data ?? []) as unknown as Array<
+    Corte & {
+      empresa: { nombre: string } | null
+      factura: { estado: EstadoFactura }[] | { estado: EstadoFactura } | null
+    }
+  >
+  // PostgREST puede devolver la relación embebida como arreglo; se normaliza a objeto | null.
+  return filas.map((c) => ({
+    ...c,
+    factura: Array.isArray(c.factura) ? (c.factura[0] ?? null) : (c.factura ?? null),
+  }))
 }
 
 export interface ResultadoCorte {
