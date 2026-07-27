@@ -9,25 +9,15 @@ import { LogotipoAmena } from "@amena/ui/components/logotipo-amena"
 
 const VIDEO_POR_DEFECTO = "/videos/general-amena.mp4"
 
-/** ¿Viewport de escritorio (lg+)? Evita descargar el video de fondo en móvil. */
-function useEsEscritorio() {
-  const [esEscritorio, setEsEscritorio] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
-  )
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)")
-    const on = () => setEsEscritorio(mq.matches)
-    mq.addEventListener("change", on)
-    return () => mq.removeEventListener("change", on)
-  }, [])
-  return esEscritorio
-}
-
 /**
  * Pantalla de acceso (login) compartida por backoffice y portal. Presentacional: la autenticación
- * se inyecta con `onIniciarSesion` (que además navega al éxito). Layout split — video a la izquierda
- * con el logotipo encima, formulario a la derecha. En móvil solo se ve el formulario (con el logo);
- * el video no se monta para no descargarlo.
+ * se inyecta con `onIniciarSesion` (que además navega al éxito).
+ *
+ * Layout responsivo con el video de marca de fondo:
+ *  - Escritorio (lg+): split — video a la IZQUIERDA (con el logotipo centrado encima) y el
+ *    formulario a la derecha sobre un panel sólido (crema).
+ *  - Móvil / tablet: el video ocupa TODO el fondo (más oscuro) y el formulario va encima en una
+ *    tarjeta translúcida tipo "liquid glass" (blur), con el logo dentro.
  */
 export function PantallaAcceso({
   subtitulo,
@@ -42,7 +32,6 @@ export function PantallaAcceso({
   videoSrc?: string
   poster?: string
 }) {
-  const esEscritorio = useEsEscritorio()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -53,7 +42,7 @@ export function PantallaAcceso({
   // Fuerza el muted (algunos navegadores ignoran el atributo) para permitir el autoplay.
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = true
-  }, [esEscritorio])
+  }, [])
 
   async function onSubmit(evento: FormEvent) {
     evento.preventDefault()
@@ -68,108 +57,115 @@ export function PantallaAcceso({
   }
 
   return (
-    <main className="grid min-h-dvh bg-background lg:grid-cols-[1.05fr_1fr]">
-      {/* Panel izquierdo: video de marca (solo escritorio) con el logotipo encima. */}
-      <div className="relative hidden overflow-hidden bg-salvia-900 lg:block">
-        {esEscritorio && (
-          <video
-            ref={videoRef}
-            className="absolute inset-0 size-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster={poster}
-          >
-            <source src={videoSrc} type="video/mp4" />
-          </video>
-        )}
-        {/* Velo sólido para dar legibilidad al logotipo sobre el video. */}
-        <div className="absolute inset-0 bg-tinta-900/30" aria-hidden />
-        <LogotipoAmena className="absolute left-10 top-9 h-8 w-auto text-primary-foreground" />
+    <main className="relative min-h-dvh overflow-hidden bg-salvia-900">
+      {/* Video de marca: fondo completo en móvil/tablet; mitad izquierda en escritorio. */}
+      <div className="absolute inset-y-0 left-0 right-0 lg:right-1/2">
+        <video
+          ref={videoRef}
+          className="absolute inset-0 size-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster={poster}
+        >
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+        {/* Velo: más oscuro en móvil (legibilidad del glass), más suave en escritorio. */}
+        <div className="absolute inset-0 bg-tinta-900/55 lg:bg-tinta-900/25" aria-hidden />
+        {/* Logotipo centrado sobre el video — solo escritorio (en móvil va dentro de la tarjeta). */}
+        <div className="absolute inset-0 hidden items-center justify-center lg:flex">
+          <LogotipoAmena className="h-14 w-auto text-primary-foreground" />
+        </div>
       </div>
 
-      {/* Panel derecho: formulario. */}
-      <div className="flex items-center justify-center px-6 py-12 sm:px-10">
-        <div className="w-full max-w-sm">
-          {/* Logo en móvil (en escritorio va sobre el video). */}
-          <LogotipoAmena className="mb-8 h-8 w-auto text-primary lg:hidden" />
+      {/* Contenido: en escritorio, 2 columnas (izquierda = video; derecha = formulario). */}
+      <div className="relative grid min-h-dvh lg:grid-cols-2">
+        <div className="hidden lg:block" aria-hidden />
 
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold tracking-tight">Bienvenido de vuelta</h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              Inicia sesión para continuar · {subtitulo}
+        {/* Columna del formulario: sólida en escritorio; transparente sobre el video en móvil. */}
+        <div className="flex items-center justify-center px-5 py-12 sm:px-8 lg:bg-background">
+          {/* Tarjeta "liquid glass" en móvil/tablet; plana en escritorio. */}
+          <div className="w-full max-w-sm rounded-3xl border border-border/60 bg-background/70 p-6 backdrop-blur-2xl sm:p-8 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+            {/* Logo dentro de la tarjeta (en escritorio está sobre el video). */}
+            <LogotipoAmena className="mb-8 h-8 w-auto text-primary lg:hidden" />
+
+            <div className="mb-8">
+              <h1 className="text-2xl font-semibold tracking-tight">Bienvenido de vuelta</h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Inicia sesión para continuar · {subtitulo}
+              </p>
+            </div>
+
+            <form onSubmit={onSubmit}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="email">Correo</FieldLabel>
+                  <div className="relative">
+                    <Mail
+                      className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                      aria-hidden
+                    />
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="tu@correo.com"
+                      className="pl-9"
+                    />
+                  </div>
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+                  <div className="relative">
+                    <Lock
+                      className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                      aria-hidden
+                    />
+                    <Input
+                      id="password"
+                      type={verPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="px-9"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      onClick={() => setVerPassword((v) => !v)}
+                      aria-label={verPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    >
+                      {verPassword ? <EyeOff /> : <Eye />}
+                    </Button>
+                  </div>
+                </Field>
+
+                {error && (
+                  <FieldError role="alert" className={cn("rounded-lg bg-destructive/10 px-3 py-2")}>
+                    {error}
+                  </FieldError>
+                )}
+
+                <Button type="submit" size="lg" className="mt-1 w-full" loading={enviando}>
+                  Entrar
+                </Button>
+              </FieldGroup>
+            </form>
+
+            <p className="mt-8 text-center text-xs text-muted-foreground">
+              ¿Problemas para entrar? Contacta al administrador de tu cuenta.
             </p>
           </div>
-
-          <form onSubmit={onSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Correo</FieldLabel>
-                <div className="relative">
-                  <Mail
-                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                    aria-hidden
-                  />
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu@correo.com"
-                    className="pl-9"
-                  />
-                </div>
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-                <div className="relative">
-                  <Lock
-                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                    aria-hidden
-                  />
-                  <Input
-                    id="password"
-                    type={verPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="px-9"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    onClick={() => setVerPassword((v) => !v)}
-                    aria-label={verPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                  >
-                    {verPassword ? <EyeOff /> : <Eye />}
-                  </Button>
-                </div>
-              </Field>
-
-              {error && (
-                <FieldError role="alert" className={cn("rounded-lg bg-destructive/10 px-3 py-2")}>
-                  {error}
-                </FieldError>
-              )}
-
-              <Button type="submit" size="lg" className="mt-1 w-full" loading={enviando}>
-                Entrar
-              </Button>
-            </FieldGroup>
-          </form>
-
-          <p className="mt-8 text-center text-xs text-muted-foreground">
-            ¿Problemas para entrar? Contacta al administrador de tu cuenta.
-          </p>
         </div>
       </div>
     </main>
