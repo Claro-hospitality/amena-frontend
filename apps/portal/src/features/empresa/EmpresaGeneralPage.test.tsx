@@ -73,21 +73,6 @@ describe('EmpresaGeneralPage', () => {
     expect(screen.getByText(/acordaste con amena/i)).toBeInTheDocument()
   })
 
-  it('muestra las 4 tarjetas de acceso a las secciones hijas', async () => {
-    renderizar('admin_empresa')
-    await screen.findByText('Constructora Norte')
-    expect(screen.getByRole('link', { name: /colaboradores/i })).toHaveAttribute(
-      'href',
-      '/empresa/colaboradores'
-    )
-    expect(screen.getByRole('link', { name: /cuotas/i })).toHaveAttribute('href', '/empresa/cuotas')
-    expect(screen.getByRole('link', { name: /cortes/i })).toHaveAttribute('href', '/empresa/cortes')
-    expect(screen.getByRole('link', { name: /facturas/i })).toHaveAttribute(
-      'href',
-      '/empresa/facturas'
-    )
-  })
-
   it('muestra el estado vacío fiscal y permite completar los datos', async () => {
     api.obtenerMiEmpresa.mockResolvedValue({ empresa, datosFiscales: null })
     const user = userEvent.setup()

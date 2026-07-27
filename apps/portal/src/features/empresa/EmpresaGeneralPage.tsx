@@ -1,16 +1,6 @@
 import { useState } from 'react'
-import { Link, Navigate, useOutletContext } from 'react-router-dom'
-import {
-  Building2,
-  CalendarDays,
-  ChevronRight,
-  ClipboardCheck,
-  FileText,
-  Pencil,
-  ReceiptText,
-  Users,
-  type LucideIcon,
-} from 'lucide-react'
+import { Navigate, useOutletContext } from 'react-router-dom'
+import { Building2, Pencil, ReceiptText } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -28,14 +18,6 @@ import type { DatosFiscales, Empresa } from './api'
 import { DatosFiscalesFormDialog } from './DatosFiscalesFormDialog'
 import { EditarNombreComercialDialog } from './EditarNombreComercialDialog'
 import { useMiEmpresa } from './queries'
-
-/** Secciones hijas de la empresa, como tarjetas de acceso (reemplazan a los tabs). */
-const SECCIONES: { to: string; label: string; descripcion: string; icon: LucideIcon }[] = [
-  { to: '/empresa/colaboradores', label: 'Colaboradores', descripcion: 'Da de alta y administra a tu equipo', icon: Users },
-  { to: '/empresa/cuotas', label: 'Cuotas', descripcion: 'Reserva las comidas de la semana', icon: CalendarDays },
-  { to: '/empresa/cortes', label: 'Cortes semanales', descripcion: 'Consumo y montos por semana', icon: ClipboardCheck },
-  { to: '/empresa/facturas', label: 'Facturas', descripcion: 'Consulta y descarga tus CFDI', icon: FileText },
-]
 
 const MODO_CONSUMO: Record<Empresa['modo_consumo'], string> = {
   reserva: 'Por reserva (cuota por día)',
@@ -190,13 +172,6 @@ export function EmpresaGeneralPage() {
         </p>
       </section>
 
-      {/* Acceso a las secciones hijas */}
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {SECCIONES.map((s) => (
-          <TarjetaAcceso key={s.to} {...s} />
-        ))}
-      </section>
-
       <EditarNombreComercialDialog
         empresaId={empresa.id}
         nombreActual={empresa.nombre_comercial}
@@ -219,23 +194,5 @@ function Dato({ label, valor, mono }: { label: string; valor: string; mono?: boo
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className={mono ? 'font-mono text-sm' : 'text-sm'}>{valor}</dd>
     </div>
-  )
-}
-
-function TarjetaAcceso({ to, label, descripcion, icon: Icon }: (typeof SECCIONES)[number]) {
-  return (
-    <Link
-      to={to}
-      className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted"
-    >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-        <Icon className="size-5" strokeWidth={1.75} />
-      </span>
-      <span className="flex min-w-0 flex-col">
-        <span className="font-medium">{label}</span>
-        <span className="truncate text-xs text-muted-foreground">{descripcion}</span>
-      </span>
-      <ChevronRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
-    </Link>
   )
 }
