@@ -58,6 +58,11 @@ const DefinirContrasenaPage = lazy(() =>
     default: m.DefinirContrasenaPage,
   }))
 )
+const ReporteSistemaPage = lazy(() =>
+  import('./features/reporte/ReporteSistemaPage').then((m) => ({
+    default: m.ReporteSistemaPage,
+  }))
+)
 
 function CargandoRuta() {
   return (
@@ -77,6 +82,15 @@ export default function App() {
         element={
           <Suspense fallback={<CargandoRuta />}>
             <DefinirContrasenaPage />
+          </Suspense>
+        }
+      />
+      {/* Reporte del sistema: PÚBLICO (sin sesión), para compartir por enlace. */}
+      <Route
+        path="/reporte"
+        element={
+          <Suspense fallback={<CargandoRuta />}>
+            <ReporteSistemaPage />
           </Suspense>
         }
       />
