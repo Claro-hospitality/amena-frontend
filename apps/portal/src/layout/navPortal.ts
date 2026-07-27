@@ -1,14 +1,4 @@
-import {
-  Building2,
-  CalendarDays,
-  ClipboardCheck,
-  FileText,
-  Home,
-  QrCode,
-  UtensilsCrossed,
-  Users,
-  type LucideIcon,
-} from 'lucide-react'
+import { Building2, Home, QrCode, UtensilsCrossed, type LucideIcon } from 'lucide-react'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
 
 export interface ItemNav {
@@ -36,10 +26,5 @@ export const navPorTipo: Record<TipoUsuarioPortal, ItemNav[]> = {
   ],
 }
 
-/** Subnavegación interna de la sección Empresa (solo admin). Rutas anidadas `/empresa/*`. */
-export const navEmpresa: ItemNav[] = [
-  { to: '/empresa/colaboradores', label: 'Colaboradores', icon: Users },
-  { to: '/empresa/cuotas', label: 'Cuotas', icon: CalendarDays },
-  { to: '/empresa/cortes', label: 'Cortes', icon: ClipboardCheck },
-  { to: '/empresa/facturas', label: 'Facturas', icon: FileText },
-]
+// La navegación a las secciones hijas de Empresa (colaboradores, cuotas, cortes, facturas) vive
+// ahora en las tarjetas de la página General (`features/empresa/EmpresaGeneralPage`).
