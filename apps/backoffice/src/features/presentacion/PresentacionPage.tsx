@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
+import { buttonVariants } from '@amena/ui/components/ui/button'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 
 /**
  * Página PÚBLICA (sin sesión) que presenta qué es Amena, para compartir por enlace
- * (backoffice.amena.social/reporte). Redacción para público general (no técnica). Layout
+ * (backoffice.amena.social/conoce-amena). Redacción para público general (no técnica). Layout
  * autocontenido con la identidad de marca: tokens del tema (crema/naranja/salvia/tinta),
- * tipografía Geist y el logotipo. Solo lectura.
+ * tipografía Geist y el logotipo. Incluye acceso al login del backoffice. Solo lectura.
  */
-export function ReporteSistemaPage() {
+export function PresentacionPage() {
   return (
     <div className="min-h-dvh bg-background text-foreground">
       <BarraSuperior />
@@ -37,23 +39,28 @@ function BarraSuperior() {
             Conoce Amena
           </span>
         </div>
-        <nav className="hidden gap-1 md:flex" aria-label="Secciones">
-          {[
-            ['#que-es', 'Qué es'],
-            ['#para-que', 'Para qué sirve'],
-            ['#publico', 'Para quién'],
-            ['#como-funciona', 'Cómo funciona'],
-            ['#administracion', 'Cómo se administra'],
-          ].map(([href, label]) => (
-            <a
-              key={href}
-              href={href}
-              className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            >
-              {label}
-            </a>
-          ))}
-        </nav>
+        <div className="flex items-center gap-1">
+          <nav className="hidden gap-1 md:flex" aria-label="Secciones">
+            {[
+              ['#que-es', 'Qué es'],
+              ['#para-que', 'Para qué sirve'],
+              ['#publico', 'Para quién'],
+              ['#como-funciona', 'Cómo funciona'],
+              ['#administracion', 'Cómo se administra'],
+            ].map(([href, label]) => (
+              <a
+                key={href}
+                href={href}
+                className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+          <Link to="/login" className={`${buttonVariants({ size: 'sm' })} ml-1`}>
+            Iniciar sesión
+          </Link>
+        </div>
       </div>
     </header>
   )
@@ -63,10 +70,10 @@ function Hero() {
   return (
     <section className="py-14 sm:py-20">
       <Eyebrow>El comedor corporativo del edificio Mutuo Vive</Eyebrow>
-      <h1 className="mt-4 text-5xl font-bold tracking-tight text-balance sm:text-7xl">
-        Amena<span className="text-primary">.</span>
+      <h1 className="mt-5">
+        <LogotipoAmena className="h-12 w-auto text-primary sm:h-16" />
       </h1>
-      <p className="mt-3 text-lg font-semibold tracking-tight text-salvia-600 sm:text-2xl">
+      <p className="mt-4 text-lg font-semibold tracking-tight text-salvia-600 sm:text-2xl">
         Comer en el trabajo, simple y bien organizado.
       </p>
       <p className="mt-6 max-w-2xl text-pretty text-base text-foreground sm:text-lg">

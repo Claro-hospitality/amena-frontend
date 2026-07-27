@@ -58,9 +58,9 @@ const DefinirContrasenaPage = lazy(() =>
     default: m.DefinirContrasenaPage,
   }))
 )
-const ReporteSistemaPage = lazy(() =>
-  import('./features/reporte/ReporteSistemaPage').then((m) => ({
-    default: m.ReporteSistemaPage,
+const PresentacionPage = lazy(() =>
+  import('./features/presentacion/PresentacionPage').then((m) => ({
+    default: m.PresentacionPage,
   }))
 )
 
@@ -85,15 +85,17 @@ export default function App() {
           </Suspense>
         }
       />
-      {/* Reporte del sistema: PÚBLICO (sin sesión), para compartir por enlace. */}
+      {/* Presentación de Amena: PÚBLICA (sin sesión), para compartir por enlace. */}
       <Route
-        path="/reporte"
+        path="/conoce-amena"
         element={
           <Suspense fallback={<CargandoRuta />}>
-            <ReporteSistemaPage />
+            <PresentacionPage />
           </Suspense>
         }
       />
+      {/* Compat: el enlace viejo /reporte redirige a la nueva ruta pública. */}
+      <Route path="/reporte" element={<Navigate to="/conoce-amena" replace />} />
 
       {/* Todo lo demás es privado: RutaProtegida exige sesión + acceso, y "/" redirige por rol. */}
       <Route element={<RutaProtegida />}>
