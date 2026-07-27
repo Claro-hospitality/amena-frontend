@@ -1,5 +1,9 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
+import { obtenerMiEmpresaId } from '../../lib/empresaActual'
+
+// Helper compartido (fuente única): también se re-exporta para el hook useMiEmpresaId y el alta.
+export { obtenerMiEmpresaId }
 
 export type ModoConsumo = Database['public']['Enums']['modo_consumo']
 
@@ -63,8 +67,10 @@ export function empresaEnModoLibre(colaborador: Colaborador): boolean {
   return colaborador.politica?.modo_consumo === 'libre'
 }
 
+// `!inner` en la identidad: permite filtrar por `usuario.empresa_id` y descarta comensales de
+// otras empresas (con left join volverían con usuario=null en vez de excluirse).
 export const SELECT_COMENSAL =
-  'id, activo, consumo_libre, usuario:usuarios_portal_empresarial(id, user_id, nombre, email, telefono, acceso_activo:activo, eliminado_en, empresa:empresas(nombre:nombre_comercial, modo_consumo, dias_permitidos, limite_diario)), credencial:credenciales_qr(qr_token, activo)'
+  'id, activo, consumo_libre, usuario:usuarios_portal_empresarial!inner(id, user_id, nombre, email, telefono, acceso_activo:activo, eliminado_en, empresa:empresas(nombre:nombre_comercial, modo_consumo, dias_permitidos, limite_diario)), credencial:credenciales_qr(qr_token, activo)'
 
 export interface FilaComensal {
   id: number
@@ -114,26 +120,22 @@ export function aplanarComensal(fila: FilaComensal): Colaborador {
 }
 
 /**
- * Colaboradores de la empresa del admin. La RLS ("admin CRUD de su empresa") ya filtra
- * por empresa_id ∈ mis_empresas_admin(). PostgREST no ordena por columnas embebidas →
- * se ordena por nombre en cliente.
+ * Colaboradores de la empresa del admin. Se ACOTA explícitamente por `usuario.empresa_id` a la
+ * empresa que administra (no basta la RLS: una cuenta con rol de backoffice vería todas las
+ * empresas — ver `obtenerMiEmpresaId`). PostgREST no ordena por columnas embebidas → orden por
+ * nombre en cliente.
  */
 export async function listarColaboradores(): Promise<Colaborador[]> {
-  const { data, error } = await supabase.from('comensales').select(SELECT_COMENSAL)
+  const empresaId = await obtenerMiEmpresaId()
+  const { data, error } = await supabase
+    .from('comensales')
+    .select(SELECT_COMENSAL)
+    .eq('usuario.empresa_id', empresaId)
   if (error) throw error
   return ((data ?? []) as FilaComensal[])
     .filter((f) => f.usuario != null && f.usuario.eliminado_en == null) // ocultar eliminados
     .map(aplanarComensal)
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
-}
-
-/** ID (int8) de la empresa que administra el usuario (para el alta de colaboradores). */
-export async function obtenerMiEmpresaId(): Promise<number> {
-  const { data, error } = await supabase.rpc('mis_empresas_admin')
-  if (error) throw error
-  const id = data?.[0]
-  if (id == null) throw new Error('El usuario no administra ninguna empresa')
-  return id
 }
 
 /**

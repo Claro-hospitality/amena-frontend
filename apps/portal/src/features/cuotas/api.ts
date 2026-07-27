@@ -1,6 +1,7 @@
 import { supabase } from '@amena/supabase'
 import type { Database, Json } from '@amena/supabase/types'
 import { aISO, deISO, diasHabiles } from '@amena/utils'
+import { obtenerMiEmpresaId } from '../../lib/empresaActual'
 
 export type OrigenCuota = Database['public']['Enums']['origen_cuota']
 
@@ -37,12 +38,20 @@ function rangoSemana(lunesISO: string) {
   return { desde: dias[0], hasta: dias[dias.length - 1] }
 }
 
-/** Cuotas activas [lun..vie] de la empresa del admin (RLS filtra la empresa). */
+/**
+ * Cuotas activas [lun..vie] de la empresa del admin. Se acota por la empresa vía el join a la
+ * identidad (`comensal.usuario.empresa_id`), con `!inner` para excluir cuotas de otras empresas
+ * (no basta la RLS: una cuenta con rol de backoffice vería todas).
+ */
 export async function listarCuotasSemana(lunesISO: string): Promise<CuotaSemana[]> {
   const { desde, hasta } = rangoSemana(lunesISO)
+  const empresaId = await obtenerMiEmpresaId()
   const { data, error } = await supabase
     .from('cuotas')
-    .select('id, fecha, origen, comensal:comensales(id, usuario:usuarios_portal_empresarial(nombre))')
+    .select(
+      'id, fecha, origen, comensal:comensales!inner(id, usuario:usuarios_portal_empresarial!inner(nombre))'
+    )
+    .eq('comensal.usuario.empresa_id', empresaId)
     .gte('fecha', desde)
     .lte('fecha', hasta)
     .eq('activo', true)
@@ -70,14 +79,16 @@ interface FilaConsumo {
 }
 
 /**
- * Consumos [lun..vie] de la empresa del admin (RLS filtra la empresa). Incluye el nombre
- * del comensal para poder listar los consumos LIBRES (que no tienen cuota asociada).
+ * Consumos [lun..vie] de la empresa del admin, acotados por `empresa_id` (no basta la RLS).
+ * Incluye el nombre del comensal para poder listar los consumos LIBRES (sin cuota asociada).
  */
 export async function listarConsumosSemana(lunesISO: string): Promise<ConsumoSemana[]> {
   const { desde, hasta } = rangoSemana(lunesISO)
+  const empresaId = await obtenerMiEmpresaId()
   const { data, error } = await supabase
     .from('consumos')
     .select('comensal_id, fecha, comensal:comensales(id, usuario:usuarios_portal_empresarial(nombre))')
+    .eq('empresa_id', empresaId)
     .gte('fecha', desde)
     .lte('fecha', hasta)
   if (error) throw error

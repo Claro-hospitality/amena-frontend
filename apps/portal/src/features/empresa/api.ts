@@ -1,6 +1,7 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
 import type { DatosFiscalesFormData } from '@amena/utils'
+import { obtenerMiEmpresaId } from '../../lib/empresaActual'
 
 export type Empresa = Database['public']['Tables']['empresas']['Row']
 export type DatosFiscales = Database['public']['Tables']['datos_fiscales']['Row']
@@ -10,15 +11,6 @@ export interface MiEmpresa {
   empresa: Empresa
   /** Fila fiscal de la empresa; `null` si aún no se ha registrado. */
   datosFiscales: DatosFiscales | null
-}
-
-/** ID (int8) de la empresa que administra el usuario logueado. */
-async function obtenerMiEmpresaId(): Promise<number> {
-  const { data, error } = await supabase.rpc('mis_empresas_admin')
-  if (error) throw error
-  const id = data?.[0]
-  if (id == null) throw new Error('El usuario no administra ninguna empresa')
-  return id
 }
 
 /**
