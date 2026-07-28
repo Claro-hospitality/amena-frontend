@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, TriangleAlert } from 'lucide-react'
+import { Check, TriangleAlert, UtensilsCrossed } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import { Calendar } from '@amena/ui/components/ui/calendar'
 import {
@@ -120,25 +120,45 @@ export function HistorialComidas() {
             </div>
           </section>
 
-          <section className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold">Historial de comidas</h2>
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="size-2.5 rounded-full bg-success" aria-hidden />
-                Día con consumo
-              </span>
-            </div>
-            <div className="flex justify-center rounded-xl border border-border p-2">
-              <Calendar
-                month={mes}
-                onMonthChange={setMes}
-                showOutsideDays={false}
-                formatters={FORMATO_ES}
-                modifiers={{ consumido: diasConConsumo }}
-                modifiersClassNames={{
-                  consumido: 'bg-success text-success-foreground rounded-2xl font-semibold',
-                }}
-              />
+          <section className="flex flex-col gap-3">
+            <h2 className="text-base font-semibold">Historial de comidas</h2>
+            <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4">
+              {/* Resumen del mes en vista */}
+              <div className="flex items-center gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-success/15 text-success-foreground">
+                  <UtensilsCrossed className="size-5" strokeWidth={1.75} />
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-semibold leading-none tabular-nums">
+                    {diasConConsumo.length}
+                  </span>
+                  <span className="mt-1 text-xs text-muted-foreground">
+                    {diasConConsumo.length === 1 ? 'día con comida' : 'días con comida'} en{' '}
+                    <span className="capitalize">
+                      {mes.toLocaleDateString('es-MX', { month: 'long' })}
+                    </span>
+                  </span>
+                </div>
+                <span className="ml-auto inline-flex items-center gap-1.5 self-start text-xs text-muted-foreground">
+                  <span className="size-2.5 rounded-full bg-success" aria-hidden />
+                  Con consumo
+                </span>
+              </div>
+
+              <div className="border-t border-border" />
+
+              <div className="flex justify-center">
+                <Calendar
+                  month={mes}
+                  onMonthChange={setMes}
+                  showOutsideDays={false}
+                  formatters={FORMATO_ES}
+                  modifiers={{ consumido: diasConConsumo }}
+                  modifiersClassNames={{
+                    consumido: 'bg-success text-success-foreground rounded-full font-semibold',
+                  }}
+                />
+              </div>
             </div>
           </section>
         </>
