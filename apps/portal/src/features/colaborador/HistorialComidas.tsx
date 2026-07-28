@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Check, TriangleAlert, UtensilsCrossed } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
-import { Calendar, CalendarDayButton } from '@amena/ui/components/ui/calendar'
+import { Calendar } from '@amena/ui/components/ui/calendar'
 import {
   Empty,
   EmptyDescription,
@@ -9,11 +9,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@amena/ui/components/ui/popover'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { aISO, deISO, diasHabiles, etiquetaDiaCorta, horaCorta, lunesDeSemana } from '@amena/utils'
 import { desgloseSemana, resumenSemana } from './logica'
@@ -51,6 +46,10 @@ export function HistorialComidas() {
 
   const [mes, setMes] = useState(() => primerDiaDelMes(new Date()))
   const { data: consumosMes } = useMisConsumosDelMes(aISO(mes))
+  // Card flotante anclada al día presionado (coords de viewport para position: fixed).
+  const [detalle, setDetalle] = useState<{ label: string; texto: string; x: number; y: number } | null>(
+    null
+  )
 
   // Horas de consumo por día (un día puede tener varias en modo libre) + días marcados.
   const horasPorFecha = new Map<string, string[]>()
@@ -179,37 +178,50 @@ export function HistorialComidas() {
                     consumido:
                       'bg-salvia-500 text-primary-foreground rounded-full font-semibold hover:bg-salvia-500 hover:text-primary-foreground',
                   }}
-                  components={{
-                    // Al presionar un día con consumo: card flotante ANCLADA arriba del día
-                    // (Popover), con la(s) hora(s). Los demás días son un botón normal.
-                    DayButton: (props) => {
-                      const t = textoConsumo(aISO(props.day.date))
-                      if (!t) return <CalendarDayButton {...props} />
-                      return (
-                        <Popover>
-                          <PopoverTrigger render={<CalendarDayButton {...props} />} />
-                          <PopoverContent
-                            side="top"
-                            sideOffset={8}
-                            className="w-auto max-w-[15rem] gap-0 p-3"
-                          >
-                            <p className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground">
-                              {props.day.date.toLocaleDateString('es-MX', {
-                                weekday: 'long',
-                                day: 'numeric',
-                                month: 'long',
-                              })}
-                            </p>
-                            <p className="mt-1 text-sm text-foreground">{t}</p>
-                          </PopoverContent>
-                        </Popover>
-                      )
-                    },
+                  // Al presionar un día con consumo: card flotante anclada ARRIBA del día.
+                  onDayClick={(day, _mods, e) => {
+                    const texto = textoConsumo(aISO(day))
+                    if (!texto) {
+                      setDetalle(null)
+                      return
+                    }
+                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                    setDetalle({
+                      label: day.toLocaleDateString('es-MX', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                      }),
+                      texto,
+                      x: r.left + r.width / 2,
+                      y: r.top - 8,
+                    })
                   }}
                 />
               </div>
             </div>
           </section>
+
+          {/* Card flotante anclada arriba del día presionado (se cierra al tocar fuera). */}
+          {detalle && (
+            <div className="fixed inset-0 z-40" onClick={() => setDetalle(null)}>
+              <div
+                role="dialog"
+                onClick={(e) => e.stopPropagation()}
+                style={{ left: detalle.x, top: detalle.y }}
+                className="fixed z-50 w-max max-w-[16rem] -translate-x-1/2 -translate-y-full rounded-2xl border border-border bg-popover p-3 text-popover-foreground shadow-lg ring-1 ring-foreground/5"
+              >
+                <p className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground first-letter:uppercase">
+                  {detalle.label}
+                </p>
+                <p className="mt-1 text-sm">{detalle.texto}</p>
+                <span
+                  className="absolute left-1/2 top-full size-2.5 -translate-x-1/2 -translate-y-[65%] rotate-45 border-r border-b border-border bg-popover"
+                  aria-hidden
+                />
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
