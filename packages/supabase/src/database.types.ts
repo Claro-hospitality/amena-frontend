@@ -702,6 +702,10 @@ export type Database = {
         }
         Returns: Json
       }
+      actualizar_mi_perfil_backoffice: {
+        Args: { p_nombre: string }
+        Returns: undefined
+      }
       actualizar_mi_perfil_portal: {
         Args: { p_nombre: string; p_telefono: string }
         Returns: undefined
