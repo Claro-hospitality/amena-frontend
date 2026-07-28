@@ -215,18 +215,24 @@ export async function establecerConsumoLibre(usuarioId: number, activo: boolean)
   if (error) throw error
 }
 
+/** Resultado de enviar el correo de restablecimiento de acceso. */
+export interface ResultadoAccesoPortal {
+  correo_enviado: boolean
+  correo_error?: string
+}
+
 /**
  * Restablece la contraseña de un colaborador vía la Edge Function `resetear-password-portal`:
- * genera una temporal (se muestra UNA sola vez) y exige el cambio al próximo login. El backend
- * valida que el admin solo pueda hacerlo sobre usuarios de SU empresa. `usuarioId` es el id de
- * `usuarios_portal_empresarial` (colaborador.usuario_id).
+ * le ENVÍA un correo con el enlace para que defina su nueva contraseña desde
+ * `/definir-contrasena` (ya no se genera contraseña temporal). El backend valida que el admin
+ * solo pueda hacerlo sobre usuarios de SU empresa. `usuarioId` = colaborador.usuario_id.
  */
-export async function resetearPasswordColaborador(usuarioId: number): Promise<CredencialesAlta> {
+export async function resetearPasswordColaborador(usuarioId: number): Promise<ResultadoAccesoPortal> {
   const { data, error } = await supabase.functions.invoke('resetear-password-portal', {
     body: { usuario_id: usuarioId },
   })
   if (error) {
-    let mensaje = 'No se pudo restablecer la contraseña. Intenta de nuevo.'
+    let mensaje = 'No se pudo enviar el correo de restablecimiento. Intenta de nuevo.'
     const resp = (error as { context?: Response }).context
     if (resp && typeof resp.json === 'function') {
       try {
@@ -238,5 +244,5 @@ export async function resetearPasswordColaborador(usuarioId: number): Promise<Cr
     }
     throw new Error(mensaje)
   }
-  return data as CredencialesAlta
+  return data as ResultadoAccesoPortal
 }
