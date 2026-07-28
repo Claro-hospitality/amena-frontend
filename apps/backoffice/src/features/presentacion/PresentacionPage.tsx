@@ -38,7 +38,7 @@ export function PresentacionPage() {
         <QueEs />
         <ParaQue />
       </main>
-      <Galeria />
+      <ShowcaseAlimentos />
       <main className="mx-auto w-full max-w-5xl px-5 sm:px-8">
         <Publico />
         <ComoFunciona />
@@ -291,32 +291,64 @@ function ParaQue() {
   )
 }
 
-function Galeria() {
+/** Muestra los platillos de a UNO, grande, con cross-fade y contexto al lado (no una grilla). */
+function ShowcaseAlimentos() {
+  const [i, setI] = useState(0)
+  const reduce = usePrefiereMenosMovimiento()
+  useEffect(() => {
+    if (reduce) return
+    const id = setInterval(() => setI((p) => (p + 1) % ALIMENTOS_V.length), 4000)
+    return () => clearInterval(id)
+  }, [reduce])
+
   return (
     <section className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-      <div className="mb-7">
-        <span className="font-mono text-sm font-semibold text-primary">·</span>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-          El sabor de Amena
-        </h2>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Cocina fresca, todos los días. Un vistazo a lo que se sirve en el comedor.
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {ALIMENTOS_V.map((src, idx) => (
-          <img
-            key={src}
-            src={src}
-            alt="Platillo del comedor Amena"
-            loading="lazy"
-            className={cn(
-              'aspect-[3/4] w-full rounded-2xl object-cover',
-              // La última en móvil ocupa las 2 columnas para cerrar la cuadrícula.
-              idx === ALIMENTOS_V.length - 1 && 'col-span-2 aspect-[3/2] sm:col-span-1 sm:aspect-[3/4]'
-            )}
-          />
-        ))}
+      <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        {/* Contexto primero (lo que faltaba). */}
+        <div>
+          <span className="text-xs font-bold uppercase tracking-widest text-primary">
+            El sabor de Amena
+          </span>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+            Cocina fresca, hecha en casa
+          </h2>
+          <p className="mt-4 max-w-md text-muted-foreground">
+            El menú cambia con la temporada: platillos preparados cada día, con ingredientes de
+            calidad. Así se ve un día cualquiera en el comedor.
+          </p>
+          {/* Puntos de navegación. */}
+          <div className="mt-7 flex items-center gap-2">
+            {ALIMENTOS_V.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setI(idx)}
+                aria-label={`Ver platillo ${idx + 1}`}
+                aria-current={idx === i ? 'true' : undefined}
+                className={cn(
+                  'h-1.5 rounded-full transition-all duration-300',
+                  idx === i ? 'w-7 bg-primary' : 'w-2.5 bg-border hover:bg-muted-foreground'
+                )}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Foto grande que rota (cross-fade). */}
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-border bg-salvia-900 sm:aspect-[5/4] lg:aspect-[4/5]">
+          {ALIMENTOS_V.map((src, idx) => (
+            <img
+              key={src}
+              src={src}
+              alt="Platillo del comedor Amena"
+              loading={idx === 0 ? 'eager' : 'lazy'}
+              className={cn(
+                'absolute inset-0 size-full object-cover transition-opacity duration-700 ease-out motion-reduce:transition-none',
+                idx === i ? 'opacity-100' : 'opacity-0'
+              )}
+            />
+          ))}
+        </div>
       </div>
     </section>
   )
