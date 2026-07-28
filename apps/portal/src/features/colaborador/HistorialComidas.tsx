@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Check, TriangleAlert, UtensilsCrossed } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
 import { Calendar, CalendarDayButton } from '@amena/ui/components/ui/calendar'
 import {
@@ -10,13 +9,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@amena/ui/components/ui/tooltip'
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@amena/ui/components/ui/popover'
+import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { aISO, deISO, diasHabiles, etiquetaDiaCorta, horaCorta, lunesDeSemana } from '@amena/utils'
 import { desgloseSemana, resumenSemana } from './logica'
 import { useMisConsumos, useMisConsumosDelMes, useMisCuotasSemana } from './queries'
@@ -168,41 +166,48 @@ export function HistorialComidas() {
 
               <div className="border-t border-border" />
 
-              <TooltipProvider>
-                <div className="flex justify-center">
-                  <Calendar
-                    className="bg-transparent [--cell-size:--spacing(10)]"
-                    month={mes}
-                    onMonthChange={setMes}
-                    showOutsideDays={false}
-                    formatters={FORMATO_ES}
-                    modifiers={{ consumido: diasConConsumo }}
-                    modifiersClassNames={{
-                      // Verde de marca (secondary). El hover conserva el color (no lo quita).
-                      consumido:
-                        'bg-salvia-500 text-primary-foreground rounded-full font-semibold hover:bg-salvia-500 hover:text-primary-foreground',
-                    }}
-                    // Tap (móvil/tablet): toast con la hora del consumo de ese día.
-                    onDayClick={(day) => {
-                      const t = textoConsumo(aISO(day))
-                      if (t) toast(t)
-                    }}
-                    components={{
-                      // Hover (PC): tooltip con la hora en los días con consumo.
-                      DayButton: (props) => {
-                        const t = textoConsumo(aISO(props.day.date))
-                        if (!t) return <CalendarDayButton {...props} />
-                        return (
-                          <Tooltip>
-                            <TooltipTrigger render={<CalendarDayButton {...props} />} />
-                            <TooltipContent>{t}</TooltipContent>
-                          </Tooltip>
-                        )
-                      },
-                    }}
-                  />
-                </div>
-              </TooltipProvider>
+              <div className="flex justify-center">
+                <Calendar
+                  className="bg-transparent [--cell-size:--spacing(10)]"
+                  month={mes}
+                  onMonthChange={setMes}
+                  showOutsideDays={false}
+                  formatters={FORMATO_ES}
+                  modifiers={{ consumido: diasConConsumo }}
+                  modifiersClassNames={{
+                    // Verde de marca (secondary). El hover conserva el color (no lo quita).
+                    consumido:
+                      'bg-salvia-500 text-primary-foreground rounded-full font-semibold hover:bg-salvia-500 hover:text-primary-foreground',
+                  }}
+                  components={{
+                    // Al presionar un día con consumo: card flotante ANCLADA arriba del día
+                    // (Popover), con la(s) hora(s). Los demás días son un botón normal.
+                    DayButton: (props) => {
+                      const t = textoConsumo(aISO(props.day.date))
+                      if (!t) return <CalendarDayButton {...props} />
+                      return (
+                        <Popover>
+                          <PopoverTrigger render={<CalendarDayButton {...props} />} />
+                          <PopoverContent
+                            side="top"
+                            sideOffset={8}
+                            className="w-auto max-w-[15rem] gap-0 p-3"
+                          >
+                            <p className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground">
+                              {props.day.date.toLocaleDateString('es-MX', {
+                                weekday: 'long',
+                                day: 'numeric',
+                                month: 'long',
+                              })}
+                            </p>
+                            <p className="mt-1 text-sm text-foreground">{t}</p>
+                          </PopoverContent>
+                        </Popover>
+                      )
+                    },
+                  }}
+                />
+              </div>
             </div>
           </section>
         </>
