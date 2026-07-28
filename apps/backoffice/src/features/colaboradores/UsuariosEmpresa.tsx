@@ -24,12 +24,7 @@ import {
 } from '@amena/ui/components/ui/alert-dialog'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
-import {
-  CredencialesAcceso,
-  type DatosCredencialAcceso,
-} from '@amena/ui/components/ui/credenciales-acceso'
 import { DataTable, type ColumnDef } from '@amena/ui/components/data-table'
-import { Dialog, DialogContent } from '@amena/ui/components/ui/dialog'
 import {
   Empty,
   EmptyContent,
@@ -49,7 +44,7 @@ import {
   useEliminarUsuarioPortal,
   useEstablecerComida,
   useEstablecerEstadoPortal,
-  useResetearPassword,
+  useRestablecerAccesoPortal,
   useUsuariosEmpresa,
 } from './queries'
 
@@ -238,7 +233,7 @@ export function UsuariosEmpresa({
 }) {
   const { data, isLoading, isError, refetch } = useUsuariosEmpresa(empresa.id)
   const establecerComida = useEstablecerComida()
-  const resetear = useResetearPassword()
+  const restablecer = useRestablecerAccesoPortal()
   const cambiarAcceso = useEstablecerEstadoPortal()
   const eliminarPortal = useEliminarUsuarioPortal()
   const [busqueda, setBusqueda] = useState('')
@@ -248,7 +243,6 @@ export function UsuariosEmpresa({
   const [desactivandoAcceso, setDesactivandoAcceso] = useState<UsuarioEmpresa | null>(null)
   const [eliminando, setEliminando] = useState<UsuarioEmpresa | null>(null)
   const [reseteando, setReseteando] = useState<UsuarioEmpresa | null>(null)
-  const [credsReset, setCredsReset] = useState<DatosCredencialAcceso | null>(null)
 
   const toggleAcceso = (u: UsuarioEmpresa) => {
     if (u.activo) {
@@ -266,12 +260,23 @@ export function UsuariosEmpresa({
 
   const confirmarReset = () => {
     if (!reseteando) return
-    resetear.mutate(reseteando.id, {
-      onSuccess: (creds) => {
+    const { email, nombre } = reseteando
+    if (!email) {
+      toast.error('Este usuario no tiene un correo registrado para enviarle el enlace.')
+      setReseteando(null)
+      return
+    }
+    restablecer.mutate(email, {
+      onSuccess: (r) => {
         setReseteando(null)
-        setCredsReset(creds)
+        if (r.correo_enviado) {
+          toast.success(`Le enviamos a ${nombre} un correo con el enlace para restablecer su contraseña.`)
+        } else {
+          toast.error(r.correo_error ?? 'El usuario se procesó, pero el correo no pudo salir.')
+        }
       },
-      onError: () => toast.error('No se pudo restablecer la contraseña. Intenta de nuevo.'),
+      onError: (e) =>
+        toast.error(e instanceof Error ? e.message : 'No se pudo enviar el correo. Intenta de nuevo.'),
     })
   }
 
@@ -488,35 +493,23 @@ export function UsuariosEmpresa({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              ¿Restablecer la contraseña de {reseteando?.nombre}?
+              ¿Enviar el enlace para restablecer la contraseña de {reseteando?.nombre}?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Se generará una contraseña temporal que verás una sola vez para entregársela; al
-              iniciar sesión deberá cambiarla. Su contraseña actual dejará de funcionar.
+              Le enviaremos un correo a{' '}
+              <strong className="text-foreground">{reseteando?.email ?? 'su correo'}</strong> con un
+              enlace para que defina una nueva contraseña. Su contraseña actual seguirá funcionando
+              hasta que la cambie.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmarReset} loading={resetear.isPending}>
-              Restablecer
+            <AlertDialogAction onClick={confirmarReset} loading={restablecer.isPending}>
+              Enviar enlace
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Credenciales tras restablecer (contraseña temporal, una sola vez) */}
-      <Dialog
-        open={credsReset != null}
-        onOpenChange={(abierto) => {
-          if (!abierto) setCredsReset(null)
-        }}
-      >
-        <DialogContent>
-          {credsReset && (
-            <CredencialesAcceso credenciales={credsReset} onClose={() => setCredsReset(null)} />
-          )}
-        </DialogContent>
-      </Dialog>
     </section>
   )
 }

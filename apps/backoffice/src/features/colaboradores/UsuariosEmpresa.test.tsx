@@ -10,7 +10,7 @@ const api = vi.hoisted(() => ({
   asignarRolUnico: vi.fn(),
   establecerRolPortal: vi.fn(),
   establecerComidaComensal: vi.fn(),
-  resetearPasswordUsuario: vi.fn(),
+  restablecerAccesoPortal: vi.fn(),
   nombreEmpresa: () => '—',
 }))
 vi.mock('./api', () => api)
@@ -45,11 +45,7 @@ beforeEach(() => {
   api.asignarRolUnico.mockResolvedValue(undefined)
   api.establecerRolPortal.mockResolvedValue(undefined)
   api.establecerComidaComensal.mockResolvedValue(undefined)
-  api.resetearPasswordUsuario.mockResolvedValue({
-    email: 'juan@x.com',
-    yaTeniaCuenta: false,
-    tempPassword: 'Temp0ral-Fuerte!',
-  })
+  api.restablecerAccesoPortal.mockResolvedValue({ correo_enviado: true })
   api.listarUsuariosEmpresa.mockResolvedValue([
     { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false, rol: 'admin', comeActivo: true },
     { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true, rol: 'colaborador', comeActivo: false },
@@ -141,19 +137,17 @@ describe('UsuariosEmpresa', () => {
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
   })
 
-  it('restablecer contraseña: confirma, llama a la función y muestra la temporal', async () => {
+  it('restablecer contraseña: confirma y envía el correo con el enlace', async () => {
     const user = userEvent.setup()
     renderizar(true)
     await screen.findByText('Juan Pérez')
 
     await user.click(screen.getByRole('button', { name: 'Restablecer contraseña de Juan Pérez' }))
     expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
-    expect(api.resetearPasswordUsuario).not.toHaveBeenCalled()
+    expect(api.restablecerAccesoPortal).not.toHaveBeenCalled()
 
-    await user.click(screen.getByRole('button', { name: 'Restablecer' }))
-    await waitFor(() => expect(api.resetearPasswordUsuario).toHaveBeenCalledWith(2))
-    // La contraseña temporal se muestra una sola vez.
-    expect(await screen.findByText('Temp0ral-Fuerte!')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Enviar enlace' }))
+    await waitFor(() => expect(api.restablecerAccesoPortal).toHaveBeenCalledWith('juan@x.com'))
   })
 
   it('en modo lectura (finanzas) no ofrece restablecer contraseña', async () => {
