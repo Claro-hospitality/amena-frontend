@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { definirPasswordAcceso, verificarTokenAcceso } from '@amena/supabase/auth'
-import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@amena/ui/components/ui/field'
-import { Input } from '@amena/ui/components/ui/input'
+import { FieldError, FieldGroup } from '@amena/ui/components/ui/field'
+import {
+  CampoPassword,
+  EncabezadoAcceso,
+  MarcoAcceso,
+} from '@amena/ui/components/marco-acceso'
 
 type Estado = 'verificando' | 'listo' | 'invalido'
 
@@ -14,7 +17,7 @@ const MIN_LONGITUD = 8
 /**
  * Página PÚBLICA (sin guard de sesión) para definir la contraseña desde el enlace del correo
  * de acceso. Verifica el token (recovery), limpia el query string del historial, y con la
- * sesión activa deja definir la contraseña.
+ * sesión activa deja definir la contraseña. Usa el `MarcoAcceso` (mismo diseño que el login).
  */
 export function DefinirContrasenaPage() {
   const [params] = useSearchParams()
@@ -70,63 +73,53 @@ export function DefinirContrasenaPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6">
-        <div className="mb-6 flex justify-center">
-          <LogotipoAmena className="h-8" />
-        </div>
+    <MarcoAcceso>
+      {estado === 'verificando' && (
+        <EncabezadoAcceso titulo="Un momento…" subtitulo="Verificando tu enlace de acceso." />
+      )}
 
-        {estado === 'verificando' && (
-          <p className="text-center text-sm text-muted-foreground">Verificando el enlace…</p>
-        )}
+      {estado === 'invalido' && (
+        <EncabezadoAcceso
+          titulo="Enlace no válido"
+          subtitulo="Este enlace venció o ya se usó. Pídele a tu administrador que te envíe uno nuevo."
+        />
+      )}
 
-        {estado === 'invalido' && (
-          <div className="flex flex-col gap-2 text-center">
-            <h1 className="text-lg font-semibold">Enlace no válido</h1>
-            <p className="text-sm text-muted-foreground">
-              Este enlace venció o ya se usó. Pídele a tu administrador que te envíe uno nuevo.
-            </p>
-          </div>
-        )}
+      {estado === 'listo' && (
+        <form onSubmit={enviar}>
+          <EncabezadoAcceso
+            titulo="Define tu contraseña"
+            subtitulo="Elige una contraseña para entrar a tu cuenta."
+          />
+          <FieldGroup>
+            <CampoPassword
+              id="password"
+              name="password"
+              label="Contraseña"
+              autoComplete="new-password"
+              autoFocus
+              aria-invalid={Boolean(error)}
+            />
+            <CampoPassword
+              id="confirmar"
+              name="confirmar"
+              label="Confirmar contraseña"
+              autoComplete="new-password"
+              aria-invalid={Boolean(error)}
+            />
 
-        {estado === 'listo' && (
-          <form onSubmit={enviar}>
-            <div className="mb-4 flex flex-col gap-1 text-center">
-              <h1 className="text-lg font-semibold">Define tu contraseña</h1>
-              <p className="text-sm text-muted-foreground">
-                Elige una contraseña para entrar a tu cuenta.
-              </p>
-            </div>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  autoFocus
-                  aria-invalid={Boolean(error)}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="confirmar">Confirmar contraseña</FieldLabel>
-                <Input
-                  id="confirmar"
-                  name="confirmar"
-                  type="password"
-                  autoComplete="new-password"
-                  aria-invalid={Boolean(error)}
-                />
-                {error && <FieldError>{error}</FieldError>}
-              </Field>
-            </FieldGroup>
-            <Button type="submit" className="mt-6 w-full" loading={guardando}>
+            {error && (
+              <FieldError role="alert" className="rounded-lg bg-destructive/10 px-3 py-2">
+                {error}
+              </FieldError>
+            )}
+
+            <Button type="submit" size="lg" className="mt-1 w-full" loading={guardando}>
               Guardar y entrar
             </Button>
-          </form>
-        )}
-      </div>
-    </div>
+          </FieldGroup>
+        </form>
+      )}
+    </MarcoAcceso>
   )
 }
