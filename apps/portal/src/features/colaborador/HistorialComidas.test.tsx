@@ -10,6 +10,7 @@ const api = vi.hoisted(() => ({
   menuSemana: vi.fn(),
   misCuotasSemana: vi.fn(),
   misConsumos: vi.fn(),
+  misConsumosDelMes: vi.fn(),
 }))
 vi.mock('./api', () => api)
 
@@ -31,23 +32,25 @@ beforeEach(() => {
 })
 
 describe('HistorialComidas', () => {
-  it('resume la semana y lista los consumos', async () => {
+  it('resume la semana y muestra el calendario de historial', async () => {
     api.misCuotasSemana.mockResolvedValue([
       { fecha: dias[0], origen: 'reserva', activo: true },
       { fecha: dias[1], origen: 'reserva', activo: true },
       { fecha: dias[2], origen: 'reserva', activo: true },
     ])
     api.misConsumos.mockResolvedValue([{ fecha: dias[0], created_at: '2026-07-13T14:32:00Z' }])
+    api.misConsumosDelMes.mockResolvedValue([dias[0]])
     renderizar()
     // 3 asignadas, 1 usada → quedan 2
     expect(await screen.findByText(/te quedan 2 de 3 comidas/i)).toBeInTheDocument()
-    expect(screen.getByText(/\d{2}:\d{2}/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /historial de comidas/i })).toBeInTheDocument()
   })
 
-  it('estado vacío cuando no hay consumos', async () => {
+  it('muestra el calendario aunque no haya consumos', async () => {
     api.misCuotasSemana.mockResolvedValue([])
     api.misConsumos.mockResolvedValue([])
+    api.misConsumosDelMes.mockResolvedValue([])
     renderizar()
-    expect(await screen.findByText(/aún no tienes comidas registradas/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /historial de comidas/i })).toBeInTheDocument()
   })
 })
