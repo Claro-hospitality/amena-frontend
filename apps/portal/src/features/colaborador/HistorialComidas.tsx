@@ -11,7 +11,7 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { aISO, deISO, diasHabiles, etiquetaDiaCorta, lunesDeSemana } from '@amena/utils'
-import { resumenSemana } from './logica'
+import { desgloseSemana, resumenSemana } from './logica'
 import { useMisConsumos, useMisConsumosDelMes, useMisCuotasSemana } from './queries'
 
 /** Primer día del mes de la fecha dada. */
@@ -51,6 +51,7 @@ export function HistorialComidas() {
   const cargando = cargandoCuotas || cargandoConsumos
   const dias = diasHabiles(deISO(lunesISO))
   const resumen = resumenSemana(dias, cuotas ?? [], consumos ?? [])
+  const desglose = desgloseSemana(dias, cuotas ?? [], consumos ?? [])
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
@@ -101,6 +102,22 @@ export function HistorialComidas() {
                 </div>
               ))}
             </div>
+
+            {/* Desglose de los consumos de la semana por tipo. */}
+            <div className="border-t border-border pt-3">
+              <p className="mb-2 text-xs text-muted-foreground">
+                {desglose.total === 0
+                  ? 'Aún no has consumido esta semana.'
+                  : `Consumos esta semana: ${desglose.total}`}
+              </p>
+              {desglose.total > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <StatConsumo etiqueta="Programadas" valor={desglose.programado} />
+                  <StatConsumo etiqueta="Extras" valor={desglose.extra} />
+                  <StatConsumo etiqueta="Libres" valor={desglose.libre} />
+                </div>
+              )}
+            </div>
           </section>
 
           <section className="flex flex-col gap-2">
@@ -127,5 +144,15 @@ export function HistorialComidas() {
         </>
       )}
     </div>
+  )
+}
+
+/** Píldora con la etiqueta del tipo de consumo y su conteo. */
+function StatConsumo({ etiqueta, valor }: { etiqueta: string; valor: number }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+      {etiqueta}
+      <span className="font-mono tabular-nums">{valor}</span>
+    </span>
   )
 }
