@@ -30,8 +30,6 @@ export function MiPerfilPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4">
-      <h1 className="text-xl font-semibold tracking-tight">Mi perfil</h1>
-
       {/* Información del usuario */}
       <Card className="shadow-none">
         <CardContent className="flex flex-col gap-5 p-5">
