@@ -43,3 +43,37 @@ export function resumenSemana(
   const usadas = porDia.filter((d) => d.usada).length
   return { asignadas, usadas, restantes: asignadas - usadas, porDia }
 }
+
+export interface DesgloseSemana {
+  total: number
+  /** Consumos de una comida reservada (cuota origen 'reserva'). */
+  programado: number
+  /** Consumos de una comida extra (cuota origen 'extra'). */
+  extra: number
+  /** Consumos sin cuota ese día (consumo libre). */
+  libre: number
+}
+
+/**
+ * Desglosa los consumos de la semana por tipo. El origen de cada consumo se deriva de la cuota
+ * del mismo día: 'reserva' → programado, 'extra' → extra, sin cuota → libre.
+ */
+export function desgloseSemana(
+  dias: Date[],
+  cuotas: MiCuota[],
+  consumos: MiConsumo[]
+): DesgloseSemana {
+  const semana = new Set(dias.map(aISO))
+  const origenPorFecha = new Map(cuotas.map((c) => [c.fecha, c.origen]))
+  let programado = 0
+  let extra = 0
+  let libre = 0
+  for (const c of consumos) {
+    if (!semana.has(c.fecha)) continue
+    const origen = origenPorFecha.get(c.fecha)
+    if (origen === 'extra') extra++
+    else if (origen) programado++
+    else libre++
+  }
+  return { total: programado + extra + libre, programado, extra, libre }
+}
