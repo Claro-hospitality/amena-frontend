@@ -50,6 +50,9 @@ const BrandingPage = lazy(() =>
 const UsuariosPage = lazy(() =>
   import('./features/usuarios/UsuariosPage').then((m) => ({ default: m.UsuariosPage }))
 )
+const WifiPage = lazy(() =>
+  import('./features/wifi/WifiPage').then((m) => ({ default: m.WifiPage }))
+)
 const MiPerfilPage = lazy(() =>
   import('./features/cuenta/MiPerfilPage').then((m) => ({ default: m.MiPerfilPage }))
 )
@@ -199,6 +202,16 @@ export default function App() {
             <RutaErrorBoundary>
               <Suspense fallback={<CargandoRuta />}>
                 <UsuariosPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="wifi"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <WifiPage />
               </Suspense>
             </RutaErrorBoundary>
           }
