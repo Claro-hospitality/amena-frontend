@@ -19,6 +19,12 @@ export async function obtenerMiPerfil(): Promise<MiPerfil> {
   return { nombre: perfil.nombre, rol: perfil.rol }
 }
 
+/** Actualiza mi propio nombre vía la RPC `actualizar_mi_perfil_backoffice`. */
+export async function actualizarMiNombre(nombre: string): Promise<void> {
+  const { error } = await supabase.rpc('actualizar_mi_perfil_backoffice', { p_nombre: nombre })
+  if (error) throw new Error(error.message)
+}
+
 /**
  * Cambia la contraseña del usuario actual (Supabase Auth) y limpia el flag
  * `debe_cambiar_password` del backoffice. Si se pasa `actual`, primero se verifica
