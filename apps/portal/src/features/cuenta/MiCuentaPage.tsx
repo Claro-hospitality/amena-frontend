@@ -24,7 +24,6 @@ export function MiCuentaPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4">
-      <h1 className="text-xl font-semibold tracking-tight">Mi cuenta</h1>
       {isLoading ? (
         <Card className="shadow-none">
           <CardContent className="flex flex-col gap-4 p-5">

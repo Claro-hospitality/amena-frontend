@@ -96,9 +96,10 @@ export function HistorialComidas() {
               </Empty>
             ) : (
               <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
-                {(consumos ?? []).map((c) => (
+                {(consumos ?? []).map((c, i) => (
                   <li
-                    key={`${c.fecha}-${c.created_at}`}
+                    // Índice en el key: dos consumos pueden compartir fecha+created_at (modo libre).
+                    key={`${c.fecha}-${c.created_at}-${i}`}
                     className="flex items-center justify-between px-4 py-3"
                   >
                     <span className="capitalize">{etiquetaDiaCorta(deISO(c.fecha))}</span>
