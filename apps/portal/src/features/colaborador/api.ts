@@ -36,6 +36,25 @@ function rangoSemana(lunesISO: string) {
   return { desde: dias[0], hasta: dias[dias.length - 1] }
 }
 
+/** Primer y último día del mes de `mesISO` (cualquier día del mes sirve). */
+function rangoMes(mesISO: string) {
+  const d = deISO(mesISO)
+  const desde = new Date(d.getFullYear(), d.getMonth(), 1)
+  const hasta = new Date(d.getFullYear(), d.getMonth() + 1, 0)
+  return { desde: aISO(desde), hasta: aISO(hasta) }
+}
+
+/**
+ * Ids de los comensales del usuario logueado (RPC SECURITY DEFINER). Acota las consultas del
+ * historial a SUS propios consumos/cuotas: la RLS permisiva deja a un admin ver los de toda
+ * su empresa, así que hay que filtrar explícitamente por comensal (ver memoria del portal).
+ */
+async function misComensalesIds(): Promise<number[]> {
+  const { data, error } = await supabase.rpc('mis_comensales')
+  if (error) throw error
+  return (data ?? []) as number[]
+}
+
 // Igual que SELECT_COMENSAL pero con INNER join a la identidad, para poder filtrar el
 // comensal por el user_id del usuario logueado (mi propia credencial). Es un literal (no un
 // .replace() en runtime) para que supabase-js infiera bien el tipo del resultado.
@@ -104,12 +123,15 @@ export async function menuSemana(lunesISO: string): Promise<PlatilloMenu[]> {
   return (data ?? []) as unknown as PlatilloMenu[]
 }
 
-/** Mis cuotas activas de la semana (para el resumen del historial). */
+/** Mis cuotas activas de la semana (para el resumen del historial). Acotadas a mis comensales. */
 export async function misCuotasSemana(lunesISO: string): Promise<MiCuota[]> {
   const { desde, hasta } = rangoSemana(lunesISO)
+  const ids = await misComensalesIds()
+  if (ids.length === 0) return []
   const { data, error } = await supabase
     .from('cuotas')
     .select('fecha, origen, activo')
+    .in('comensal_id', ids)
     .gte('fecha', desde)
     .lte('fecha', hasta)
     .eq('activo', true)
@@ -118,13 +140,31 @@ export async function misCuotasSemana(lunesISO: string): Promise<MiCuota[]> {
   return (data ?? []) as MiCuota[]
 }
 
-/** Mis consumos recientes (orden inverso). */
+/** Mis consumos recientes (orden inverso). Acotados a mis comensales. */
 export async function misConsumos(limite = 30): Promise<MiConsumo[]> {
+  const ids = await misComensalesIds()
+  if (ids.length === 0) return []
   const { data, error } = await supabase
     .from('consumos')
     .select('fecha, created_at')
+    .in('comensal_id', ids)
     .order('created_at', { ascending: false })
     .limit(limite)
   if (error) throw error
   return (data ?? []) as MiConsumo[]
+}
+
+/** Fechas (YYYY-MM-DD) en las que tuve consumo dentro del mes de `mesISO`. Para el calendario. */
+export async function misConsumosDelMes(mesISO: string): Promise<string[]> {
+  const ids = await misComensalesIds()
+  if (ids.length === 0) return []
+  const { desde, hasta } = rangoMes(mesISO)
+  const { data, error } = await supabase
+    .from('consumos')
+    .select('fecha')
+    .in('comensal_id', ids)
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+  if (error) throw error
+  return [...new Set((data ?? []).map((r) => r.fecha))]
 }

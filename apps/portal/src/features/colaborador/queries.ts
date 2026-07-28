@@ -4,6 +4,7 @@ import {
   menuDelDia,
   menuSemana,
   misConsumos,
+  misConsumosDelMes,
   misCuotasSemana,
   obtenerMiColaborador,
 } from './api'
@@ -30,4 +31,11 @@ export function useMisCuotasSemana(lunesISO: string) {
 
 export function useMisConsumos() {
   return useQuery({ queryKey: ['mis-consumos'], queryFn: () => misConsumos() })
+}
+
+export function useMisConsumosDelMes(mesISO: string) {
+  return useQuery({
+    queryKey: ['mis-consumos-mes', mesISO],
+    queryFn: () => misConsumosDelMes(mesISO),
+  })
 }

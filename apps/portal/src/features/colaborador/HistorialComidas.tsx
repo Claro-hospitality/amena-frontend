@@ -1,5 +1,7 @@
-import { Check, TriangleAlert, UtensilsCrossed } from 'lucide-react'
+import { useState } from 'react'
+import { Check, TriangleAlert } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
+import { Calendar } from '@amena/ui/components/ui/calendar'
 import {
   Empty,
   EmptyDescription,
@@ -8,14 +10,29 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
-import { aISO, deISO, diasHabiles, etiquetaDiaCorta, horaCorta, lunesDeSemana } from '@amena/utils'
+import { aISO, deISO, diasHabiles, etiquetaDiaCorta, lunesDeSemana } from '@amena/utils'
 import { resumenSemana } from './logica'
-import { useMisConsumos, useMisCuotasSemana } from './queries'
+import { useMisConsumos, useMisConsumosDelMes, useMisCuotasSemana } from './queries'
+
+/** Primer día del mes de la fecha dada. */
+function primerDiaDelMes(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1)
+}
+
+// Nombres de mes/día en español sin depender de un locale externo (date-fns no es dep directa
+// del portal): se usa Intl vía toLocaleDateString('es-MX').
+const FORMATO_ES = {
+  formatCaption: (date: Date) =>
+    date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
+  formatMonthCaption: (date: Date) =>
+    date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
+  formatWeekdayName: (date: Date) => date.toLocaleDateString('es-MX', { weekday: 'narrow' }),
+}
 
 /**
- * Historial de comidas del usuario logueado: resumen de la semana ("Te quedan X de Y"),
- * tira de días (asignado •/usado ✓) y lista de consumos. Se muestra bajo la credencial en
- * "Mi QR". Consulta los datos del comensal del usuario actual.
+ * Historial de comidas del usuario logueado (colaborador o admin que además es comensal):
+ * resumen de la semana ("Te quedan X de Y") y un CALENDARIO que marca los días en que tuvo
+ * consumo, navegable por mes. Los datos se acotan a los comensales del propio usuario.
  */
 export function HistorialComidas() {
   const lunesISO = aISO(lunesDeSemana(new Date()))
@@ -27,6 +44,10 @@ export function HistorialComidas() {
     refetch,
   } = useMisConsumos()
 
+  const [mes, setMes] = useState(() => primerDiaDelMes(new Date()))
+  const { data: fechasMes } = useMisConsumosDelMes(aISO(mes))
+  const diasConConsumo = (fechasMes ?? []).map((f) => deISO(f))
+
   const cargando = cargandoCuotas || cargandoConsumos
   const dias = diasHabiles(deISO(lunesISO))
   const resumen = resumenSemana(dias, cuotas ?? [], consumos ?? [])
@@ -36,7 +57,7 @@ export function HistorialComidas() {
       {cargando ? (
         <>
           <Skeleton className="h-28 w-full" />
-          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-72 w-full" />
         </>
       ) : isError ? (
         <Empty>
@@ -83,33 +104,25 @@ export function HistorialComidas() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold">Mis comidas</h2>
-            {(consumos ?? []).length === 0 ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <UtensilsCrossed className="size-6" />
-                  </EmptyMedia>
-                  <EmptyTitle>Aún no tienes comidas registradas</EmptyTitle>
-                  <EmptyDescription>Tus consumos aparecerán aquí.</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
-                {(consumos ?? []).map((c, i) => (
-                  <li
-                    // Índice en el key: dos consumos pueden compartir fecha+created_at (modo libre).
-                    key={`${c.fecha}-${c.created_at}-${i}`}
-                    className="flex items-center justify-between px-4 py-3"
-                  >
-                    <span className="capitalize">{etiquetaDiaCorta(deISO(c.fecha))}</span>
-                    <span className="font-mono text-sm tabular-nums text-muted-foreground">
-                      {horaCorta(new Date(c.created_at))}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">Historial de comidas</h2>
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="size-2.5 rounded-full bg-success" aria-hidden />
+                Día con consumo
+              </span>
+            </div>
+            <div className="flex justify-center rounded-xl border border-border p-2">
+              <Calendar
+                month={mes}
+                onMonthChange={setMes}
+                showOutsideDays={false}
+                formatters={FORMATO_ES}
+                modifiers={{ consumido: diasConConsumo }}
+                modifiersClassNames={{
+                  consumido: 'bg-success text-success-foreground rounded-2xl font-semibold',
+                }}
+              />
+            </div>
           </section>
         </>
       )}
