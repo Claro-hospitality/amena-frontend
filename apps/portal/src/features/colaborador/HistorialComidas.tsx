@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Check, TriangleAlert, UtensilsCrossed } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
-import { Calendar } from '@amena/ui/components/ui/calendar'
+import { Calendar, CalendarDayButton } from '@amena/ui/components/ui/calendar'
 import {
   Empty,
   EmptyDescription,
@@ -10,7 +11,13 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
-import { aISO, deISO, diasHabiles, etiquetaDiaCorta, lunesDeSemana } from '@amena/utils'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@amena/ui/components/ui/tooltip'
+import { aISO, deISO, diasHabiles, etiquetaDiaCorta, horaCorta, lunesDeSemana } from '@amena/utils'
 import { desgloseSemana, resumenSemana } from './logica'
 import { useMisConsumos, useMisConsumosDelMes, useMisCuotasSemana } from './queries'
 
@@ -45,8 +52,22 @@ export function HistorialComidas() {
   } = useMisConsumos()
 
   const [mes, setMes] = useState(() => primerDiaDelMes(new Date()))
-  const { data: fechasMes } = useMisConsumosDelMes(aISO(mes))
-  const diasConConsumo = (fechasMes ?? []).map((f) => deISO(f))
+  const { data: consumosMes } = useMisConsumosDelMes(aISO(mes))
+
+  // Horas de consumo por día (un día puede tener varias en modo libre) + días marcados.
+  const horasPorFecha = new Map<string, string[]>()
+  for (const c of consumosMes ?? []) {
+    const horas = horasPorFecha.get(c.fecha) ?? []
+    horas.push(horaCorta(new Date(c.created_at)))
+    horasPorFecha.set(c.fecha, horas)
+  }
+  const diasConConsumo = [...horasPorFecha.keys()].map((f) => deISO(f))
+
+  const textoConsumo = (fechaISO: string): string | null => {
+    const horas = horasPorFecha.get(fechaISO)
+    if (!horas?.length) return null
+    return horas.length === 1 ? `Comiste a las ${horas[0]}` : `Comidas: ${horas.join(', ')}`
+  }
 
   const cargando = cargandoCuotas || cargandoConsumos
   const dias = diasHabiles(deISO(lunesISO))
@@ -147,18 +168,39 @@ export function HistorialComidas() {
 
               <div className="border-t border-border" />
 
-              <div className="flex justify-center">
-                <Calendar
-                  month={mes}
-                  onMonthChange={setMes}
-                  showOutsideDays={false}
-                  formatters={FORMATO_ES}
-                  modifiers={{ consumido: diasConConsumo }}
-                  modifiersClassNames={{
-                    consumido: 'bg-success text-success-foreground rounded-full font-semibold',
-                  }}
-                />
-              </div>
+              <TooltipProvider>
+                <div className="flex justify-center">
+                  <Calendar
+                    className="[--cell-size:--spacing(10)]"
+                    month={mes}
+                    onMonthChange={setMes}
+                    showOutsideDays={false}
+                    formatters={FORMATO_ES}
+                    modifiers={{ consumido: diasConConsumo }}
+                    modifiersClassNames={{
+                      consumido: 'bg-success text-success-foreground rounded-full font-semibold',
+                    }}
+                    // Tap (móvil/tablet): toast con la hora del consumo de ese día.
+                    onDayClick={(day) => {
+                      const t = textoConsumo(aISO(day))
+                      if (t) toast(t)
+                    }}
+                    components={{
+                      // Hover (PC): tooltip con la hora en los días con consumo.
+                      DayButton: (props) => {
+                        const t = textoConsumo(aISO(props.day.date))
+                        if (!t) return <CalendarDayButton {...props} />
+                        return (
+                          <Tooltip>
+                            <TooltipTrigger render={<CalendarDayButton {...props} />} />
+                            <TooltipContent>{t}</TooltipContent>
+                          </Tooltip>
+                        )
+                      },
+                    }}
+                  />
+                </div>
+              </TooltipProvider>
             </div>
           </section>
         </>

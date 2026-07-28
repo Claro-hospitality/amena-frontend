@@ -39,7 +39,7 @@ describe('HistorialComidas', () => {
       { fecha: dias[2], origen: 'reserva', activo: true },
     ])
     api.misConsumos.mockResolvedValue([{ fecha: dias[0], created_at: '2026-07-13T14:32:00Z' }])
-    api.misConsumosDelMes.mockResolvedValue([dias[0]])
+    api.misConsumosDelMes.mockResolvedValue([{ fecha: dias[0], created_at: '2026-07-13T14:32:00Z' }])
     renderizar()
     // 3 asignadas, 1 usada → quedan 2
     expect(await screen.findByText(/te quedan 2 de 3 comidas/i)).toBeInTheDocument()
