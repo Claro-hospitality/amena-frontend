@@ -10,6 +10,7 @@ import {
   Settings,
   Users,
   UtensilsCrossed,
+  Wifi,
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
@@ -37,6 +38,7 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/consumos', label: 'Consumos', icon: Receipt },
     { to: '/cortes', label: 'Cortes semanales', icon: ClipboardCheck },
     { to: '/usuarios', label: 'Usuarios', icon: Users },
+    { to: '/wifi', label: 'WiFi', icon: Wifi },
     { to: '/configuracion', label: 'Configuración', icon: Settings },
   ],
   finanzas: [

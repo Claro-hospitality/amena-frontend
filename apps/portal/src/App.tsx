@@ -40,6 +40,11 @@ const FacturasEmpresaPage = lazy(() =>
 const MiCuentaPage = lazy(() =>
   import('./features/cuenta/MiCuentaPage').then((m) => ({ default: m.MiCuentaPage }))
 )
+const DefinirContrasenaPage = lazy(() =>
+  import('./features/acceso/DefinirContrasenaPage').then((m) => ({
+    default: m.DefinirContrasenaPage,
+  }))
+)
 
 function CargandoRuta() {
   return (
@@ -63,6 +68,8 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/sin-acceso" element={<SinAccesoPage />} />
+      {/* Definir contraseña desde el enlace del correo de acceso: PÚBLICA (sin sesión). */}
+      <Route path="/definir-contrasena" element={<Ruta><DefinirContrasenaPage /></Ruta>} />
 
       {/* Todo lo demás es privado: RutaProtegida exige sesión + acceso, y "/" redirige por tipo. */}
       <Route element={<RutaProtegida />}>
