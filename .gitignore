@@ -21,6 +21,11 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
+# Assets de origen del owner (staging) en la raíz — las apps usan su propio public/,
+# no estos. Evita commitear imágenes/videos pesados por error.
+/public/imagenes/
+/public/videos/
+
 # Sistema / editor
 .DS_Store
 .vscode/*

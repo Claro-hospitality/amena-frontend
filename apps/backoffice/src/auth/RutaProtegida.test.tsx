@@ -60,7 +60,7 @@ describe('rutas protegidas del backoffice', () => {
     auth.obtenerSesion.mockResolvedValue(null)
     montar('/inicio')
     expect(await screen.findByRole('button', { name: /entrar/i })).toBeInTheDocument()
-    expect(screen.getByText('Backoffice')).toBeInTheDocument()
+    expect(screen.getByText(/backoffice/i)).toBeInTheDocument()
   })
 
   it('super_admin llega a /inicio', async () => {
