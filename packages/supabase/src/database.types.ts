@@ -702,6 +702,10 @@ export type Database = {
         }
         Returns: Json
       }
+      actualizar_mi_perfil_portal: {
+        Args: { p_nombre: string; p_telefono: string }
+        Returns: undefined
+      }
       actualizar_nombre_comercial: {
         Args: { p_empresa_id: number; p_nombre: string }
         Returns: undefined
@@ -836,6 +840,7 @@ export type Database = {
         }[]
       }
       mi_perfil_backoffice: { Args: never; Returns: Json }
+      mi_perfil_portal: { Args: never; Returns: Json }
       mis_comensales: { Args: never; Returns: number[] }
       mis_empresas_admin: { Args: never; Returns: number[] }
       mis_empresas_comensal: { Args: never; Returns: number[] }
