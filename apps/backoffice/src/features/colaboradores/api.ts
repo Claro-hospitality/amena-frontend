@@ -1,5 +1,4 @@
 import { supabase } from '@amena/supabase'
-import type { DatosCredencialAcceso } from '@amena/ui/components/ui/credenciales-acceso'
 
 /**
  * Colaborador (comensal) aplanado para el listado global: la identidad (nombre,
@@ -215,18 +214,24 @@ export async function altaUsuarioPortal(datos: DatosAlta): Promise<CredencialesA
   return data as CredencialesAlta
 }
 
+/** Resultado de enviar el correo de restablecimiento de acceso. */
+export interface ResultadoAccesoPortal {
+  correo_enviado: boolean
+  correo_error?: string
+}
+
 /**
- * Restablece la contraseña de un usuario del portal vía la edge function
- * `resetear-password-portal`: genera una temporal (se muestra una sola vez) y exige el
- * cambio al próximo login. `usuarioId` es el id de `usuarios_portal_empresarial`. Solo
- * super_admin (o el admin de la empresa, en el portal) — lo valida la función.
+ * Envía por correo el enlace para restablecer la contraseña de un usuario del PORTAL, vía la
+ * edge function `restablecer-acceso` (plataforma "portal", motivo "restablecer"). El usuario
+ * define su nueva contraseña desde `/definir-contrasena` — ya no se genera contraseña temporal.
+ * Solo super_admin (lo valida la función).
  */
-export async function resetearPasswordUsuario(usuarioId: number): Promise<DatosCredencialAcceso> {
-  const { data, error } = await supabase.functions.invoke('resetear-password-portal', {
-    body: { usuario_id: usuarioId },
+export async function restablecerAccesoPortal(email: string): Promise<ResultadoAccesoPortal> {
+  const { data, error } = await supabase.functions.invoke('restablecer-acceso', {
+    body: { email, plataforma: 'portal', motivo: 'restablecer' },
   })
   if (error) {
-    let mensaje = 'No se pudo restablecer la contraseña. Intenta de nuevo.'
+    let mensaje = 'No se pudo enviar el correo de restablecimiento. Intenta de nuevo.'
     const resp = (error as { context?: Response }).context
     if (resp && typeof resp.json === 'function') {
       try {
@@ -238,5 +243,5 @@ export async function resetearPasswordUsuario(usuarioId: number): Promise<DatosC
     }
     throw new Error(mensaje)
   }
-  return data as DatosCredencialAcceso
+  return data as ResultadoAccesoPortal
 }

@@ -8,7 +8,7 @@ import {
   establecerRolPortal,
   listarColaboradores,
   listarUsuariosEmpresa,
-  resetearPasswordUsuario,
+  restablecerAccesoPortal,
   type DatosAlta,
   type RolPortal,
 } from './api'
@@ -83,10 +83,10 @@ export function useAltaUsuario() {
   })
 }
 
-/** Restablece la contraseña de un usuario del portal; devuelve la temporal (una vez). */
-export function useResetearPassword() {
+/** Envía por correo el enlace para que un usuario del portal restablezca su contraseña. */
+export function useRestablecerAccesoPortal() {
   return useMutation({
-    mutationFn: (usuarioId: number) => resetearPasswordUsuario(usuarioId),
+    mutationFn: (email: string) => restablecerAccesoPortal(email),
   })
 }
 
