@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -96,15 +96,11 @@ describe('ColaboradoresPage', () => {
     expect(screen.getAllByRole('switch', { name: /consumo libre/i }).length).toBeGreaterThan(0)
   })
 
-  it('restablecer contraseña: confirma, llama a la función y muestra la temporal', async () => {
+  it('restablecer contraseña: confirma y envía el correo con el enlace', async () => {
     const user = userEvent.setup()
-    api.resetearPasswordColaborador.mockResolvedValue({
-      email: 'maria@x.com',
-      yaTeniaCuenta: false,
-      tempPassword: 'Temp0ral-Fuerte!',
-    })
+    api.resetearPasswordColaborador.mockResolvedValue({ correo_enviado: true })
     api.listarColaboradores.mockResolvedValue([
-      crearColaboradorFake({ usuario_id: 5, user_id: 'u1' }),
+      crearColaboradorFake({ usuario_id: 5, user_id: 'u1', email: 'maria@x.com' }),
     ])
     renderizar('admin_empresa')
     await screen.findAllByText('María López')
@@ -113,11 +109,10 @@ describe('ColaboradoresPage', () => {
     await user.click(screen.getAllByRole('button', { name: /acciones de maría lópez/i })[0])
     await user.click(await screen.findByRole('menuitem', { name: /restablecer contraseña/i }))
 
-    // Confirmación → aplicar.
+    // Confirmación → envía el correo.
     expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Restablecer' }))
-    expect(api.resetearPasswordColaborador).toHaveBeenCalledWith(5)
-    expect(await screen.findByText('Temp0ral-Fuerte!')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Enviar enlace' }))
+    await waitFor(() => expect(api.resetearPasswordColaborador).toHaveBeenCalledWith(5))
   })
 
   it('activar el toggle llama establecer_consumo_libre con el usuario_id (no el id de comensal)', async () => {
