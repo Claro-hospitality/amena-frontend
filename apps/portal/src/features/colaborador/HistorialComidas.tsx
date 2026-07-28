@@ -146,7 +146,7 @@ export function HistorialComidas() {
             <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4">
               {/* Resumen del mes en vista */}
               <div className="flex items-center gap-3">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-success/15 text-success-foreground">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-salvia-500/15 text-salvia-500">
                   <UtensilsCrossed className="size-5" strokeWidth={1.75} />
                 </span>
                 <div className="flex flex-col">
@@ -161,7 +161,7 @@ export function HistorialComidas() {
                   </span>
                 </div>
                 <span className="ml-auto inline-flex items-center gap-1.5 self-start text-xs text-muted-foreground">
-                  <span className="size-2.5 rounded-full bg-success" aria-hidden />
+                  <span className="size-2.5 rounded-full bg-salvia-500" aria-hidden />
                   Con consumo
                 </span>
               </div>
@@ -171,14 +171,16 @@ export function HistorialComidas() {
               <TooltipProvider>
                 <div className="flex justify-center">
                   <Calendar
-                    className="[--cell-size:--spacing(10)]"
+                    className="bg-transparent [--cell-size:--spacing(10)]"
                     month={mes}
                     onMonthChange={setMes}
                     showOutsideDays={false}
                     formatters={FORMATO_ES}
                     modifiers={{ consumido: diasConConsumo }}
                     modifiersClassNames={{
-                      consumido: 'bg-success text-success-foreground rounded-full font-semibold',
+                      // Verde de marca (secondary). El hover conserva el color (no lo quita).
+                      consumido:
+                        'bg-salvia-500 text-primary-foreground rounded-full font-semibold hover:bg-salvia-500 hover:text-primary-foreground',
                     }}
                     // Tap (móvil/tablet): toast con la hora del consumo de ese día.
                     onDayClick={(day) => {
