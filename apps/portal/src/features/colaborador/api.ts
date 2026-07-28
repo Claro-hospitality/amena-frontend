@@ -154,17 +154,21 @@ export async function misConsumos(limite = 30): Promise<MiConsumo[]> {
   return (data ?? []) as MiConsumo[]
 }
 
-/** Fechas (YYYY-MM-DD) en las que tuve consumo dentro del mes de `mesISO`. Para el calendario. */
-export async function misConsumosDelMes(mesISO: string): Promise<string[]> {
+/**
+ * Mis consumos del mes de `mesISO` (fecha + hora). Para el calendario del historial: marca los
+ * días con consumo y, al tocarlos/hover, muestra la hora. Acotado a mis comensales.
+ */
+export async function misConsumosDelMes(mesISO: string): Promise<MiConsumo[]> {
   const ids = await misComensalesIds()
   if (ids.length === 0) return []
   const { desde, hasta } = rangoMes(mesISO)
   const { data, error } = await supabase
     .from('consumos')
-    .select('fecha')
+    .select('fecha, created_at')
     .in('comensal_id', ids)
     .gte('fecha', desde)
     .lte('fecha', hasta)
+    .order('created_at')
   if (error) throw error
-  return [...new Set((data ?? []).map((r) => r.fecha))]
+  return (data ?? []) as MiConsumo[]
 }
