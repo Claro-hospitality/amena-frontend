@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, TriangleAlert, UtensilsCrossed } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
 import { Calendar } from '@amena/ui/components/ui/calendar'
@@ -50,6 +50,17 @@ export function HistorialComidas() {
   const [detalle, setDetalle] = useState<{ label: string; texto: string; x: number; y: number } | null>(
     null
   )
+  // Controla la animación: abre de abajo→arriba; cierra de arriba→abajo (desmonta al terminar).
+  const [abierta, setAbierta] = useState(false)
+  useEffect(() => {
+    if (!detalle) return
+    const id = requestAnimationFrame(() => setAbierta(true))
+    return () => cancelAnimationFrame(id)
+  }, [detalle])
+  const cerrarDetalle = () => {
+    setAbierta(false)
+    window.setTimeout(() => setDetalle(null), 160)
+  }
 
   // Horas de consumo por día (un día puede tener varias en modo libre) + días marcados.
   const horasPorFecha = new Map<string, string[]>()
@@ -202,23 +213,32 @@ export function HistorialComidas() {
             </div>
           </section>
 
-          {/* Card flotante anclada arriba del día presionado (se cierra al tocar fuera). */}
+          {/* Card flotante anclada arriba del día presionado (se cierra al tocar fuera).
+              Abre de abajo→arriba; cierra de arriba→abajo. */}
           {detalle && (
-            <div className="fixed inset-0 z-40" onClick={() => setDetalle(null)}>
+            <div className="fixed inset-0 z-40" onClick={cerrarDetalle}>
+              {/* Contenedor que ancla la card arriba del día (no anima). */}
               <div
-                role="dialog"
-                onClick={(e) => e.stopPropagation()}
                 style={{ left: detalle.x, top: detalle.y }}
-                className="fixed z-50 w-max max-w-[16rem] -translate-x-1/2 -translate-y-full rounded-2xl border border-border bg-popover p-3 text-popover-foreground shadow-lg ring-1 ring-foreground/5"
+                className="fixed z-50 -translate-x-1/2 -translate-y-full"
               >
-                <p className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground first-letter:uppercase">
-                  {detalle.label}
-                </p>
-                <p className="mt-1 text-sm">{detalle.texto}</p>
-                <span
-                  className="absolute left-1/2 top-full size-2.5 -translate-x-1/2 -translate-y-[65%] rotate-45 border-r border-b border-border bg-popover"
-                  aria-hidden
-                />
+                {/* Card animada (transform + opacidad). */}
+                <div
+                  role="dialog"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`relative w-max max-w-[16rem] rounded-2xl border border-border bg-popover p-3 text-popover-foreground shadow-lg ring-1 ring-foreground/5 transition-[transform,opacity] duration-150 ease-out motion-reduce:transition-none ${
+                    abierta ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                  }`}
+                >
+                  <p className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground first-letter:uppercase">
+                    {detalle.label}
+                  </p>
+                  <p className="mt-1 text-sm">{detalle.texto}</p>
+                  <span
+                    className="absolute left-1/2 top-full size-2.5 -translate-x-1/2 -translate-y-[65%] rotate-45 border-r border-b border-border bg-popover"
+                    aria-hidden
+                  />
+                </div>
               </div>
             </div>
           )}
