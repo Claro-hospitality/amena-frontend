@@ -59,7 +59,7 @@ export function HistorialComidas() {
   }, [detalle])
   const cerrarDetalle = () => {
     setAbierta(false)
-    window.setTimeout(() => setDetalle(null), 160)
+    window.setTimeout(() => setDetalle(null), 320)
   }
 
   // Horas de consumo por día (un día puede tener varias en modo libre) + días marcados.
@@ -226,8 +226,8 @@ export function HistorialComidas() {
                 <div
                   role="dialog"
                   onClick={(e) => e.stopPropagation()}
-                  className={`relative w-max max-w-[16rem] rounded-2xl border border-border bg-popover p-3 text-popover-foreground shadow-lg ring-1 ring-foreground/5 transition-[transform,opacity] duration-150 ease-out motion-reduce:transition-none ${
-                    abierta ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                  className={`relative w-max max-w-[16rem] rounded-2xl border border-border bg-popover p-3 text-popover-foreground shadow-lg ring-1 ring-foreground/5 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[transform,opacity] motion-reduce:transition-none ${
+                    abierta ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-95 opacity-0'
                   }`}
                 >
                   <p className="text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground first-letter:uppercase">
