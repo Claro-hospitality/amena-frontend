@@ -17,17 +17,22 @@ export function InicioPage() {
   const { data: estado } = useEstadoHoy()
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5">
       <SaludoBienvenida />
 
       {esComensal ? (
-        <section className="flex flex-col gap-3">
+        <>
           {estado && <EstadoHoy estado={estado} />}
-          <Button size="lg" className="h-12 w-full" onClick={() => navigate('/mi-qr')}>
+          {/* CTA principal anclado abajo: aprovecha la pantalla y queda al alcance del pulgar. */}
+          <Button
+            size="lg"
+            className="mt-auto h-14 w-full text-base"
+            onClick={() => navigate('/mi-qr')}
+          >
             <QrCode className="size-5" />
             Mostrar mi QR
           </Button>
-        </section>
+        </>
       ) : (
         <p className="text-sm text-muted-foreground">
           Gestiona a tu equipo y tus consumos desde la sección{' '}

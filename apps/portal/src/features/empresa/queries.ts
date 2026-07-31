@@ -8,8 +8,12 @@ import {
 
 const CLAVE_MI_EMPRESA = ['mi-empresa'] as const
 
-export function useMiEmpresa() {
-  return useQuery({ queryKey: CLAVE_MI_EMPRESA, queryFn: obtenerMiEmpresa })
+export function useMiEmpresa(opciones?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: CLAVE_MI_EMPRESA,
+    queryFn: obtenerMiEmpresa,
+    enabled: opciones?.enabled ?? true,
+  })
 }
 
 export function useGuardarDatosFiscales(empresaId: number) {
