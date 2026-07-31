@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { cambiarPassword } from '@amena/supabase/auth'
+import { programarRecorrido } from '../recorrido/useRecorridoPortal'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@amena/ui/components/ui/card'
@@ -31,6 +32,8 @@ export function CambiarPasswordObligatorio() {
     setEnviando(true)
     try {
       await cambiarPassword(password)
+      // Programa el recorrido guiado para el primer acceso al portal.
+      programarRecorrido()
       toast.success('Contraseña actualizada')
       // No se navega: el cambio de sesión (USER_UPDATED) limpia must_change_password
       // y RutaProtegida vuelve a renderizar el portal.

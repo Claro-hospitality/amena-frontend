@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { useIsMobile } from '@amena/ui/hooks/use-mobile'
@@ -8,6 +8,11 @@ import { Breadcrumbs } from './Breadcrumbs'
 import { UsuarioMenu } from './UsuarioMenu'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
 import { navPorTipo, type ItemNav } from './navPortal'
+import { consumirRecorridoPendiente, useRecorridoPortal } from '../features/recorrido/useRecorridoPortal'
+
+// Guarda a nivel de módulo: garantiza un solo auto-inicio por carga de la app
+// (evita que el doble montaje de StrictMode en dev lo dispare dos veces o lo cancele).
+let recorridoAutoArrancado = false
 
 /**
  * Shell del portal (mobile-first):
@@ -25,6 +30,21 @@ export function PortalShell({
   children: ReactNode
 }) {
   const items = navPorTipo[tipo]
+  const { iniciar } = useRecorridoPortal(tipo)
+  const { pathname } = useLocation()
+
+  // En "reservar cuotas" la página tiene su propia barra de acción fija abajo
+  // (botón Reservar). La píldora de navegación la taparía, así que se oculta ahí.
+  const ocultarNavInferior = pathname.startsWith('/empresa/cuotas/reservar')
+
+  // Auto-inicia el recorrido solo si quedó programado al definir la contraseña
+  // por primera vez (correo de bienvenida o cambio obligatorio).
+  useEffect(() => {
+    if (recorridoAutoArrancado) return
+    if (!consumirRecorridoPendiente()) return
+    recorridoAutoArrancado = true
+    iniciar()
+  }, [iniciar])
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -37,6 +57,7 @@ export function PortalShell({
             <NavLink
               key={item.to}
               to={item.to}
+              data-tour={item.tourId}
               className={({ isActive }) =>
                 cn(
                   'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
@@ -52,7 +73,7 @@ export function PortalShell({
         </nav>
 
         <div className="ml-auto flex items-center lg:ml-0">
-          <UsuarioMenu />
+          <UsuarioMenu onVerRecorrido={iniciar} />
         </div>
       </header>
 
@@ -61,8 +82,8 @@ export function PortalShell({
         {children}
       </main>
 
-      {/* Móvil y tablet: navegación en píldora inferior */}
-      <NavInferior items={items} />
+      {/* Móvil y tablet: navegación en píldora inferior (oculta donde estorbe) */}
+      {!ocultarNavInferior && <NavInferior items={items} />}
     </div>
   )
 }
@@ -103,7 +124,7 @@ function NavInferior({ items }: { items: ItemNav[] }) {
       // Solo se oculta en móvil; en tablet (≥768) queda fija. Spring = deslizamiento fluido.
       animate={{ y: esMovil && oculto ? '150%' : '0%' }}
       transition={{ type: 'spring', stiffness: 220, damping: 30, mass: 0.9 }}
-      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex w-fit items-stretch gap-1 rounded-3xl border border-border/40 bg-card/70 p-1.5 shadow-lg ring-1 ring-foreground/5 backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-card/40 lg:hidden"
+      className="fixed inset-x-3 bottom-3 z-20 mx-auto flex w-fit items-stretch gap-1 rounded-3xl border border-border/50 bg-card/80 p-1.5 shadow-lg ring-1 ring-foreground/5 backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-card/60 lg:hidden"
     >
       {items.map((item) => (
         <ItemPildora key={item.to} item={item} />
@@ -121,6 +142,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
   return (
     <NavLink
       to={item.to}
+      data-tour={item.tourId}
       onClick={() => setRipples((r) => [...r, (idRef.current += 1)])}
       className={({ isActive }) =>
         cn(
