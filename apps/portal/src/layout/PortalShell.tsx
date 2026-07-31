@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LogotipoAmena } from '@amena/ui/components/logotipo-amena'
 import { useIsMobile } from '@amena/ui/hooks/use-mobile'
@@ -31,6 +31,11 @@ export function PortalShell({
 }) {
   const items = navPorTipo[tipo]
   const { iniciar } = useRecorridoPortal(tipo)
+  const { pathname } = useLocation()
+
+  // En "reservar cuotas" la página tiene su propia barra de acción fija abajo
+  // (botón Reservar). La píldora de navegación la taparía, así que se oculta ahí.
+  const ocultarNavInferior = pathname.startsWith('/empresa/cuotas/reservar')
 
   // Auto-inicia el recorrido solo si quedó programado al definir la contraseña
   // por primera vez (correo de bienvenida o cambio obligatorio).
@@ -77,8 +82,8 @@ export function PortalShell({
         {children}
       </main>
 
-      {/* Móvil y tablet: navegación en píldora inferior */}
-      <NavInferior items={items} />
+      {/* Móvil y tablet: navegación en píldora inferior (oculta donde estorbe) */}
+      {!ocultarNavInferior && <NavInferior items={items} />}
     </div>
   )
 }
