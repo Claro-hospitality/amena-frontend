@@ -40,6 +40,7 @@ export function FilaColaboradorReserva({
           </Button>
         </div>
         <ToggleGroup
+          multiple
           value={valor}
           onValueChange={(vals) => onCambio(vals.filter((v) => !yaReservadas.has(v)))}
           className="flex-wrap"
@@ -55,7 +56,7 @@ export function FilaColaboradorReserva({
                 variant="outline"
                 disabled={bloqueada}
                 aria-label={etiquetaDiaCorta(d)}
-                className="h-11 min-w-16 capitalize"
+                className="h-11 min-w-16 capitalize aria-pressed:border-salvia-500 aria-pressed:bg-salvia-500 aria-pressed:text-primary-foreground hover:aria-pressed:bg-salvia-600"
               >
                 {etiquetaDiaCorta(d)}
               </ToggleGroupItem>
