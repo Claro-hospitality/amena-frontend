@@ -11,7 +11,7 @@ export type { Colaborador }
 /** Un platillo del menú de un día. */
 export interface PlatilloMenu {
   fecha: string
-  platillo: { nombre: string; foto_url: string | null }
+  platillo: { nombre: string; foto_url: string | null; descripcion?: string | null }
 }
 
 /** Estado de la comida de hoy del colaborador. */
@@ -102,7 +102,7 @@ export async function estadoDeHoy(): Promise<EstadoHoy> {
 export async function menuDelDia(fechaISO: string): Promise<PlatilloMenu[]> {
   const { data, error } = await supabase
     .from('menu_dias')
-    .select('fecha, platillo:platillos(nombre, foto_url)')
+    .select('fecha, platillo:platillos(nombre, foto_url, descripcion)')
     .eq('fecha', fechaISO)
     .eq('activo', true)
   if (error) throw error
@@ -114,7 +114,7 @@ export async function menuSemana(lunesISO: string): Promise<PlatilloMenu[]> {
   const { desde, hasta } = rangoSemana(lunesISO)
   const { data, error } = await supabase
     .from('menu_dias')
-    .select('fecha, platillo:platillos(nombre, foto_url)')
+    .select('fecha, platillo:platillos(nombre, foto_url, descripcion)')
     .gte('fecha', desde)
     .lte('fecha', hasta)
     .eq('activo', true)
