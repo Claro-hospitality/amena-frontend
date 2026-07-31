@@ -8,7 +8,11 @@ import { Breadcrumbs } from './Breadcrumbs'
 import { UsuarioMenu } from './UsuarioMenu'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
 import { navPorTipo, type ItemNav } from './navPortal'
-import { recorridoVisto, useRecorridoPortal } from '../features/recorrido/useRecorridoPortal'
+import { consumirRecorridoPendiente, useRecorridoPortal } from '../features/recorrido/useRecorridoPortal'
+
+// Guarda a nivel de módulo: garantiza un solo auto-inicio por carga de la app
+// (evita que el doble montaje de StrictMode en dev lo dispare dos veces o lo cancele).
+let recorridoAutoArrancado = false
 
 /**
  * Shell del portal (mobile-first):
@@ -28,13 +32,13 @@ export function PortalShell({
   const items = navPorTipo[tipo]
   const { iniciar } = useRecorridoPortal(tipo)
 
-  // Auto-inicia el recorrido en el primer acceso (una sola vez por dispositivo).
-  const autoIniciado = useRef(false)
+  // Auto-inicia el recorrido solo si quedó programado al definir la contraseña
+  // por primera vez (correo de bienvenida o cambio obligatorio).
   useEffect(() => {
-    if (autoIniciado.current || recorridoVisto()) return
-    autoIniciado.current = true
-    const t = window.setTimeout(iniciar, 700) // deja montar el layout
-    return () => window.clearTimeout(t)
+    if (recorridoAutoArrancado) return
+    if (!consumirRecorridoPendiente()) return
+    recorridoAutoArrancado = true
+    iniciar()
   }, [iniciar])
 
   return (

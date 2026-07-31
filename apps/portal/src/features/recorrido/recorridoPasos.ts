@@ -39,7 +39,7 @@ export function construirPasos(tipo: TipoUsuarioPortal): PasoRecorrido[] {
     ruta: '/menu',
     ancla: '[data-tour="nav-menu"]',
     titulo: 'Menú',
-    descripcion: 'Consulta el menú de la semana en el comedor.',
+    descripcion: 'Consulta el menú de la semana en el restaurante.',
   }
 
   const miQr: PasoRecorrido = {
@@ -47,7 +47,7 @@ export function construirPasos(tipo: TipoUsuarioPortal): PasoRecorrido[] {
     ancla: '[data-tour="nav-mi-qr"]',
     titulo: 'Mi QR',
     descripcion:
-      'Muestra este código QR en el comedor para registrar tu comida. Sin dinero ni vales.',
+      'Muestra este código QR en el restaurante para registrar tu comida. Sin dinero ni vales.',
   }
 
   const cierre: PasoRecorrido = {

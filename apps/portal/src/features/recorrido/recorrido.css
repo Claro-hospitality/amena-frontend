@@ -59,7 +59,7 @@
 }
 
 .driver-popover.amena-recorrido .driver-popover-next-btn:hover {
-  background-color: var(--naranja-600, var(--primary));
+  background-color: var(--color-naranja-600, var(--primary));
 }
 
 .driver-popover.amena-recorrido .driver-popover-prev-btn {

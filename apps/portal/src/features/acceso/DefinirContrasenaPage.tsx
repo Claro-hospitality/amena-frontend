@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { definirPasswordAcceso, verificarTokenAcceso } from '@amena/supabase/auth'
+import { programarRecorrido } from '../recorrido/useRecorridoPortal'
 import { Button } from '@amena/ui/components/ui/button'
 import { FieldError, FieldGroup } from '@amena/ui/components/ui/field'
 import {
@@ -64,6 +65,8 @@ export function DefinirContrasenaPage() {
     setGuardando(true)
     try {
       await definirPasswordAcceso(pass)
+      // Programa el recorrido guiado para el primer acceso al portal.
+      programarRecorrido()
       toast.success('Contraseña definida. ¡Bienvenido!')
       navigate('/', { replace: true })
     } catch {

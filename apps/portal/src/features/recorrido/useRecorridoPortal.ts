@@ -6,23 +6,35 @@ import './recorrido.css'
 import { construirPasos } from './recorridoPasos'
 import type { TipoUsuarioPortal } from '../../auth/validarAccesoPortal'
 
-const CLAVE_VISTO = 'amena.portal.recorrido.v1'
+const CLAVE_PENDIENTE = 'amena.portal.recorrido.pendiente'
 
-/** ¿El usuario ya vio (o cerró) el recorrido en este dispositivo? */
-export function recorridoVisto(): boolean {
+/**
+ * Programa el recorrido para que se muestre automáticamente en el próximo acceso
+ * al portal. Se llama justo después de que el usuario define su contraseña por
+ * primera vez (enlace del correo de bienvenida o cambio obligatorio).
+ */
+export function programarRecorrido() {
   try {
-    return localStorage.getItem(CLAVE_VISTO) === '1'
+    localStorage.setItem(CLAVE_PENDIENTE, '1')
   } catch {
-    return false
+    /* modo privado / sin storage: se omite el auto-inicio */
   }
 }
 
-function marcarVisto() {
+/**
+ * Devuelve `true` una sola vez si el recorrido estaba programado, y lo limpia
+ * (consumo atómico) para que no vuelva a auto-iniciarse.
+ */
+export function consumirRecorridoPendiente(): boolean {
   try {
-    localStorage.setItem(CLAVE_VISTO, '1')
+    if (localStorage.getItem(CLAVE_PENDIENTE) === '1') {
+      localStorage.removeItem(CLAVE_PENDIENTE)
+      return true
+    }
   } catch {
-    /* modo privado / sin storage: no pasa nada, solo no se recuerda */
+    /* sin storage: nunca hay pendiente */
   }
+  return false
 }
 
 /** De entre los elementos que casan el selector, el primero realmente visible. */
@@ -71,7 +83,6 @@ export function useRecorridoPortal(tipo: TipoUsuarioPortal) {
       stageRadius: 12,
       popoverClass: 'amena-recorrido',
       onDestroyed: () => {
-        marcarVisto()
         driverRef.current = null
       },
     })
