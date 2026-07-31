@@ -23,15 +23,15 @@ export function SaludoBienvenida() {
   const c = clima ? describirClima(clima.codigo) : null
 
   return (
-    <section className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-4">
+    <section className="flex flex-col gap-1.5 rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-lg font-semibold leading-tight">
+        <p className="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
           {saludoPorHora(hora)}
           {nombre ? `, ${nombre}` : ''} {emojiPorHora(hora)}
         </p>
         {clima && c && (
-          <span className="flex shrink-0 items-center gap-1 text-sm font-medium tabular-nums">
-            <span aria-hidden className="text-base leading-none">
+          <span className="flex shrink-0 items-center gap-1 text-base font-semibold tabular-nums">
+            <span aria-hidden className="text-xl leading-none">
               {c.emoji}
             </span>
             {clima.tempC}°
