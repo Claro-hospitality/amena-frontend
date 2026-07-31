@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { LogOut, UserRound } from 'lucide-react'
+import { Compass, LogOut, UserRound } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@amena/ui/components/ui/avatar'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -27,7 +27,7 @@ function iniciales(texto: string): string {
  * acciones "Mi cuenta" y "Cerrar sesión". Reemplaza los botones sueltos del header
  * (mismo componente que el backoffice).
  */
-export function UsuarioMenu() {
+export function UsuarioMenu({ onVerRecorrido }: { onVerRecorrido?: () => void }) {
   const { session, cerrarSesion } = useAuth()
   const navigate = useNavigate()
 
@@ -66,6 +66,12 @@ export function UsuarioMenu() {
           <UserRound className="size-4" />
           Mi cuenta
         </DropdownMenuItem>
+        {onVerRecorrido && (
+          <DropdownMenuItem onClick={onVerRecorrido}>
+            <Compass className="size-4" />
+            Ver recorrido
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => cerrarSesion()}>
           <LogOut className="size-4" />
           Cerrar sesión

@@ -50,6 +50,7 @@ export function EmpresaLayout() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                data-tour={item.tourId}
                 // "General" (índice /empresa) solo activo en la ruta exacta, no en las hijas.
                 end={item.to === '/empresa'}
                 className={({ isActive }) =>

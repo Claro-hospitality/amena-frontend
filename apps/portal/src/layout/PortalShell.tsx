@@ -8,6 +8,7 @@ import { Breadcrumbs } from './Breadcrumbs'
 import { UsuarioMenu } from './UsuarioMenu'
 import type { TipoUsuarioPortal } from '../auth/validarAccesoPortal'
 import { navPorTipo, type ItemNav } from './navPortal'
+import { recorridoVisto, useRecorridoPortal } from '../features/recorrido/useRecorridoPortal'
 
 /**
  * Shell del portal (mobile-first):
@@ -25,6 +26,16 @@ export function PortalShell({
   children: ReactNode
 }) {
   const items = navPorTipo[tipo]
+  const { iniciar } = useRecorridoPortal(tipo)
+
+  // Auto-inicia el recorrido en el primer acceso (una sola vez por dispositivo).
+  const autoIniciado = useRef(false)
+  useEffect(() => {
+    if (autoIniciado.current || recorridoVisto()) return
+    autoIniciado.current = true
+    const t = window.setTimeout(iniciar, 700) // deja montar el layout
+    return () => window.clearTimeout(t)
+  }, [iniciar])
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -37,6 +48,7 @@ export function PortalShell({
             <NavLink
               key={item.to}
               to={item.to}
+              data-tour={item.tourId}
               className={({ isActive }) =>
                 cn(
                   'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
@@ -52,7 +64,7 @@ export function PortalShell({
         </nav>
 
         <div className="ml-auto flex items-center lg:ml-0">
-          <UsuarioMenu />
+          <UsuarioMenu onVerRecorrido={iniciar} />
         </div>
       </header>
 
@@ -121,6 +133,7 @@ function ItemPildora({ item }: { item: ItemNav }) {
   return (
     <NavLink
       to={item.to}
+      data-tour={item.tourId}
       onClick={() => setRipples((r) => [...r, (idRef.current += 1)])}
       className={({ isActive }) =>
         cn(

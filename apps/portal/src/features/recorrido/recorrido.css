@@ -1,0 +1,96 @@
+/* Recorrido guiado (driver.js) con el branding de Amena: superficie plana con
+   borde (sin sombra), tipografía del tema y botón principal en naranja. Usa los
+   tokens semánticos del tema para adaptarse a claro/oscuro. */
+
+.driver-popover.amena-recorrido {
+  background-color: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: none;
+  padding: 1.25rem;
+  max-width: 20rem;
+  font-family: var(--font-sans, inherit);
+}
+
+.driver-popover.amena-recorrido .driver-popover-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.driver-popover.amena-recorrido .driver-popover-description {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.driver-popover.amena-recorrido .amena-recorrido-progreso {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.driver-popover.amena-recorrido .driver-popover-progress-text {
+  display: none; /* usamos nuestro propio contador dentro de la descripción */
+}
+
+.driver-popover.amena-recorrido .driver-popover-navigation-btns {
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.driver-popover.amena-recorrido .driver-popover-navigation-btns button {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.4rem 0.95rem;
+  text-shadow: none;
+  transition: background-color 0.15s ease;
+}
+
+.driver-popover.amena-recorrido .driver-popover-next-btn {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid transparent;
+}
+
+.driver-popover.amena-recorrido .driver-popover-next-btn:hover {
+  background-color: var(--naranja-600, var(--primary));
+}
+
+.driver-popover.amena-recorrido .driver-popover-prev-btn {
+  background-color: transparent;
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+}
+
+.driver-popover.amena-recorrido .driver-popover-prev-btn:hover {
+  color: var(--foreground);
+  background-color: var(--secondary);
+}
+
+.driver-popover.amena-recorrido .driver-popover-close-btn {
+  color: var(--muted-foreground);
+}
+
+.driver-popover.amena-recorrido .driver-popover-close-btn:hover {
+  color: var(--foreground);
+}
+
+/* La flecha toma el color de la superficie (card blanco) para no romper el borde. */
+.driver-popover.amena-recorrido .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: var(--card);
+}
+.driver-popover.amena-recorrido .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: var(--card);
+}
+.driver-popover.amena-recorrido .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: var(--card);
+}
+.driver-popover.amena-recorrido .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: var(--card);
+}
