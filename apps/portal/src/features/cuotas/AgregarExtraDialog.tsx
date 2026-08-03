@@ -75,6 +75,7 @@ export function AgregarExtraDialog({
   const [nombre, setNombre] = useState('')
   const [apellido, setApellido] = useState('')
   const [telefono, setTelefono] = useState('')
+  const [correo, setCorreo] = useState('')
   const [paseCreado, setPaseCreado] = useState<PaseInvitadoCreado | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
 
@@ -99,7 +100,7 @@ export function AgregarExtraDialog({
   const guardarInvitado = () => {
     if (!empresaId || !nombre.trim() || !fecha) return
     crearPase.mutate(
-      { empresaId, nombre: nombre.trim(), apellido: apellido.trim(), telefono: telefono.trim(), fecha },
+      { empresaId, nombre: nombre.trim(), apellido: apellido.trim(), telefono: telefono.trim(), correo: correo.trim(), fecha },
       {
         onSuccess: (pase) => {
           setPaseCreado(pase)
@@ -236,7 +237,9 @@ export function AgregarExtraDialog({
                   onClick={() => setTipo(t)}
                   className={cn(
                     'flex-1 rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors',
-                    tipo === t ? 'bg-card text-foreground' : 'text-muted-foreground hover:text-foreground'
+                    tipo === t
+                      ? 'bg-salvia-500 text-primary-foreground'
+                      : 'text-secondary-foreground/80 hover:text-secondary-foreground'
                   )}
                 >
                   {t}
@@ -286,6 +289,17 @@ export function AgregarExtraDialog({
                     onChange={(e) => setTelefono(e.target.value)}
                     placeholder="Teléfono (opcional)"
                     inputMode="tel"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium">Correo</label>
+                  <Input
+                    value={correo}
+                    onChange={(e) => setCorreo(e.target.value)}
+                    placeholder="Correo (opcional)"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
                   />
                 </div>
                 {diaSelect}

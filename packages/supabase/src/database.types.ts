@@ -535,6 +535,7 @@ export type Database = {
         Row: {
           activo: boolean
           apellido: string | null
+          correo: string | null
           creado_por: string | null
           created_at: string
           empresa_id: number
@@ -551,6 +552,7 @@ export type Database = {
         Insert: {
           activo?: boolean
           apellido?: string | null
+          correo?: string | null
           creado_por?: string | null
           created_at?: string
           empresa_id: number
@@ -567,6 +569,7 @@ export type Database = {
         Update: {
           activo?: boolean
           apellido?: string | null
+          correo?: string | null
           creado_por?: string | null
           created_at?: string
           empresa_id?: number
@@ -808,6 +811,7 @@ export type Database = {
       crear_pase_invitado: {
         Args: {
           p_apellido: string
+          p_correo: string
           p_empresa_id: number
           p_fecha: string
           p_nombre: string

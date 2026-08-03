@@ -162,6 +162,7 @@ export async function crearPaseInvitado(v: {
   nombre: string
   apellido: string
   telefono: string
+  correo: string
   fecha: string
 }): Promise<PaseInvitadoCreado> {
   const { data, error } = await supabase.rpc('crear_pase_invitado', {
@@ -169,6 +170,7 @@ export async function crearPaseInvitado(v: {
     p_nombre: v.nombre,
     p_apellido: v.apellido,
     p_telefono: v.telefono,
+    p_correo: v.correo,
     p_fecha: v.fecha,
   })
   if (error) throw error
