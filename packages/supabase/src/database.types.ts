@@ -531,6 +531,68 @@ export type Database = {
         }
         Relationships: []
       }
+      pases_invitado: {
+        Row: {
+          activo: boolean
+          apellido: string | null
+          correo: string | null
+          creado_por: string | null
+          created_at: string
+          empresa_id: number
+          estado: Database["public"]["Enums"]["estado_pase_invitado"]
+          fecha: string
+          id: number
+          nombre: string
+          qr_token: string
+          registrado_por: string | null
+          telefono: string | null
+          updated_at: string
+          usado_en: string | null
+        }
+        Insert: {
+          activo?: boolean
+          apellido?: string | null
+          correo?: string | null
+          creado_por?: string | null
+          created_at?: string
+          empresa_id: number
+          estado?: Database["public"]["Enums"]["estado_pase_invitado"]
+          fecha: string
+          id?: number
+          nombre: string
+          qr_token?: string
+          registrado_por?: string | null
+          telefono?: string | null
+          updated_at?: string
+          usado_en?: string | null
+        }
+        Update: {
+          activo?: boolean
+          apellido?: string | null
+          correo?: string | null
+          creado_por?: string | null
+          created_at?: string
+          empresa_id?: number
+          estado?: Database["public"]["Enums"]["estado_pase_invitado"]
+          fecha?: string
+          id?: number
+          nombre?: string
+          qr_token?: string
+          registrado_por?: string | null
+          telefono?: string | null
+          updated_at?: string
+          usado_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pases_invitado_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platillos: {
         Row: {
           activo: boolean
@@ -743,8 +805,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      cancelar_pase_invitado: { Args: { p_pase_id: number }; Returns: Json }
       comensales_de_mis_empresas: { Args: never; Returns: number[] }
       confirmar_cambio_password_backoffice: { Args: never; Returns: undefined }
+      crear_pase_invitado: {
+        Args: {
+          p_apellido: string
+          p_correo: string
+          p_empresa_id: number
+          p_fecha: string
+          p_nombre: string
+          p_telefono: string
+        }
+        Returns: Json
+      }
       cuota_disponible: {
         Args: { p_comensal_id: number; p_fecha: string }
         Returns: boolean
@@ -886,6 +960,7 @@ export type Database = {
       ciclo_facturacion: "semanal" | "mensual"
       estado_corte: "abierto" | "cerrado"
       estado_factura: "borrador" | "emitida" | "error" | "pagada" | "cancelada"
+      estado_pase_invitado: "pendiente" | "usado" | "cancelado"
       metodo_consumo: "qr" | "manual"
       modo_consumo: "reserva" | "libre"
       origen_cuota: "reserva" | "extra"
@@ -1029,6 +1104,7 @@ export const Constants = {
       ciclo_facturacion: ["semanal", "mensual"],
       estado_corte: ["abierto", "cerrado"],
       estado_factura: ["borrador", "emitida", "error", "pagada", "cancelada"],
+      estado_pase_invitado: ["pendiente", "usado", "cancelado"],
       metodo_consumo: ["qr", "manual"],
       modo_consumo: ["reserva", "libre"],
       origen_cuota: ["reserva", "extra"],

@@ -116,3 +116,63 @@ export async function reservarCuotas(
   if (error) throw error
   return data as unknown as ResumenReserva
 }
+
+/* ---------------- Invitados (consumo extra sin usuario, QR de un solo uso) ---------------- */
+
+export type EstadoPase = Database['public']['Enums']['estado_pase_invitado']
+
+/** Un pase de invitado de la semana (para reflejarlo en cuotas). */
+export interface PaseSemana {
+  id: number
+  nombre: string
+  apellido: string | null
+  fecha: string
+  estado: EstadoPase
+}
+
+/** Pases de invitado [lun..vie] de la empresa del admin (excluye cancelados). */
+export async function listarPasesInvitadoSemana(lunesISO: string): Promise<PaseSemana[]> {
+  const { desde, hasta } = rangoSemana(lunesISO)
+  const empresaId = await obtenerMiEmpresaId()
+  const { data, error } = await supabase
+    .from('pases_invitado')
+    .select('id, nombre, apellido, fecha, estado')
+    .eq('empresa_id', empresaId)
+    .neq('estado', 'cancelado')
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+    .order('fecha')
+  if (error) throw error
+  return (data ?? []) as PaseSemana[]
+}
+
+/** El pase recién creado (incluye el token para el QR). */
+export interface PaseInvitadoCreado {
+  id: number
+  empresa_id: number
+  nombre: string
+  apellido: string | null
+  fecha: string
+  qr_token: string
+}
+
+/** Crea un invitado + su pase de un solo uso vía la RPC `crear_pase_invitado`. */
+export async function crearPaseInvitado(v: {
+  empresaId: number
+  nombre: string
+  apellido: string
+  telefono: string
+  correo: string
+  fecha: string
+}): Promise<PaseInvitadoCreado> {
+  const { data, error } = await supabase.rpc('crear_pase_invitado', {
+    p_empresa_id: v.empresaId,
+    p_nombre: v.nombre,
+    p_apellido: v.apellido,
+    p_telefono: v.telefono,
+    p_correo: v.correo,
+    p_fecha: v.fecha,
+  })
+  if (error) throw error
+  return (data as unknown as { pase: PaseInvitadoCreado }).pase
+}

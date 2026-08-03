@@ -29,11 +29,11 @@ import {
   SelectValue,
 } from '@amena/ui/components/ui/select'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
-import { ToggleGroup, ToggleGroupItem } from '@amena/ui/components/ui/toggle-group'
 import { deISO, etiquetaDiaCorta, formatearMoneda, horaCorta } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { PAGE_SIZE, type ConsumoRow, type FiltrosConsumos } from './api'
-import { badgeOrigen, presetsRango, type RangoPreset } from './logica'
+import { badgeOrigen, rangoPorGranularidad, type Granularidad } from './logica'
+import { SelectorPeriodo } from './SelectorPeriodo'
 import { useConsumos, useEmpresas, useResumenConsumos } from './queries'
 
 const CHART_CONFIG: ChartConfig = {
@@ -99,8 +99,9 @@ const columnas: ColumnDef<ConsumoRow>[] = [
 
 export function ConsumosPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
-  const presets = useMemo(() => presetsRango(new Date()), [])
-  const [preset, setPreset] = useState<RangoPreset>(presets[0])
+  // Por defecto: la semana actual (granularidad 'semana' + hoy → lunes–domingo de esta semana).
+  const [granularidad, setGranularidad] = useState<Granularidad>('semana')
+  const [fechaRef, setFechaRef] = useState<Date>(() => new Date())
   const [empresaSel, setEmpresaSel] = useState('')
   const [meseroSel, setMeseroSel] = useState('')
   const [busqueda, setBusqueda] = useState('')
@@ -117,20 +118,26 @@ export function ConsumosPage() {
     return () => clearTimeout(t)
   }, [busqueda])
 
+  const rango = useMemo(() => rangoPorGranularidad(fechaRef, granularidad), [fechaRef, granularidad])
+
   const filtros: FiltrosConsumos = useMemo(
     () => ({
-      desde: preset.desde,
-      hasta: preset.hasta,
+      desde: rango.desde,
+      hasta: rango.hasta,
       empresaId: empresaSel ? Number(empresaSel) : null,
       registradoPor: meseroSel || null,
       q: q || null,
     }),
-    [preset, empresaSel, meseroSel, q]
+    [rango, empresaSel, meseroSel, q]
   )
 
-  // Los cambios de preset/empresa/mesero resetean la página en su propio handler (abajo).
-  const cambiarPreset = (p: RangoPreset) => {
-    setPreset(p)
+  // Los cambios de granularidad/fecha/empresa/mesero resetean la página en su propio handler.
+  const cambiarGranularidad = (g: Granularidad) => {
+    setGranularidad(g)
+    setPage(0)
+  }
+  const cambiarFecha = (d: Date) => {
+    setFechaRef(d)
     setPage(0)
   }
   const cambiarEmpresa = (v: string) => {
@@ -175,26 +182,13 @@ export function ConsumosPage() {
     <div className="flex flex-col gap-4">
       {/* Filtros combinables */}
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-        <ToggleGroup
-          aria-label="Rango de fechas"
-          value={[preset.clave]}
-          onValueChange={(vals) => {
-            const clave = (vals as string[]).at(-1)
-            const elegido = presets.find((p) => p.clave === clave)
-            if (elegido) cambiarPreset(elegido)
-          }}
-        >
-          {presets.map((p) => (
-            <ToggleGroupItem
-              key={p.clave}
-              value={p.clave}
-              aria-label={p.etiqueta}
-              className="aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 aria-pressed:hover:text-primary-foreground"
-            >
-              {p.etiqueta}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        {/* Periodo (día/semana/mes) + fecha de referencia: permite ver cualquier día, semana o mes. */}
+        <SelectorPeriodo
+          granularidad={granularidad}
+          fecha={fechaRef}
+          onGranularidad={cambiarGranularidad}
+          onFecha={cambiarFecha}
+        />
 
         <Field className="w-full max-w-52 gap-1 sm:w-auto">
           <FieldLabel htmlFor="filtro-empresa">Empresa</FieldLabel>

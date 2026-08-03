@@ -1,26 +1,58 @@
-import { aISO, lunesDeSemana } from '@amena/utils'
+import { aISO, deISO, lunesDeSemana } from '@amena/utils'
 import type { OrigenConsumo } from './api'
 
-/** Un preset de rango de fechas para el filtro. */
-export interface RangoPreset {
-  clave: 'hoy' | 'semana' | 'mes'
-  etiqueta: string
+/** Granularidad del filtro de fechas: un día, una semana (L–D) o un mes completos. */
+export type Granularidad = 'dia' | 'semana' | 'mes'
+
+/** Rango [desde, hasta] en 'YYYY-MM-DD'. */
+export interface RangoConsulta {
   desde: string
   hasta: string
 }
 
 /**
- * Presets de rango calculados a partir de `hoy` (inyectable para tests):
- * Hoy, Esta semana (lunes→hoy) y Este mes (día 1→hoy). Fechas en 'YYYY-MM-DD'.
+ * Rango de fechas para una fecha de referencia según la granularidad. Permite ver un día
+ * cualquiera, cualquier semana (lunes→domingo de esa fecha) o cualquier mes (día 1→último).
  */
-export function presetsRango(hoy: Date): RangoPreset[] {
-  const hoyISO = aISO(hoy)
-  const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
-  return [
-    { clave: 'hoy', etiqueta: 'Hoy', desde: hoyISO, hasta: hoyISO },
-    { clave: 'semana', etiqueta: 'Esta semana', desde: aISO(lunesDeSemana(hoy)), hasta: hoyISO },
-    { clave: 'mes', etiqueta: 'Este mes', desde: aISO(inicioMes), hasta: hoyISO },
-  ]
+export function rangoPorGranularidad(fecha: Date, g: Granularidad): RangoConsulta {
+  if (g === 'dia') {
+    const iso = aISO(fecha)
+    return { desde: iso, hasta: iso }
+  }
+  if (g === 'semana') {
+    const lunes = lunesDeSemana(fecha)
+    const domingo = new Date(lunes)
+    domingo.setDate(lunes.getDate() + 6)
+    return { desde: aISO(lunes), hasta: aISO(domingo) }
+  }
+  const primero = new Date(fecha.getFullYear(), fecha.getMonth(), 1)
+  const ultimo = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0)
+  return { desde: aISO(primero), hasta: aISO(ultimo) }
+}
+
+function capitalizar(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+/** Etiqueta legible del rango elegido (para el botón del filtro). */
+export function etiquetaRango(fecha: Date, g: Granularidad): string {
+  if (g === 'dia') {
+    return capitalizar(
+      fecha.toLocaleDateString('es-MX', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    )
+  }
+  if (g === 'mes') {
+    return capitalizar(fecha.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }))
+  }
+  const { desde, hasta } = rangoPorGranularidad(fecha, 'semana')
+  const d = deISO(desde).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+  const h = deISO(hasta).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+  return `${d} – ${h}`
 }
 
 /** Presentación del badge de origen: etiqueta legible + variante del componente Badge. */
