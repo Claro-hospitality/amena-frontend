@@ -14,6 +14,7 @@ export interface ConsumoRow {
   created_at: string
   comensal_id: number
   comensal_nombre: string
+  es_invitado: boolean
   empresa_id: number
   empresa_nombre: string
   precio_comida: number

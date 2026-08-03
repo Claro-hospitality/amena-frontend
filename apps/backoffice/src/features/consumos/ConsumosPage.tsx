@@ -64,7 +64,12 @@ const columnas: ColumnDef<ConsumoRow>[] = [
   {
     id: 'comensal',
     header: 'Comensal',
-    cell: ({ row }) => <span className="font-medium">{row.original.comensal_nombre}</span>,
+    cell: ({ row }) => (
+      <span className="flex items-center gap-2">
+        <span className="font-medium">{row.original.comensal_nombre}</span>
+        {row.original.es_invitado && <Badge variant="secondary">Invitado</Badge>}
+      </span>
+    ),
   },
   {
     id: 'empresa',

@@ -881,6 +881,7 @@ export type Database = {
           created_at: string
           empresa_id: number
           empresa_nombre: string
+          es_invitado: boolean
           fecha: string
           id: number
           mesero_nombre: string
