@@ -15,7 +15,7 @@ import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { AgregarExtraDialog } from './AgregarExtraDialog'
 import { DiaResumen } from './DiaResumen'
 import { NavegadorSemana } from './NavegadorSemana'
-import { useConsumosSemana, useCuotasSemana } from './queries'
+import { useConsumosSemana, useCuotasSemana, usePasesInvitadoSemana } from './queries'
 
 function moverLunes(lunesISO: string, deltaSemanas: number): string {
   const lunes = deISO(lunesISO)
@@ -30,6 +30,7 @@ export function CuotasSemanaPage() {
 
   const { data: cuotas, isLoading, isError, refetch } = useCuotasSemana(lunesISO)
   const { data: consumos } = useConsumosSemana(lunesISO)
+  const { data: pases } = usePasesInvitadoSemana(lunesISO)
 
   if (tipo !== 'admin_empresa') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -38,6 +39,7 @@ export function CuotasSemanaPage() {
   const dias = diasHabiles(deISO(lunesISO))
   const hayDiasFuturos = dias.some((d) => !esFechaPasada(d))
   const cuotasDe = (iso: string) => (cuotas ?? []).filter((q) => q.fecha === iso)
+  const pasesDe = (iso: string) => (pases ?? []).filter((p) => p.fecha === iso)
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,7 +77,13 @@ export function CuotasSemanaPage() {
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
           {dias.map((d) => (
-            <DiaResumen key={aISO(d)} fecha={d} cuotas={cuotasDe(aISO(d))} consumos={consumos ?? []} />
+            <DiaResumen
+              key={aISO(d)}
+              fecha={d}
+              cuotas={cuotasDe(aISO(d))}
+              consumos={consumos ?? []}
+              invitados={pasesDe(aISO(d))}
+            />
           ))}
         </div>
       )}

@@ -1,17 +1,19 @@
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
 import { aISO, esFechaPasada, etiquetaDia } from '@amena/utils'
-import type { ConsumoSemana, CuotaSemana } from './api'
+import type { ConsumoSemana, CuotaSemana, PaseSemana } from './api'
 import { consumosLibresDelDia, estaConsumida } from './logica'
 
 export function DiaResumen({
   fecha,
   cuotas,
   consumos,
+  invitados = [],
 }: {
   fecha: Date
   cuotas: CuotaSemana[]
   consumos: ConsumoSemana[]
+  invitados?: PaseSemana[]
 }) {
   const pasado = esFechaPasada(fecha)
   const iso = aISO(fecha)
@@ -29,7 +31,7 @@ export function DiaResumen({
           {pasado && <span className="text-xs text-muted-foreground">Pasado</span>}
         </header>
 
-        {cuotas.length === 0 && libres.length === 0 ? (
+        {cuotas.length === 0 && libres.length === 0 && invitados.length === 0 ? (
           <p className="text-xs text-muted-foreground">Sin comidas</p>
         ) : (
           <div className="flex flex-col gap-2">
@@ -88,6 +90,36 @@ export function DiaResumen({
                         <Badge className="border-transparent bg-success text-success-foreground">
                           Consumida
                         </Badge>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {invitados.length > 0 && (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  {invitados.length} {invitados.length === 1 ? 'invitado' : 'invitados'}
+                </p>
+                <ul className="flex flex-col gap-1.5">
+                  {invitados.map((p) => (
+                    <li key={p.id} className="flex items-center justify-between gap-2 text-sm">
+                      <span className="min-w-0 truncate">
+                        {p.nombre}
+                        {p.apellido ? ` ${p.apellido}` : ''}
+                      </span>
+                      <span className="flex shrink-0 items-center gap-1.5">
+                        <Badge className="border-transparent bg-warning text-warning-foreground">
+                          Invitado
+                        </Badge>
+                        {p.estado === 'usado' ? (
+                          <Badge className="border-transparent bg-success text-success-foreground">
+                            Consumida
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">Disponible</Badge>
+                        )}
                       </span>
                     </li>
                   ))}
