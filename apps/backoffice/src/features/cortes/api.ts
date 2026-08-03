@@ -33,6 +33,28 @@ export async function listarCortes(): Promise<CorteConEmpresa[]> {
   }))
 }
 
+/** Desglose de los consumos de un corte (RPC `detalle_corte_consumo`): categorías disjuntas. */
+export interface DesgloseCorte {
+  reservados: number
+  extras: number
+  libres: number
+  invitados: number
+  consumidas: number
+}
+
+/** Recompone el desglose de consumo de una (empresa, semana) para el diálogo de detalle. */
+export async function detalleCorteConsumo(
+  empresaId: number,
+  semanaInicio: string
+): Promise<DesgloseCorte> {
+  const { data, error } = await supabase.rpc('detalle_corte_consumo', {
+    p_empresa_id: empresaId,
+    p_semana_inicio: semanaInicio,
+  })
+  if (error) throw error
+  return data as unknown as DesgloseCorte
+}
+
 export interface ResultadoCorte {
   corrio: boolean
   forzado?: boolean
@@ -41,6 +63,7 @@ export interface ResultadoCorte {
     semana_inicio: string
     generados: number
     ya_existentes: number
+    omitidos: number
     empresas: unknown[]
   }
 }

@@ -88,8 +88,12 @@ export function CortesPage() {
     try {
       const res = await ejecutar.mutateAsync()
       if (res.corrio && res.resultado) {
-        const { generados, ya_existentes } = res.resultado
-        toast.success(`Corte ejecutado: ${generados} generados · ${ya_existentes} ya existían.`)
+        const { generados, ya_existentes, omitidos } = res.resultado
+        toast.success(
+          `Corte ejecutado: ${generados} generados · ${ya_existentes} ya existían` +
+            (omitidos ? ` · ${omitidos} sin consumos (omitidos)` : '') +
+            '.'
+        )
       } else {
         toast.info(res.motivo ?? 'No se generaron cortes.')
       }
