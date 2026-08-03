@@ -99,7 +99,8 @@ const columnas: ColumnDef<ConsumoRow>[] = [
 
 export function ConsumosPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
-  const [granularidad, setGranularidad] = useState<Granularidad>('dia')
+  // Por defecto: la semana actual (granularidad 'semana' + hoy → lunes–domingo de esta semana).
+  const [granularidad, setGranularidad] = useState<Granularidad>('semana')
   const [fechaRef, setFechaRef] = useState<Date>(() => new Date())
   const [empresaSel, setEmpresaSel] = useState('')
   const [meseroSel, setMeseroSel] = useState('')
