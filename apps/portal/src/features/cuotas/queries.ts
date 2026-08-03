@@ -1,17 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   reservarCuotas,
-  crearPaseInvitado,
+  crearInvitado,
   listarConsumosSemana,
   listarCuotasSemana,
-  listarPasesInvitadoSemana,
+  listarInvitadosSemana,
   type ItemReserva,
   type OrigenCuota,
 } from './api'
 
 const claveCuotas = (lunesISO: string) => ['cuotas-semana', lunesISO] as const
 const claveConsumos = (lunesISO: string) => ['consumos-semana', lunesISO] as const
-const clavePases = (lunesISO: string) => ['pases-invitado-semana', lunesISO] as const
+const claveInvitados = (lunesISO: string) => ['invitados-semana', lunesISO] as const
 
 export function useCuotasSemana(lunesISO: string) {
   return useQuery({ queryKey: claveCuotas(lunesISO), queryFn: () => listarCuotasSemana(lunesISO) })
@@ -36,16 +36,16 @@ export function useReservarCuotas(lunesISO: string) {
   })
 }
 
-export function usePasesInvitadoSemana(lunesISO: string) {
-  return useQuery({ queryKey: clavePases(lunesISO), queryFn: () => listarPasesInvitadoSemana(lunesISO) })
+export function useInvitadosSemana(lunesISO: string) {
+  return useQuery({ queryKey: claveInvitados(lunesISO), queryFn: () => listarInvitadosSemana(lunesISO) })
 }
 
-export function useCrearPaseInvitado(lunesISO: string) {
+export function useCrearInvitado(lunesISO: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: crearPaseInvitado,
+    mutationFn: crearInvitado,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: clavePases(lunesISO) })
+      qc.invalidateQueries({ queryKey: claveInvitados(lunesISO) })
       qc.invalidateQueries({ queryKey: claveCuotas(lunesISO) })
     },
   })

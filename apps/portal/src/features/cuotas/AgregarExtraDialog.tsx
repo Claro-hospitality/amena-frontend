@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Download } from 'lucide-react'
+import { CalendarDays, Download } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import { toast } from 'sonner'
 import { cn } from '@amena/ui/lib/utils'
@@ -20,22 +20,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@amena/ui/components/ui/dialog'
+import { Calendar } from '@amena/ui/components/ui/calendar'
 import { Input } from '@amena/ui/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@amena/ui/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@amena/ui/components/ui/popover'
 import { aISO, deISO, diasHabiles, esFechaPasada, etiquetaDia } from '@amena/utils'
 import type { Colaborador } from '../colaboradores/api'
 import { useColaboradores, useMiEmpresaId } from '../colaboradores/queries'
-import type { PaseInvitadoCreado } from './api'
+import type { InvitadoCreado } from './api'
 import { mapearErrorReserva } from './errores'
-import { useCrearPaseInvitado, useReservarCuotas } from './queries'
+import { useCrearInvitado, useReservarCuotas } from './queries'
 
 type Tipo = 'colaborador' | 'invitado'
+
+// Encabezados del calendario en es-MX (mismo patrón que SelectorPeriodo del backoffice).
+const FORMATTERS = {
+  formatCaption: (d: Date) => d.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
+  formatWeekdayName: (d: Date) => d.toLocaleDateString('es-MX', { weekday: 'narrow' }),
+}
 
 /** Escapa texto para insertarlo con seguridad en el HTML del documento de impresión. */
 function escaparHtml(texto: string): string {
@@ -59,14 +60,17 @@ export function AgregarExtraDialog({
   const { data: colaboradores } = useColaboradores()
   const { data: empresaId } = useMiEmpresaId()
   const reservar = useReservarCuotas(lunesISO)
-  const crearPase = useCrearPaseInvitado(lunesISO)
+  const crearInvitadoMut = useCrearInvitado(lunesISO)
 
   const activos = (colaboradores ?? []).filter((c) => c.activo)
   const empresaNombre = activos[0]?.empresa?.nombre ?? ''
   const dias = diasHabiles(deISO(lunesISO)).filter((d) => !esFechaPasada(d))
+  // Solo estos días hábiles (no pasados) de la semana son elegibles en el calendario.
+  const fechasPermitidas = new Set(dias.map(aISO))
 
   const [tipo, setTipo] = useState<Tipo>('colaborador')
   const [fecha, setFecha] = useState(dias[0] ? aISO(dias[0]) : '')
+  const [calendarioAbierto, setCalendarioAbierto] = useState(false)
 
   // Colaborador
   const [colaborador, setColaborador] = useState<Colaborador | null>(null)
@@ -76,7 +80,7 @@ export function AgregarExtraDialog({
   const [apellido, setApellido] = useState('')
   const [telefono, setTelefono] = useState('')
   const [correo, setCorreo] = useState('')
-  const [paseCreado, setPaseCreado] = useState<PaseInvitadoCreado | null>(null)
+  const [invitadoCreado, setInvitadoCreado] = useState<InvitadoCreado | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
 
   const guardarColaborador = () => {
@@ -98,12 +102,12 @@ export function AgregarExtraDialog({
   }
 
   const guardarInvitado = () => {
-    if (!empresaId || !nombre.trim() || !fecha) return
-    crearPase.mutate(
+    if (!empresaId || !nombre.trim() || !apellido.trim() || !fecha) return
+    crearInvitadoMut.mutate(
       { empresaId, nombre: nombre.trim(), apellido: apellido.trim(), telefono: telefono.trim(), correo: correo.trim(), fecha },
       {
-        onSuccess: (pase) => {
-          setPaseCreado(pase)
+        onSuccess: (invitado) => {
+          setInvitadoCreado(invitado)
           toast.success('Invitado agregado. Descarga su QR.')
         },
         onError: (e) => toast.error(mapearErrorReserva(e)),
@@ -113,16 +117,16 @@ export function AgregarExtraDialog({
 
   /** Abre una ventana aislada con el pase (logo + QR + nombre + día) y lanza "Guardar como PDF". */
   function descargarPDF() {
-    if (!paseCreado) return
+    if (!invitadoCreado) return
     const canvas = canvasRef.current?.querySelector('canvas')
     if (!canvas) return
     const imagenQR = canvas.toDataURL('image/png')
     const ventana = window.open('', '_blank')
     if (!ventana) return
 
-    const nombrePase = escaparHtml(`${paseCreado.nombre}${paseCreado.apellido ? ` ${paseCreado.apellido}` : ''}`)
+    const nombrePase = escaparHtml(`${invitadoCreado.nombre}${invitadoCreado.apellido ? ` ${invitadoCreado.apellido}` : ''}`)
     const empresa = empresaNombre ? escaparHtml(empresaNombre) : ''
-    const dia = escaparHtml(etiquetaDia(deISO(paseCreado.fecha)))
+    const dia = escaparHtml(etiquetaDia(deISO(invitadoCreado.fecha)))
 
     ventana.document.write(`<!doctype html>
 <html lang="es">
@@ -167,18 +171,29 @@ export function AgregarExtraDialog({
   const diaSelect = (
     <div className="flex flex-col gap-1.5">
       <label className="text-sm font-medium">Día</label>
-      <Select value={fecha} onValueChange={(v) => setFecha(v ?? '')}>
-        <SelectTrigger className="w-full capitalize">
-          <SelectValue>{(v) => (v ? etiquetaDia(deISO(v)) : 'Elige un día')}</SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {dias.map((d) => (
-            <SelectItem key={aISO(d)} value={aISO(d)} className="capitalize">
-              {etiquetaDia(d)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Popover open={calendarioAbierto} onOpenChange={setCalendarioAbierto}>
+        <PopoverTrigger
+          render={<Button variant="outline" className="w-full justify-start gap-2 font-normal capitalize" />}
+        >
+          <CalendarDays className="size-4 shrink-0 text-muted-foreground" />
+          {fecha ? etiquetaDia(deISO(fecha)) : <span className="text-muted-foreground">Elige un día</span>}
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={fecha ? deISO(fecha) : undefined}
+            onSelect={(d) => {
+              if (!d) return
+              setFecha(aISO(d))
+              setCalendarioAbierto(false)
+            }}
+            defaultMonth={fecha ? deISO(fecha) : dias[0]}
+            disabled={(d) => !fechasPermitidas.has(aISO(d))}
+            showOutsideDays={false}
+            formatters={FORMATTERS}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   )
 
@@ -198,23 +213,23 @@ export function AgregarExtraDialog({
         </DialogHeader>
 
         {/* Pase creado: mostrar el QR y ofrecer el PDF. */}
-        {paseCreado ? (
+        {invitadoCreado ? (
           <div className="flex flex-col items-center gap-4 py-2">
             <div className="rounded-2xl border border-border bg-card p-4">
-              <QRCodeCanvas value={paseCreado.qr_token} size={220} />
+              <QRCodeCanvas value={invitadoCreado.qr_token} size={220} />
             </div>
             <div className="text-center">
               <p className="font-medium">
-                {paseCreado.nombre}
-                {paseCreado.apellido ? ` ${paseCreado.apellido}` : ''}
+                {invitadoCreado.nombre}
+                {invitadoCreado.apellido ? ` ${invitadoCreado.apellido}` : ''}
               </p>
               <p className="text-sm capitalize text-muted-foreground">
-                {etiquetaDia(deISO(paseCreado.fecha))}
+                {etiquetaDia(deISO(invitadoCreado.fecha))}
               </p>
             </div>
             {/* Canvas oculto en alta resolución para el PDF. */}
             <div ref={canvasRef} className="hidden" aria-hidden>
-              <QRCodeCanvas value={paseCreado.qr_token} size={512} />
+              <QRCodeCanvas value={invitadoCreado.qr_token} size={512} />
             </div>
             <DialogFooter className="w-full">
               <Button variant="outline" onClick={onClose}>
@@ -280,7 +295,7 @@ export function AgregarExtraDialog({
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium">Apellido</label>
-                  <Input value={apellido} onChange={(e) => setApellido(e.target.value)} placeholder="Apellido (opcional)" />
+                  <Input value={apellido} onChange={(e) => setApellido(e.target.value)} placeholder="Apellido del invitado" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium">Teléfono</label>
@@ -315,7 +330,7 @@ export function AgregarExtraDialog({
                   Agregar extra
                 </Button>
               ) : (
-                <Button onClick={guardarInvitado} disabled={!nombre.trim() || !fecha} loading={crearPase.isPending}>
+                <Button onClick={guardarInvitado} disabled={!nombre.trim() || !apellido.trim() || !fecha} loading={crearInvitadoMut.isPending}>
                   Generar pase
                 </Button>
               )}
