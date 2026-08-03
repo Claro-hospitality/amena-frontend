@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { Check, Plus, TriangleAlert } from "lucide-react";
+import { Check, Plus, TriangleAlert, UserPlus, Utensils } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,18 +10,21 @@ import {
 import { deISO, formatearMoneda, rangoSemanaLegible } from "@amena/utils";
 import { SeccionFacturaCorte } from "../facturas/SeccionFacturaCorte";
 import type { CorteConEmpresa } from "./api";
+import { useDetalleCorte } from "./queries";
 import { BadgeEstadoCorte } from "./BadgeEstadoCorte";
 
-type Tono = "success" | "info" | "warning";
+type Tono = "success" | "info" | "neutral" | "warning";
 
 const TONO_CHIP: Record<Tono, string> = {
   success: "bg-success/10 text-success",
   info: "bg-info/10 text-info",
+  neutral: "bg-muted text-muted-foreground",
   warning: "bg-warning/10 text-warning",
 };
 const TONO_BARRA: Record<Tono, string> = {
   success: "bg-success",
   info: "bg-info",
+  neutral: "bg-muted-foreground/40",
   warning: "bg-warning",
 };
 
@@ -64,11 +67,13 @@ export function CorteDetalleDialog({
   corte: CorteConEmpresa;
   onClose: () => void;
 }) {
-  // Desglose de las consumidas (no hay enlace consumo↔reserva; se infiere: primero se consumen
-  // las reservas). consumidas = reservadosConsumidos + extrasLibres; reservadas = reservadosConsumidos + sinConsumir.
-  const reservadosConsumidos = Math.min(corte.reservadas, corte.consumidas);
-  const reservadosSinConsumir = Math.max(corte.reservadas - corte.consumidas, 0);
-  const extrasLibres = Math.max(corte.consumidas - corte.reservadas, 0);
+  // Desglose real de las consumidas por categoría (RPC). Mientras carga, cae al inferido.
+  const { data: desglose } = useDetalleCorte(corte.empresa_id, corte.semana_inicio);
+  const reservadosConsumidos = desglose?.reservados ?? Math.min(corte.reservadas, corte.consumidas);
+  const extras = desglose?.extras ?? 0;
+  const libres = desglose?.libres ?? Math.max(corte.consumidas - corte.reservadas, 0);
+  const invitados = desglose?.invitados ?? 0;
+  const reservadosSinConsumir = Math.max(corte.reservadas - reservadosConsumidos, 0);
 
   return (
     <Dialog
@@ -100,14 +105,16 @@ export function CorteDetalleDialog({
             </span>
           </div>
 
-          {/* Barra: cómo se compone lo consumido (reservado vs extra/libre). */}
+          {/* Barra: cómo se compone lo consumido (reservado / extra / libre / invitado). */}
           {corte.consumidas > 0 && (
             <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted">
               {reservadosConsumidos > 0 && (
                 <div className={TONO_BARRA.success} style={{ flexGrow: reservadosConsumidos }} />
               )}
-              {extrasLibres > 0 && (
-                <div className={TONO_BARRA.info} style={{ flexGrow: extrasLibres }} />
+              {extras > 0 && <div className={TONO_BARRA.info} style={{ flexGrow: extras }} />}
+              {libres > 0 && <div className={TONO_BARRA.neutral} style={{ flexGrow: libres }} />}
+              {invitados > 0 && (
+                <div className={TONO_BARRA.warning} style={{ flexGrow: invitados }} />
               )}
             </div>
           )}
@@ -119,7 +126,11 @@ export function CorteDetalleDialog({
               etiqueta="Reservados consumidos"
               valor={reservadosConsumidos}
             />
-            <Metrica tono="info" icono={Plus} etiqueta="Extras y libres" valor={extrasLibres} />
+            <Metrica tono="info" icono={Plus} etiqueta="Extras" valor={extras} />
+            <Metrica tono="neutral" icono={Utensils} etiqueta="Libres" valor={libres} />
+            {invitados > 0 && (
+              <Metrica tono="warning" icono={UserPlus} etiqueta="Invitados" valor={invitados} />
+            )}
             {reservadosSinConsumir > 0 && (
               <Metrica
                 tono="warning"

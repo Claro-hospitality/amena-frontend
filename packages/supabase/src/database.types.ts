@@ -821,6 +821,10 @@ export type Database = {
         Args: { p_comensal_id: number; p_fecha: string }
         Returns: boolean
       }
+      detalle_corte_consumo: {
+        Args: { p_empresa_id: number; p_semana_inicio: string }
+        Returns: Json
+      }
       eliminar_usuario_backoffice: {
         Args: { p_user_id: string }
         Returns: undefined

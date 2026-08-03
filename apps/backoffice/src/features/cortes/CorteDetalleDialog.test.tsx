@@ -4,16 +4,36 @@ import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
 // SeccionFacturaCorte (dentro del diálogo) usa estas queries; se mockean para aislar el desglose.
+// useDetalleCorte devuelve el desglose real del corte (reservados/extras/libres/invitados).
 const mocks = vi.hoisted(() => ({
   useFacturaDeCorte: vi.fn(() => ({ data: null, isLoading: false })),
   useFacturarCorte: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
   useDatosFiscalesEmpresa: vi.fn(() => ({ data: null })),
+  useDetalleCorte: vi.fn(
+    () =>
+      ({ data: undefined }) as {
+        data:
+          | { reservados: number; extras: number; libres: number; invitados: number; consumidas: number }
+          | undefined;
+      },
+  ),
 }));
 vi.mock("../facturas/queries", () => ({
   useFacturaDeCorte: mocks.useFacturaDeCorte,
   useFacturarCorte: mocks.useFacturarCorte,
 }));
 vi.mock("../empresas/queries", () => ({ useDatosFiscalesEmpresa: mocks.useDatosFiscalesEmpresa }));
+vi.mock("./queries", () => ({ useDetalleCorte: mocks.useDetalleCorte }));
+
+function conDesglose(d: {
+  reservados: number;
+  extras: number;
+  libres: number;
+  invitados: number;
+  consumidas: number;
+}) {
+  mocks.useDetalleCorte.mockReturnValue({ data: d });
+}
 
 import type { CorteConEmpresa } from "./api";
 import { CorteDetalleDialog } from "./CorteDetalleDialog";
@@ -54,26 +74,30 @@ function valorDe(etiqueta: RegExp): string {
 }
 
 describe("CorteDetalleDialog — desglose de consumo", () => {
-  it("con más consumidas que reservadas: reservados consumidos + extras/libres, sin faltantes", () => {
+  it("separa extras y libres del desglose real; sin faltantes ni invitados", () => {
+    conDesglose({ reservados: 5, extras: 1, libres: 1, invitados: 0, consumidas: 7 });
     renderizar(corteCon({ reservadas: 5, consumidas: 7 }));
-    // reservadosConsumidos = min(5,7)=5 ; extrasLibres = 7-5=2
     expect(valorDe(/reservados consumidos/i)).toBe("5");
-    expect(valorDe(/extras y libres/i)).toBe("2");
+    expect(valorDe(/^Extras$/i)).toBe("1");
+    expect(valorDe(/^Libres$/i)).toBe("1");
+    expect(screen.queryByText(/^Invitados$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/sin consumir/i)).not.toBeInTheDocument();
   });
 
-  it("con reservados sin consumir: los muestra con la nota de que se cobran igual", () => {
+  it("muestra reservados sin consumir (se cobran igual)", () => {
+    conDesglose({ reservados: 3, extras: 0, libres: 0, invitados: 0, consumidas: 3 });
     renderizar(corteCon({ reservadas: 5, consumidas: 3 }));
-    // reservadosConsumidos = 3 ; sinConsumir = 2 ; extrasLibres = 0
     expect(valorDe(/reservados consumidos/i)).toBe("3");
     expect(valorDe(/reservados sin consumir/i)).toBe("2");
     expect(screen.getByText(/se cobran igual/i)).toBeInTheDocument();
   });
 
-  it("empresa en modo libre (0 reservados): todo cae en extras y libres", () => {
+  it("modo libre con invitados: muestra libres y la fila de invitados", () => {
+    conDesglose({ reservados: 0, extras: 2, libres: 25, invitados: 3, consumidas: 30 });
     renderizar(corteCon({ reservadas: 0, consumidas: 30 }));
     expect(valorDe(/reservados consumidos/i)).toBe("0");
-    expect(valorDe(/extras y libres/i)).toBe("30");
-    expect(screen.queryByText(/sin consumir/i)).not.toBeInTheDocument();
+    expect(valorDe(/^Extras$/i)).toBe("2");
+    expect(valorDe(/^Libres$/i)).toBe("25");
+    expect(valorDe(/^Invitados$/i)).toBe("3");
   });
 });
