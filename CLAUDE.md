@@ -57,7 +57,7 @@ pnpm gen:types               # regenerar tipos desde el esquema local de Supabas
 
 > **Cambio en prueba (2026-07-17) — evaluar tras módulos 4.7 y 4.8.**
 
-- **Automática (obligatoria, sin cambios):** `pnpm test` (Vitest), `pnpm build` y `pnpm lint` en verde por cada unidad de trabajo **antes del merge**. Son rápidos y no negociables. El **CI en `dev`** es la red de seguridad.
+- **Automática (obligatoria, sin cambios):** `pnpm test` (Vitest), `pnpm build` y `pnpm lint` en verde por cada unidad de trabajo **antes del merge**. Son rápidos y no negociables. El CI **ya no corre en `dev`** (solo al tocar `main`: PR de release + push a `main`), así que estos checks locales antes del merge y el **PR de release** son la red de seguridad.
 - **Visual con Puppeteer: FUERA de la rutina de módulos.** La revisión visual la hace **Cristian** al cierre de cada módulo — no se generan capturas por defecto.
   - **Excepción:** usar Puppeteer solo cuando la verificación requiera una simulación que el humano no pueda hacer fácilmente (p. ej. cámara falsa para el escáner, estados difíciles de reproducir). **Avisar antes de usarlo y explicar por qué.**
 - **Guía de revisión (obligatoria en el resumen final de cada módulo):** para que Cristian revise, incluir por cada pantalla nueva o modificada:
