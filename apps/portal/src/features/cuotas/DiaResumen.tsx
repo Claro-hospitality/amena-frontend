@@ -1,7 +1,7 @@
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
 import { aISO, esFechaPasada, etiquetaDia } from '@amena/utils'
-import type { ConsumoSemana, CuotaSemana, PaseSemana } from './api'
+import type { ConsumoSemana, CuotaSemana, InvitadoSemana } from './api'
 import { consumosLibresDelDia, estaConsumida } from './logica'
 
 export function DiaResumen({
@@ -13,7 +13,7 @@ export function DiaResumen({
   fecha: Date
   cuotas: CuotaSemana[]
   consumos: ConsumoSemana[]
-  invitados?: PaseSemana[]
+  invitados?: InvitadoSemana[]
 }) {
   const pasado = esFechaPasada(fecha)
   const iso = aISO(fecha)

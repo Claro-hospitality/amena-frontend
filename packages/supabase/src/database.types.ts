@@ -40,26 +40,36 @@ export type Database = {
           consumo_libre: boolean
           created_at: string
           id: number
+          invitado_id: number | null
           updated_at: string
-          usuario_id: number
+          usuario_id: number | null
         }
         Insert: {
           activo?: boolean
           consumo_libre?: boolean
           created_at?: string
           id?: number
+          invitado_id?: number | null
           updated_at?: string
-          usuario_id: number
+          usuario_id?: number | null
         }
         Update: {
           activo?: boolean
           consumo_libre?: boolean
           created_at?: string
           id?: number
+          invitado_id?: number | null
           updated_at?: string
-          usuario_id?: number
+          usuario_id?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "comensales_invitado_id_fkey"
+            columns: ["invitado_id"]
+            isOneToOne: true
+            referencedRelation: "invitados"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "comensales_usuario_id_fkey"
             columns: ["usuario_id"]
@@ -451,6 +461,56 @@ export type Database = {
           },
         ]
       }
+      invitados: {
+        Row: {
+          activo: boolean
+          apellido: string | null
+          correo: string | null
+          creado_por: string | null
+          created_at: string
+          empresa_id: number
+          fecha: string
+          id: number
+          nombre: string
+          telefono: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          apellido?: string | null
+          correo?: string | null
+          creado_por?: string | null
+          created_at?: string
+          empresa_id: number
+          fecha: string
+          id?: number
+          nombre: string
+          telefono?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          apellido?: string | null
+          correo?: string | null
+          creado_por?: string | null
+          created_at?: string
+          empresa_id?: number
+          fecha?: string
+          id?: number
+          nombre?: string
+          telefono?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pases_invitado_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_dias: {
         Row: {
           activo: boolean
@@ -530,68 +590,6 @@ export type Database = {
           tipo?: string
         }
         Relationships: []
-      }
-      pases_invitado: {
-        Row: {
-          activo: boolean
-          apellido: string | null
-          correo: string | null
-          creado_por: string | null
-          created_at: string
-          empresa_id: number
-          estado: Database["public"]["Enums"]["estado_pase_invitado"]
-          fecha: string
-          id: number
-          nombre: string
-          qr_token: string
-          registrado_por: string | null
-          telefono: string | null
-          updated_at: string
-          usado_en: string | null
-        }
-        Insert: {
-          activo?: boolean
-          apellido?: string | null
-          correo?: string | null
-          creado_por?: string | null
-          created_at?: string
-          empresa_id: number
-          estado?: Database["public"]["Enums"]["estado_pase_invitado"]
-          fecha: string
-          id?: number
-          nombre: string
-          qr_token?: string
-          registrado_por?: string | null
-          telefono?: string | null
-          updated_at?: string
-          usado_en?: string | null
-        }
-        Update: {
-          activo?: boolean
-          apellido?: string | null
-          correo?: string | null
-          creado_por?: string | null
-          created_at?: string
-          empresa_id?: number
-          estado?: Database["public"]["Enums"]["estado_pase_invitado"]
-          fecha?: string
-          id?: number
-          nombre?: string
-          qr_token?: string
-          registrado_por?: string | null
-          telefono?: string | null
-          updated_at?: string
-          usado_en?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pases_invitado_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       platillos: {
         Row: {
@@ -805,10 +803,10 @@ export type Database = {
         }
         Returns: undefined
       }
-      cancelar_pase_invitado: { Args: { p_pase_id: number }; Returns: Json }
+      cancelar_invitado: { Args: { p_invitado_id: number }; Returns: Json }
       comensales_de_mis_empresas: { Args: never; Returns: number[] }
       confirmar_cambio_password_backoffice: { Args: never; Returns: undefined }
-      crear_pase_invitado: {
+      crear_invitado: {
         Args: {
           p_apellido: string
           p_correo: string
@@ -906,6 +904,16 @@ export type Database = {
           registrado_por: string
         }[]
       }
+      listar_invitados_semana: {
+        Args: { p_lunes: string }
+        Returns: {
+          apellido: string
+          estado: string
+          fecha: string
+          id: number
+          nombre: string
+        }[]
+      }
       listar_usuarios_backoffice: {
         Args: never
         Returns: {
@@ -960,7 +968,6 @@ export type Database = {
       ciclo_facturacion: "semanal" | "mensual"
       estado_corte: "abierto" | "cerrado"
       estado_factura: "borrador" | "emitida" | "error" | "pagada" | "cancelada"
-      estado_pase_invitado: "pendiente" | "usado" | "cancelado"
       metodo_consumo: "qr" | "manual"
       modo_consumo: "reserva" | "libre"
       origen_cuota: "reserva" | "extra"
@@ -1104,7 +1111,6 @@ export const Constants = {
       ciclo_facturacion: ["semanal", "mensual"],
       estado_corte: ["abierto", "cerrado"],
       estado_factura: ["borrador", "emitida", "error", "pagada", "cancelada"],
-      estado_pase_invitado: ["pendiente", "usado", "cancelado"],
       metodo_consumo: ["qr", "manual"],
       modo_consumo: ["reserva", "libre"],
       origen_cuota: ["reserva", "extra"],
