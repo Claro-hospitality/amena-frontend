@@ -10,6 +10,7 @@ const rows: ConsumoRow[] = [
     created_at: '2026-07-24T12:00:00Z',
     comensal_id: 10,
     comensal_nombre: 'Juan Pérez',
+    es_invitado: false,
     empresa_id: 1,
     empresa_nombre: 'Acme',
     precio_comida: 100,
@@ -24,6 +25,7 @@ const rows: ConsumoRow[] = [
     created_at: '2026-07-24T13:00:00Z',
     comensal_id: 10,
     comensal_nombre: 'Juan Pérez',
+    es_invitado: false,
     empresa_id: 1,
     empresa_nombre: 'Acme',
     precio_comida: 100,
@@ -38,6 +40,7 @@ const rows: ConsumoRow[] = [
     created_at: '2026-07-24T14:00:00Z',
     comensal_id: 20,
     comensal_nombre: 'Ana Ruiz',
+    es_invitado: true,
     empresa_id: 2,
     empresa_nombre: 'Beta',
     precio_comida: 80,
@@ -121,6 +124,8 @@ describe('ConsumosPage', () => {
     expect(screen.getByText('Reservada')).toBeInTheDocument()
     expect(screen.getByText('Libre')).toBeInTheDocument()
     expect(screen.getByText('Extra')).toBeInTheDocument()
+    // etiqueta de invitado junto al nombre (Ana Ruiz es invitado)
+    expect(screen.getByText('Invitado')).toBeInTheDocument()
     // desglose por mesero
     expect(screen.getByText('Por mesero')).toBeInTheDocument()
   })

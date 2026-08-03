@@ -105,13 +105,18 @@ export function DiaResumen({
                 <ul className="flex flex-col gap-1.5">
                   {invitados.map((p) => (
                     <li key={p.id} className="flex items-center justify-between gap-2 text-sm">
-                      <span className="min-w-0 truncate">
-                        {p.nombre}
-                        {p.apellido ? ` ${p.apellido}` : ''}
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="min-w-0 truncate">
+                          {p.nombre}
+                          {p.apellido ? ` ${p.apellido}` : ''}
+                        </span>
+                        <Badge variant="secondary" className="shrink-0">
+                          Invitado
+                        </Badge>
                       </span>
                       <span className="flex shrink-0 items-center gap-1.5">
                         <Badge className="border-transparent bg-warning text-warning-foreground">
-                          Invitado
+                          Extra
                         </Badge>
                         {p.estado === 'usado' ? (
                           <Badge className="border-transparent bg-success text-success-foreground">
