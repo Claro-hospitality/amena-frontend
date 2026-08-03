@@ -1,16 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import {
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  TriangleAlert,
-  UtensilsCrossed,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, TriangleAlert, UtensilsCrossed } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
-import { Calendar } from '@amena/ui/components/ui/calendar'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
 import {
   ChartContainer,
@@ -27,7 +20,6 @@ import {
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
 import { Field, FieldLabel } from '@amena/ui/components/ui/field'
-import { Popover, PopoverContent, PopoverTrigger } from '@amena/ui/components/ui/popover'
 import { SearchInput } from '@amena/ui/components/ui/search-input'
 import {
   Select,
@@ -37,11 +29,11 @@ import {
   SelectValue,
 } from '@amena/ui/components/ui/select'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
-import { ToggleGroup, ToggleGroupItem } from '@amena/ui/components/ui/toggle-group'
 import { deISO, etiquetaDiaCorta, formatearMoneda, horaCorta } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { PAGE_SIZE, type ConsumoRow, type FiltrosConsumos } from './api'
-import { badgeOrigen, etiquetaRango, rangoPorGranularidad, type Granularidad } from './logica'
+import { badgeOrigen, rangoPorGranularidad, type Granularidad } from './logica'
+import { SelectorPeriodo } from './SelectorPeriodo'
 import { useConsumos, useEmpresas, useResumenConsumos } from './queries'
 
 const CHART_CONFIG: ChartConfig = {
@@ -109,7 +101,6 @@ export function ConsumosPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
   const [granularidad, setGranularidad] = useState<Granularidad>('dia')
   const [fechaRef, setFechaRef] = useState<Date>(() => new Date())
-  const [calAbierto, setCalAbierto] = useState(false)
   const [empresaSel, setEmpresaSel] = useState('')
   const [meseroSel, setMeseroSel] = useState('')
   const [busqueda, setBusqueda] = useState('')
@@ -147,7 +138,6 @@ export function ConsumosPage() {
   const cambiarFecha = (d: Date) => {
     setFechaRef(d)
     setPage(0)
-    setCalAbierto(false)
   }
   const cambiarEmpresa = (v: string) => {
     setEmpresaSel(v)
@@ -191,64 +181,13 @@ export function ConsumosPage() {
     <div className="flex flex-col gap-4">
       {/* Filtros combinables */}
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-        {/* Granularidad + fecha de referencia: permite ver cualquier día, semana o mes. */}
-        <Field className="gap-1">
-          <FieldLabel>Rango</FieldLabel>
-          <div className="flex flex-wrap items-center gap-2">
-            <ToggleGroup
-              aria-label="Granularidad del rango"
-              value={[granularidad]}
-              onValueChange={(vals) => {
-                const g = (vals as string[]).at(-1) as Granularidad | undefined
-                if (g) cambiarGranularidad(g)
-              }}
-            >
-              {(
-                [
-                  { g: 'dia', label: 'Día' },
-                  { g: 'semana', label: 'Semana' },
-                  { g: 'mes', label: 'Mes' },
-                ] as const
-              ).map(({ g, label }) => (
-                <ToggleGroupItem
-                  key={g}
-                  value={g}
-                  aria-label={label}
-                  className="aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 aria-pressed:hover:text-primary-foreground"
-                >
-                  {label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-
-            <Popover open={calAbierto} onOpenChange={setCalAbierto}>
-              <PopoverTrigger
-                render={
-                  <Button variant="outline" className="min-w-56 justify-start gap-2 capitalize" />
-                }
-              >
-                <CalendarDays className="size-4 shrink-0" />
-                {etiquetaRango(fechaRef, granularidad)}
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={fechaRef}
-                  onSelect={(d) => d && cambiarFecha(d)}
-                  defaultMonth={fechaRef}
-                  disabled={{ after: new Date() }}
-                  showOutsideDays={false}
-                  formatters={{
-                    formatCaption: (date) =>
-                      date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
-                    formatWeekdayName: (date) =>
-                      date.toLocaleDateString('es-MX', { weekday: 'narrow' }),
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </Field>
+        {/* Periodo (día/semana/mes) + fecha de referencia: permite ver cualquier día, semana o mes. */}
+        <SelectorPeriodo
+          granularidad={granularidad}
+          fecha={fechaRef}
+          onGranularidad={cambiarGranularidad}
+          onFecha={cambiarFecha}
+        />
 
         <Field className="w-full max-w-52 gap-1 sm:w-auto">
           <FieldLabel htmlFor="filtro-empresa">Empresa</FieldLabel>
