@@ -5,6 +5,28 @@ export type Empresa = Database['public']['Tables']['empresas']['Row']
 export type CicloFacturacion = Database['public']['Enums']['ciclo_facturacion']
 export type ModoConsumo = Database['public']['Enums']['modo_consumo']
 
+/** Una reserva (cuota) de la semana de una empresa + si ya se consumió. */
+export interface ReservaSemana {
+  comensal_id: number
+  nombre: string
+  fecha: string
+  origen: 'reserva' | 'extra'
+  consumido: boolean
+}
+
+/** Reservas de la semana [lunes..+6] de una empresa, con estado consumido (RPC). */
+export async function reservasSemanaEmpresa(
+  empresaId: number,
+  lunesISO: string
+): Promise<ReservaSemana[]> {
+  const { data, error } = await supabase.rpc('reservas_semana_empresa', {
+    p_empresa_id: empresaId,
+    p_lunes: lunesISO,
+  })
+  if (error) throw error
+  return (data ?? []) as ReservaSemana[]
+}
+
 /** Fila de datos fiscales (1:1 con empresa). */
 export type DatosFiscales = Database['public']['Tables']['datos_fiscales']['Row']
 
