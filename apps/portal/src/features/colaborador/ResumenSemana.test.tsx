@@ -29,6 +29,8 @@ function renderizar() {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // Por defecto: sin comensal libre (camino de reserva). Los tests de libre lo sobreescriben.
+  api.obtenerMiColaborador.mockResolvedValue(null)
 })
 
 describe('ResumenSemana', () => {
@@ -49,5 +51,21 @@ describe('ResumenSemana', () => {
     api.misConsumos.mockResolvedValue([])
     renderizar()
     expect(await screen.findByText(/aún no has consumido esta semana/i)).toBeInTheDocument()
+  })
+
+  it('en consumo libre muestra el avance contra la política (no "te quedan")', async () => {
+    // Empresa en modo libre + comensal con consumo_libre: L-V, 1/día.
+    api.obtenerMiColaborador.mockResolvedValue({
+      consumoLibre: true,
+      politica: { modo_consumo: 'libre', dias_permitidos: [1, 2, 3, 4, 5], limite_diario: 1 },
+    })
+    api.misCuotasSemana.mockResolvedValue([])
+    // Un consumo el lunes de la semana en curso (siempre ≤ hoy dentro de la semana).
+    api.misConsumos.mockResolvedValue([{ fecha: dias[0], created_at: `${dias[0]}T13:00:00Z` }])
+    renderizar()
+
+    expect(await screen.findByText(/llevas 1 de 5 comidas/i)).toBeInTheDocument()
+    expect(screen.getByText(/máx 1\/día/i)).toBeInTheDocument()
+    expect(screen.queryByText(/te quedan/i)).not.toBeInTheDocument()
   })
 })
