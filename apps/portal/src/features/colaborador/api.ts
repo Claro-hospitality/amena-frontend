@@ -83,12 +83,19 @@ export async function obtenerMiColaborador(): Promise<Colaborador | null> {
   return data ? aplanarComensal(data as FilaComensal) : null
 }
 
-/** ¿Tengo cuota activa hoy? ¿Ya consumí? */
+/**
+ * ¿Tengo cuota activa hoy? ¿Ya consumí? Acotado a MIS comensales: la RLS permisiva deja a un
+ * admin ver los consumos/cuotas de toda su empresa (y filas de otras empresas en cuentas con
+ * doble rol), así que sin filtrar por `comensal_id` el `.limit(1)` tomaría el consumo de otra
+ * persona → "Ya comiste hoy" falso. Hay que filtrar explícitamente (ver memoria del portal).
+ */
 export async function estadoDeHoy(): Promise<EstadoHoy> {
   const hoy = aISO(new Date())
+  const ids = await misComensalesIds()
+  if (ids.length === 0) return { tieneCuota: false, consumo: null }
   const [cuotas, consumos] = await Promise.all([
-    supabase.from('cuotas').select('fecha').eq('fecha', hoy).eq('activo', true).limit(1),
-    supabase.from('consumos').select('created_at').eq('fecha', hoy).limit(1),
+    supabase.from('cuotas').select('fecha').in('comensal_id', ids).eq('fecha', hoy).eq('activo', true).limit(1),
+    supabase.from('consumos').select('created_at').in('comensal_id', ids).eq('fecha', hoy).limit(1),
   ])
   if (cuotas.error) throw cuotas.error
   if (consumos.error) throw consumos.error
