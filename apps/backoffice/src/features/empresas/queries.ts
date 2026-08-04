@@ -7,6 +7,7 @@ import {
   listarDatosFiscales,
   listarEmpresas,
   obtenerDatosFiscales,
+  reservasSemanaEmpresa,
   type DatosEmpresa,
   type DatosEmpresaBase,
   type DatosFiscalesEditables,
@@ -25,6 +26,14 @@ export function useResumenEmpresa(empresaId: number) {
   return useQuery({
     queryKey: ['empresa', empresaId, 'resumen'],
     queryFn: () => obtenerResumenEmpresa(empresaId),
+  })
+}
+
+/** Reservas de la semana de una empresa (con estado consumido) para el tab Consumos. */
+export function useReservasSemanaEmpresa(empresaId: number, lunesISO: string) {
+  return useQuery({
+    queryKey: ['empresa', empresaId, 'reservas-semana', lunesISO],
+    queryFn: () => reservasSemanaEmpresa(empresaId, lunesISO),
   })
 }
 

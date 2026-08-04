@@ -20,6 +20,7 @@ import { deISO, formatearMoneda, rangoSemanaLegible } from '@amena/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useSetTituloDetalle } from '../../layout/tituloDetalle'
 import { UsuariosEmpresa } from '../colaboradores/UsuariosEmpresa'
+import { ConsumosEmpresa } from './ConsumosEmpresa'
 import type { CorteConEmpresa } from '../cortes/api'
 import { CorteDetalleDialog } from '../cortes/CorteDetalleDialog'
 import { crearColumnasCortes } from '../cortes/columns'
@@ -107,10 +108,14 @@ export function EmpresaDetallePage() {
         <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
           <TabsList>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
+            <TabsTrigger value="consumos">Consumos</TabsTrigger>
             <TabsTrigger value="cortes">Cortes semanales</TabsTrigger>
           </TabsList>
           <TabsContent value="usuarios" className="flex min-h-0 flex-col">
             <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} fillHeight />
+          </TabsContent>
+          <TabsContent value="consumos" className="flex min-h-0 flex-col">
+            <ConsumosEmpresa empresaId={id} />
           </TabsContent>
           <TabsContent value="cortes" className="flex min-h-0 flex-col">
             <HistoricoSeccion empresaId={id} onVerDetalle={setDetalleCorte} fillHeight />

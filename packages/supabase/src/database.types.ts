@@ -951,6 +951,16 @@ export type Database = {
         }
         Returns: Json
       }
+      reservas_semana_empresa: {
+        Args: { p_empresa_id: number; p_lunes: string }
+        Returns: {
+          comensal_id: number
+          consumido: boolean
+          fecha: string
+          nombre: string
+          origen: string
+        }[]
+      }
       resumen_consumos: {
         Args: {
           p_desde: string
