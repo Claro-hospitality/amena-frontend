@@ -10,6 +10,7 @@ const api = vi.hoisted(() => ({
   asignarRolUnico: vi.fn(),
   establecerRolPortal: vi.fn(),
   establecerComidaComensal: vi.fn(),
+  establecerConsumoLibre: vi.fn(),
   restablecerAccesoPortal: vi.fn(),
   nombreEmpresa: () => '—',
 }))
@@ -31,24 +32,27 @@ const empresa: Empresa = {
   limite_diario: null,
 }
 
-function renderizar(puedeGestionar = true) {
+function renderizar(puedeGestionar = true, empresaProp: Empresa = empresa) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={qc}>
-      <UsuariosEmpresa empresa={empresa} puedeGestionar={puedeGestionar} />
+      <UsuariosEmpresa empresa={empresaProp} puedeGestionar={puedeGestionar} />
     </QueryClientProvider>
   )
 }
+
+const empresaLibre: Empresa = { ...empresa, modo_consumo: 'libre' }
 
 beforeEach(() => {
   vi.clearAllMocks()
   api.asignarRolUnico.mockResolvedValue(undefined)
   api.establecerRolPortal.mockResolvedValue(undefined)
   api.establecerComidaComensal.mockResolvedValue(undefined)
+  api.establecerConsumoLibre.mockResolvedValue(undefined)
   api.restablecerAccesoPortal.mockResolvedValue({ correo_enviado: true })
   api.listarUsuariosEmpresa.mockResolvedValue([
-    { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false, rol: 'admin', comeActivo: true },
-    { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true, rol: 'colaborador', comeActivo: false },
+    { id: 1, nombre: 'Adriana Ruiz', email: 'admin@x.com', activo: true, esAdmin: true, esColaborador: false, rol: 'admin', comeActivo: true, consumoLibre: false },
+    { id: 2, nombre: 'Juan Pérez', email: 'juan@x.com', activo: true, esAdmin: false, esColaborador: true, rol: 'colaborador', comeActivo: false, consumoLibre: false },
   ])
 })
 
@@ -59,6 +63,29 @@ describe('UsuariosEmpresa', () => {
     expect(screen.getByText('Juan Pérez')).toBeInTheDocument()
     expect(screen.getByText('Administrador')).toBeInTheDocument()
     expect(screen.getByText('Colaborador')).toBeInTheDocument()
+  })
+
+  it('modo libre: muestra la columna Consumo libre y togglear llama al RPC', async () => {
+    const user = userEvent.setup()
+    renderizar(true, empresaLibre)
+    await screen.findByText('Adriana Ruiz')
+    expect(screen.getByRole('columnheader', { name: 'Consumo libre' })).toBeInTheDocument()
+    // Un switch por usuario (2). Al activar el de Adriana se llama al RPC con su id.
+    const switches = screen.getAllByRole('switch')
+    expect(switches.length).toBe(2)
+    await user.click(switches[0])
+    await waitFor(() =>
+      expect(api.establecerConsumoLibre).toHaveBeenCalledWith(1, true)
+    )
+  })
+
+  it('modo reserva: NO muestra la columna Consumo libre', async () => {
+    renderizar(true, empresa)
+    await screen.findByText('Adriana Ruiz')
+    expect(
+      screen.queryByRole('columnheader', { name: 'Consumo libre' })
+    ).not.toBeInTheDocument()
+    expect(screen.queryAllByRole('switch').length).toBe(0)
   })
 
   it('la tabla no muestra columna "Estado" y renombra "Come" a "Comensal"', async () => {

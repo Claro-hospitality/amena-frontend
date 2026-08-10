@@ -4,6 +4,7 @@ import {
   asignarRolUnico,
   eliminarUsuarioPortal,
   establecerComidaComensal,
+  establecerConsumoLibre,
   establecerEstadoPortal,
   establecerRolPortal,
   listarColaboradores,
@@ -64,6 +65,19 @@ export function useEstablecerComida() {
   return useMutation({
     mutationFn: ({ usuarioId, activo }: { usuarioId: number; activo: boolean }) =>
       establecerComidaComensal(usuarioId, activo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['usuarios'] })
+      qc.invalidateQueries({ queryKey: ['empresa'] })
+    },
+  })
+}
+
+/** Activa/desactiva el consumo libre de un usuario (comensal); refresca listado y resumen. */
+export function useEstablecerConsumoLibre() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ usuarioId, activo }: { usuarioId: number; activo: boolean }) =>
+      establecerConsumoLibre(usuarioId, activo),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['usuarios'] })
       qc.invalidateQueries({ queryKey: ['empresa'] })
