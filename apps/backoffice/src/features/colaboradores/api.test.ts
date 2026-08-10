@@ -33,7 +33,7 @@ describe('listarUsuariosEmpresa', () => {
           email: 'admin@x.com',
           activo: true,
           roles: [{ rol: 'admin', activo: true }],
-          comensal: { id: 10, activo: true },
+          comensal: { id: 10, activo: true, consumo_libre: true },
         },
         {
           // Tiene comensal pero NINGÚN rol de colaborador → esColaborador debe ser false.
@@ -42,7 +42,7 @@ describe('listarUsuariosEmpresa', () => {
           email: 'juan@x.com',
           activo: true,
           roles: [],
-          comensal: { id: 11, activo: false },
+          comensal: { id: 11, activo: false, consumo_libre: false },
         },
         {
           // Rol colaborador inactivo no cuenta; sin comensal → comeActivo false.
@@ -69,6 +69,7 @@ describe('listarUsuariosEmpresa', () => {
         esColaborador: false,
         rol: 'admin',
         comeActivo: true,
+        consumoLibre: true,
       },
       {
         id: 2,
@@ -79,6 +80,7 @@ describe('listarUsuariosEmpresa', () => {
         esColaborador: false, // tener comensal ya NO implica colaborador
         rol: null,
         comeActivo: false,
+        consumoLibre: false,
       },
       {
         id: 3,
@@ -89,6 +91,7 @@ describe('listarUsuariosEmpresa', () => {
         esColaborador: false, // rol colaborador inactivo no cuenta
         rol: null,
         comeActivo: false,
+        consumoLibre: false,
       },
     ])
   })

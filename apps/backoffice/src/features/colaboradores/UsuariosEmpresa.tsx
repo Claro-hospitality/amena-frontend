@@ -35,6 +35,7 @@ import {
 } from '@amena/ui/components/ui/empty'
 import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
+import { Switch } from '@amena/ui/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
 import type { Empresa } from '../empresas/api'
 import type { UsuarioEmpresa } from './api'
@@ -43,6 +44,7 @@ import { EditarRolesDialog } from './EditarRolesDialog'
 import {
   useEliminarUsuarioPortal,
   useEstablecerComida,
+  useEstablecerConsumoLibre,
   useEstablecerEstadoPortal,
   useRestablecerAccesoPortal,
   useUsuariosEmpresa,
@@ -99,6 +101,30 @@ const columnasBase: ColumnDef<UsuarioEmpresa>[] = [
       ),
   },
 ]
+
+/**
+ * Columna "Consumo libre" — solo cuando la empresa está en modo libre. Muestra un switch
+ * por usuario para activar/desactivar su consumo libre (RPC establecer_consumo_libre).
+ * `interactivo=false` (finanzas) lo deja de solo lectura.
+ */
+function columnaConsumoLibre(
+  onToggle: (u: UsuarioEmpresa, activo: boolean) => void,
+  interactivo: boolean,
+  pendiente: boolean
+): ColumnDef<UsuarioEmpresa> {
+  return {
+    id: 'consumo_libre',
+    header: 'Consumo libre',
+    cell: ({ row }) => (
+      <Switch
+        checked={row.original.consumoLibre}
+        disabled={!interactivo || pendiente}
+        onCheckedChange={(v) => onToggle(row.original, v)}
+        aria-label={`Consumo libre de ${row.original.nombre}`}
+      />
+    ),
+  }
+}
 
 /**
  * Columna de acciones (editar roles + activar/desactivar comida) — solo para quien
@@ -233,7 +259,9 @@ export function UsuariosEmpresa({
 }) {
   const { data, isLoading, isError, refetch } = useUsuariosEmpresa(empresa.id)
   const establecerComida = useEstablecerComida()
+  const establecerLibre = useEstablecerConsumoLibre()
   const restablecer = useRestablecerAccesoPortal()
+  const empresaEnModoLibre = empresa.modo_consumo === 'libre'
   const cambiarAcceso = useEstablecerEstadoPortal()
   const eliminarPortal = useEliminarUsuarioPortal()
   const [busqueda, setBusqueda] = useState('')
@@ -293,6 +321,19 @@ export function UsuariosEmpresa({
     )
   }
 
+  const cambiarConsumoLibre = (u: UsuarioEmpresa, activo: boolean) => {
+    establecerLibre.mutate(
+      { usuarioId: u.id, activo },
+      {
+        onSuccess: () =>
+          toast.success(
+            activo ? `Consumo libre activado para ${u.nombre}` : `Consumo libre desactivado para ${u.nombre}`
+          ),
+        onError: () => toast.error('No se pudo cambiar el consumo libre. Intenta de nuevo.'),
+      }
+    )
+  }
+
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase()
     const base = data ?? []
@@ -300,25 +341,27 @@ export function UsuariosEmpresa({
     return base.filter((u) => `${u.nombre} ${u.email ?? ''}`.toLowerCase().includes(q))
   }, [data, busqueda])
 
-  const columnas = useMemo(
-    () =>
-      puedeGestionar
-        ? [
-            ...columnasBase,
-            columnaAcciones(
-              setEditando,
-              (u) => cambiarComida(u, true),
-              setDesactivandoComida,
-              setReseteando,
-              toggleAcceso,
-              setEliminando,
-              establecerComida.isPending
-            ),
-          ]
-        : columnasBase,
+  const columnas = useMemo(() => {
+    // La columna de consumo libre solo aparece si la empresa está en modo libre.
+    const conLibre = empresaEnModoLibre
+      ? [...columnasBase, columnaConsumoLibre(cambiarConsumoLibre, puedeGestionar, establecerLibre.isPending)]
+      : columnasBase
+    return puedeGestionar
+      ? [
+          ...conLibre,
+          columnaAcciones(
+            setEditando,
+            (u) => cambiarComida(u, true),
+            setDesactivandoComida,
+            setReseteando,
+            toggleAcceso,
+            setEliminando,
+            establecerComida.isPending
+          ),
+        ]
+      : conLibre
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [puedeGestionar, establecerComida.isPending]
-  )
+  }, [puedeGestionar, establecerComida.isPending, empresaEnModoLibre, establecerLibre.isPending])
 
   const hayUsuarios = (data ?? []).length > 0
 

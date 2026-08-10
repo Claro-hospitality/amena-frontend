@@ -86,6 +86,8 @@ export interface UsuarioEmpresa {
   rol: RolPortal | null
   /** True si su comensal está activo (consume + QR vigente). */
   comeActivo: boolean
+  /** True si su comensal tiene consumo libre activado (solo relevante si la empresa está en modo libre). */
+  consumoLibre: boolean
 }
 
 /**
@@ -99,7 +101,7 @@ export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioE
   const { data, error } = await supabase
     .from('usuarios_portal_empresarial')
     .select(
-      'id, nombre, email, activo, roles:roles_portal_empresarial(rol, activo), comensal:comensales(id, activo)'
+      'id, nombre, email, activo, roles:roles_portal_empresarial(rol, activo), comensal:comensales(id, activo, consumo_libre)'
     )
     .eq('empresa_id', empresaId)
     .is('eliminado_en', null)
@@ -118,8 +120,22 @@ export async function listarUsuariosEmpresa(empresaId: number): Promise<UsuarioE
       esColaborador,
       rol: esAdmin ? 'admin' : esColaborador ? 'colaborador' : null,
       comeActivo: u.comensal?.activo ?? false,
+      consumoLibre: u.comensal?.consumo_libre ?? false,
     }
   })
+}
+
+/**
+ * Activa o desactiva el consumo libre de un usuario (su comensal) vía el RPC
+ * `establecer_consumo_libre`. Solo tiene efecto si la empresa está en modo libre
+ * (el backend lo valida). SECURITY DEFINER: super_admin o admin de la empresa.
+ */
+export async function establecerConsumoLibre(usuarioId: number, activo: boolean): Promise<void> {
+  const { error } = await supabase.rpc('establecer_consumo_libre', {
+    p_usuario_id: usuarioId,
+    p_activo: activo,
+  })
+  if (error) throw error
 }
 
 /**
