@@ -1,20 +1,27 @@
+import { useState } from 'react'
+import { QrCode } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
+import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
 import { aISO, esFechaPasada, etiquetaDia } from '@amena/utils'
 import type { ConsumoSemana, CuotaSemana, InvitadoSemana } from './api'
 import { consumosLibresDelDia, estaConsumida } from './logica'
+import { PaseInvitadoDialog } from './PaseInvitadoDialog'
 
 export function DiaResumen({
   fecha,
   cuotas,
   consumos,
   invitados = [],
+  empresaNombre,
 }: {
   fecha: Date
   cuotas: CuotaSemana[]
   consumos: ConsumoSemana[]
   invitados?: InvitadoSemana[]
+  empresaNombre?: string
 }) {
+  const [paseAbierto, setPaseAbierto] = useState<InvitadoSemana | null>(null)
   const pasado = esFechaPasada(fecha)
   const iso = aISO(fecha)
   const consumidas = cuotas.filter((q) => estaConsumida(q.colaborador.id, iso, consumos)).length
@@ -24,6 +31,7 @@ export function DiaResumen({
   const totalLibres = libres.reduce((n, l) => n + l.cantidad, 0)
 
   return (
+    <>
     <Card className={pasado ? 'bg-muted/30' : undefined}>
       <CardContent className="flex flex-col gap-2 p-4">
         <header className="flex items-center justify-between gap-2">
@@ -125,6 +133,15 @@ export function DiaResumen({
                         ) : (
                           <Badge variant="outline">Disponible</Badge>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7"
+                          onClick={() => setPaseAbierto(p)}
+                          aria-label={`Ver pase de ${p.nombre}`}
+                        >
+                          <QrCode className="size-4" />
+                        </Button>
                       </span>
                     </li>
                   ))}
@@ -135,5 +152,13 @@ export function DiaResumen({
         )}
       </CardContent>
     </Card>
+    {paseAbierto && (
+      <PaseInvitadoDialog
+        invitado={paseAbierto}
+        empresaNombre={empresaNombre}
+        onClose={() => setPaseAbierto(null)}
+      />
+    )}
+    </>
   )
 }

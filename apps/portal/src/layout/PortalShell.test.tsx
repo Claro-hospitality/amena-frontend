@@ -36,9 +36,9 @@ describe('PortalShell', () => {
     for (const label of ['Inicio', 'Menú', 'Empresa', 'Mi QR']) {
       expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0)
     }
-    // La gestión (Colaboradores, Cuotas, Cortes) vive DENTRO de Empresa, no en el nav principal.
+    // La gestión (Colaboradores, Consumos, Cortes) vive DENTRO de Empresa, no en el nav principal.
     expect(screen.queryAllByRole('link', { name: 'Colaboradores' }).length).toBe(0)
-    expect(screen.queryAllByRole('link', { name: 'Cuotas' }).length).toBe(0)
+    expect(screen.queryAllByRole('link', { name: 'Consumos' }).length).toBe(0)
   })
 
   it('los tabs de comensal (Inicio, Menú, Mi QR) son idénticos entre ambos roles', () => {

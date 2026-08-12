@@ -35,7 +35,7 @@ export function PortalShell({
 
   // En "reservar cuotas" la página tiene su propia barra de acción fija abajo
   // (botón Reservar). La píldora de navegación la taparía, así que se oculta ahí.
-  const ocultarNavInferior = pathname.startsWith('/empresa/cuotas/reservar')
+  const ocultarNavInferior = pathname.startsWith('/empresa/consumos/reservar')
 
   // Auto-inicia el recorrido solo si quedó programado al definir la contraseña
   // por primera vez (correo de bienvenida o cambio obligatorio).

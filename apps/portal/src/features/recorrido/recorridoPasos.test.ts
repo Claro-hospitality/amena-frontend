@@ -34,7 +34,7 @@ describe('construirPasos', () => {
     const porAncla = new Map(construirPasos('admin_empresa').map((p) => [p.ancla, p.ruta]))
     expect(porAncla.get('[data-tour="emp-general"]')).toBe('/empresa')
     expect(porAncla.get('[data-tour="emp-colaboradores"]')).toBe('/empresa/colaboradores')
-    expect(porAncla.get('[data-tour="emp-cuotas"]')).toBe('/empresa/cuotas')
+    expect(porAncla.get('[data-tour="emp-cuotas"]')).toBe('/empresa/consumos')
     expect(porAncla.get('[data-tour="emp-cortes"]')).toBe('/empresa/cortes')
     expect(porAncla.get('[data-tour="emp-facturas"]')).toBe('/empresa/facturas')
   })

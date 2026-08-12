@@ -47,7 +47,7 @@ export const navPorTipo: Record<TipoUsuarioPortal, ItemNav[]> = {
 export const navEmpresa: ItemNav[] = [
   { to: '/empresa', label: 'General', icon: Info, tourId: 'emp-general' },
   { to: '/empresa/colaboradores', label: 'Colaboradores', icon: Users, tourId: 'emp-colaboradores' },
-  { to: '/empresa/cuotas', label: 'Cuotas', icon: CalendarDays, tourId: 'emp-cuotas' },
+  { to: '/empresa/consumos', label: 'Consumos', icon: CalendarDays, tourId: 'emp-cuotas' },
   { to: '/empresa/cortes', label: 'Cortes', icon: ClipboardCheck, tourId: 'emp-cortes' },
   { to: '/empresa/facturas', label: 'Facturas', icon: FileText, tourId: 'emp-facturas' },
 ]

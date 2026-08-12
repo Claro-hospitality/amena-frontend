@@ -84,9 +84,9 @@ export function construirPasos(tipo: TipoUsuarioPortal): PasoRecorrido[] {
   }
 
   const empCuotas: PasoRecorrido = {
-    ruta: '/empresa/cuotas',
+    ruta: '/empresa/consumos',
     ancla: '[data-tour="emp-cuotas"]',
-    titulo: 'Empresa · Cuotas',
+    titulo: 'Empresa · Consumos',
     descripcion: 'Reserva cuántas comidas quieres para tu equipo cada semana.',
   }
 
