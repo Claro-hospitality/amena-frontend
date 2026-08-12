@@ -29,7 +29,7 @@ describe('EmpresaLayout', () => {
       'href',
       '/empresa/colaboradores'
     )
-    expect(screen.getByRole('link', { name: /cuotas/i })).toHaveAttribute('href', '/empresa/cuotas')
+    expect(screen.getByRole('link', { name: /consumos/i })).toHaveAttribute('href', '/empresa/consumos')
     expect(screen.getByRole('link', { name: /cortes/i })).toHaveAttribute('href', '/empresa/cortes')
     expect(screen.getByRole('link', { name: /facturas/i })).toHaveAttribute(
       'href',

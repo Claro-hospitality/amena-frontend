@@ -11,8 +11,8 @@ export const RUTAS_BREADCRUMB: Record<string, string> = {
   '/mi-cuenta': 'Mi cuenta',
   '/empresa': 'Empresa',
   '/empresa/colaboradores': 'Colaboradores',
-  '/empresa/cuotas': 'Cuotas',
-  '/empresa/cuotas/reservar': 'Reservar cuotas',
+  '/empresa/consumos': 'Consumos',
+  '/empresa/consumos/reservar': 'Reservar consumos',
   '/empresa/cortes': 'Cortes',
   '/empresa/facturas': 'Facturas',
 }

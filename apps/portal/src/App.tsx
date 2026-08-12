@@ -85,19 +85,22 @@ export default function App() {
         <Route path="empresa" element={<EmpresaLayout />}>
           <Route index element={<Ruta><EmpresaGeneralPage /></Ruta>} />
           <Route path="colaboradores" element={<Ruta><ColaboradoresPage /></Ruta>} />
-          <Route path="cuotas" element={<Ruta><CuotasSemanaPage /></Ruta>} />
-          <Route path="cuotas/reservar" element={<Ruta><ReservarCuotasPage /></Ruta>} />
+          <Route path="consumos" element={<Ruta><CuotasSemanaPage /></Ruta>} />
+          <Route path="consumos/reservar" element={<Ruta><ReservarCuotasPage /></Ruta>} />
           <Route path="cortes" element={<Ruta><CortesPage /></Ruta>} />
           <Route path="facturas" element={<Ruta><FacturasEmpresaPage /></Ruta>} />
           {/* La sección se llamó "cierres": redirige el link viejo dentro de Empresa. */}
           <Route path="cierres" element={<Navigate to="/empresa/cortes" replace />} />
+          {/* La sección se llamó "cuotas": redirige los links viejos dentro de Empresa. */}
+          <Route path="cuotas" element={<Navigate to="/empresa/consumos" replace />} />
+          <Route path="cuotas/reservar" element={<Navigate to="/empresa/consumos/reservar" replace />} />
         </Route>
 
         {/* Redirecciones de rutas viejas (bookmarks, correos, enlaces guardados). */}
         <Route path="historial" element={<Navigate to="/mi-qr" replace />} />
         <Route path="colaboradores" element={<Navigate to="/empresa/colaboradores" replace />} />
-        <Route path="cuotas" element={<Navigate to="/empresa/cuotas" replace />} />
-        <Route path="cuotas/reservar" element={<Navigate to="/empresa/cuotas/reservar" replace />} />
+        <Route path="cuotas" element={<Navigate to="/empresa/consumos" replace />} />
+        <Route path="cuotas/reservar" element={<Navigate to="/empresa/consumos/reservar" replace />} />
         <Route path="cierres" element={<Navigate to="/empresa/cortes" replace />} />
       </Route>
 

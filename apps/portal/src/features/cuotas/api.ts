@@ -129,6 +129,8 @@ export interface InvitadoSemana {
   apellido: string | null
   fecha: string
   estado: EstadoInvitado
+  /** Token del QR de su credencial (para volver a ver/descargar el pase). */
+  qr_token: string
 }
 
 /** Invitados [lun..vie] de la empresa del admin, con estado derivado (RPC `listar_invitados_semana`). */

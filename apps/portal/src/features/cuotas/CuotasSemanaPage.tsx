@@ -15,6 +15,7 @@ import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { AgregarExtraDialog } from './AgregarExtraDialog'
 import { DiaResumen } from './DiaResumen'
 import { NavegadorSemana } from './NavegadorSemana'
+import { useColaboradores } from '../colaboradores/queries'
 import { useConsumosSemana, useCuotasSemana, useInvitadosSemana } from './queries'
 
 function moverLunes(lunesISO: string, deltaSemanas: number): string {
@@ -31,6 +32,8 @@ export function CuotasSemanaPage() {
   const { data: cuotas, isLoading, isError, refetch } = useCuotasSemana(lunesISO)
   const { data: consumos } = useConsumosSemana(lunesISO)
   const { data: invitados } = useInvitadosSemana(lunesISO)
+  const { data: colaboradores } = useColaboradores()
+  const empresaNombre = (colaboradores ?? []).find((c) => c.empresa)?.empresa?.nombre ?? ''
 
   if (tipo !== 'admin_empresa') {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
@@ -49,7 +52,7 @@ export function CuotasSemanaPage() {
             variant="outline"
             size="sm"
             nativeButton={false}
-            render={<Link to="/empresa/cuotas/reservar" />}
+            render={<Link to="/empresa/consumos/reservar" />}
           >
             <CalendarPlus className="size-4" />
             Reservar próxima semana
@@ -83,6 +86,7 @@ export function CuotasSemanaPage() {
               cuotas={cuotasDe(aISO(d))}
               consumos={consumos ?? []}
               invitados={invitadosDe(aISO(d))}
+              empresaNombre={empresaNombre}
             />
           ))}
         </div>

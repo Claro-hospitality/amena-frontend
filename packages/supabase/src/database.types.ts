@@ -917,6 +917,7 @@ export type Database = {
           fecha: string
           id: number
           nombre: string
+          qr_token: string
         }[]
       }
       listar_usuarios_backoffice: {
