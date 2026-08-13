@@ -81,13 +81,15 @@ interface FilaConsumo {
 /**
  * Consumos [lun..vie] de la empresa del admin, acotados por `empresa_id` (no basta la RLS).
  * Incluye el nombre del comensal para poder listar los consumos LIBRES (sin cuota asociada).
+ * `!inner` sobre el usuario deja fuera los consumos de INVITADOS (comensal sin usuario de portal):
+ * esos se muestran aparte en la sección de invitados, no como "libres" sin nombre.
  */
 export async function listarConsumosSemana(lunesISO: string): Promise<ConsumoSemana[]> {
   const { desde, hasta } = rangoSemana(lunesISO)
   const empresaId = await obtenerMiEmpresaId()
   const { data, error } = await supabase
     .from('consumos')
-    .select('comensal_id, fecha, comensal:comensales(id, usuario:usuarios_portal_empresarial(nombre))')
+    .select('comensal_id, fecha, comensal:comensales!inner(id, usuario:usuarios_portal_empresarial!inner(nombre))')
     .eq('empresa_id', empresaId)
     .gte('fecha', desde)
     .lte('fecha', hasta)
