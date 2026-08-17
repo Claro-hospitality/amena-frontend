@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { definirPasswordAcceso, verificarTokenAcceso } from '@amena/supabase/auth'
+import {
+  definirPasswordAcceso,
+  solicitarAcceso,
+  verificarTokenAcceso,
+} from '@amena/supabase/auth'
 import { programarRecorrido } from '../recorrido/useRecorridoPortal'
 import { Button } from '@amena/ui/components/ui/button'
 import { FieldError, FieldGroup } from '@amena/ui/components/ui/field'
@@ -9,6 +13,7 @@ import {
   CampoPassword,
   EncabezadoAcceso,
   MarcoAcceso,
+  SolicitarEnlaceAcceso,
 } from '@amena/ui/components/marco-acceso'
 
 type Estado = 'verificando' | 'listo' | 'invalido'
@@ -82,10 +87,13 @@ export function DefinirContrasenaPage() {
       )}
 
       {estado === 'invalido' && (
-        <EncabezadoAcceso
-          titulo="Enlace no válido"
-          subtitulo="Este enlace venció o ya se usó. Pídele a tu administrador que te envíe uno nuevo."
-        />
+        <>
+          <EncabezadoAcceso
+            titulo="Enlace no válido"
+            subtitulo="Este enlace venció o ya se usó. Escribe tu correo y te enviamos uno nuevo."
+          />
+          <SolicitarEnlaceAcceso onEnviar={(email) => solicitarAcceso(email, 'portal')} />
+        </>
       )}
 
       {estado === 'listo' && (
