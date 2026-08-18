@@ -5,21 +5,93 @@ Monorepo de frontends de Amena (Turborepo + pnpm). Dos apps React + Vite —
 comparten paquetes internos en `packages/`. La guía de desarrollo vive en
 [`CLAUDE.md`](./CLAUDE.md).
 
-## Desarrollo
+## Requisitos
+
+- **Node 22** (la versión que usa el CI) y **pnpm**: el repo fija `pnpm@10.13.1` en `packageManager`, así que con Corepack activo (`corepack enable`) se toma la versión correcta sola.
+- Para el modo dev: el **stack local de Supabase** del repo `amena-backend` corriendo (`supabase start`). Ver su README.
 
 ```bash
-pnpm install          # instalar todo el workspace
-pnpm dev              # ambas apps en modo dev
-pnpm dev:backoffice   # solo backoffice
-pnpm dev:portal       # solo portal
-pnpm build            # build de todo (Turborepo cachea lo no afectado)
-pnpm lint             # lint del workspace
-pnpm test             # tests del workspace
+pnpm install    # instala todo el workspace
 ```
 
-Cada app usa variables `VITE_*`. Copia el `.env.example` de cada app a
-`.env.local` y complétalo (ver [`apps/backoffice/.env.example`](./apps/backoffice/.env.example)
-y [`apps/portal/.env.example`](./apps/portal/.env.example)).
+## Los dos modos de correr el front
+
+La misma app se puede correr contra tu Docker local o contra el Supabase de producción. Lo único que cambia es **qué backend** consume y **qué archivo de entorno** lee:
+
+| | `pnpm dev` | `pnpm prod` |
+|---|---|---|
+| Backend | Docker local (`amena-backend`) | **Supabase Cloud de producción** |
+| Archivo de entorno | `.env.local` de cada app | `.env.prod` de cada app |
+| Modo de Vite | `development` | `prod` |
+| Puerto backoffice | `5174` | `5184` |
+| Puerto portal | `5173` | `5183` |
+| Datos | seed, desechables | **reales** |
+
+Los puertos son distintos a propósito: **puedes tener los dos modos arriba al mismo tiempo** y comparar comportamientos sin apagar nada.
+
+### Modo dev — contra el Docker local
+
+Es el modo normal de trabajo. Requiere el stack del backend levantado.
+
+```bash
+# 1. En el repo amena-backend, una sola vez por sesión:
+#    supabase start   →  copia la publishable key que imprime (o `supabase status`)
+
+# 2. Aquí, la primera vez: configura el entorno de cada app
+cp apps/backoffice/.env.example apps/backoffice/.env.local
+cp apps/portal/.env.example apps/portal/.env.local
+#    → pega la llave local en VITE_SUPABASE_ANON_KEY (la URL ya viene: http://localhost:54331)
+
+# 3. Levantar
+pnpm dev              # ambas apps
+pnpm dev:backoffice   # solo backoffice  → http://localhost:5174
+pnpm dev:portal       # solo portal      → http://localhost:5173
+```
+
+Entra con cualquier usuario del seed (`super@amena.com` / `password123` para el backoffice, `admin@constructora.mx` / `password123` para el portal). La lista completa está en el README de `amena-backend`.
+
+### Modo prod — contra la base real
+
+Sirve para verificar en producción sin desplegar: corres el front **en tu máquina** apuntando al Supabase Cloud real.
+
+```bash
+# La primera vez: configura el entorno de prod de cada app
+cp apps/backoffice/.env.prod.example apps/backoffice/.env.prod
+cp apps/portal/.env.prod.example apps/portal/.env.prod
+#    → pega la llave publishable de PROD (Dashboard de Supabase → Project Settings → API Keys)
+
+pnpm prod              # ambas apps
+pnpm prod:backoffice   # solo backoffice  → http://localhost:5184
+pnpm prod:portal       # solo portal      → http://localhost:5183
+```
+
+> ⚠️ **Estás en la base de datos real.** Todo lo que hagas aquí es producción: usuarios que se crean de verdad, consumos que cuentan, correos que **salen a la gente**. No es un ambiente de pruebas — sirve para reproducir un problema reportado o confirmar un despliegue, no para experimentar. Para eso está el modo dev.
+>
+> `.env.local` y `.env.prod` están fuera de git (solo se versionan los `.example`). Nunca commitees llaves.
+
+### Regenerar los tipos de la base
+
+Los tipos de TypeScript del esquema **no se escriben a mano**: se generan del Supabase **local**, así que necesita el stack del backend corriendo.
+
+```bash
+pnpm gen:types    # → packages/supabase/src/database.types.ts
+```
+
+Si un tipo no existe, el cambio va **primero** en el backend (migración → merge a su `dev`) y luego se regeneran aquí.
+
+## Comandos
+
+```bash
+pnpm dev / dev:backoffice / dev:portal      # dev contra el Docker local
+pnpm prod / prod:backoffice / prod:portal   # local contra el Supabase de producción
+pnpm dev:lan / dev:lan:portal / …           # dev accesible desde el teléfono (ver abajo)
+pnpm build                                  # build de todo (Turborepo cachea lo no afectado)
+pnpm test                                   # tests del workspace (Vitest)
+pnpm lint                                   # lint del workspace
+pnpm gen:types                              # regenerar tipos desde el esquema local
+```
+
+`pnpm build`, `pnpm test` y `pnpm lint` en verde son requisito antes de integrar a `dev` (ver [`CLAUDE.md`](./CLAUDE.md)).
 
 ### Probar desde teléfono/tablet (LAN)
 
@@ -55,7 +127,9 @@ producción (secret de CI, ver abajo).
 
 ## CI
 
-`.github/workflows/ci.yml` corre en cada **pull request** y en **push a `main`**:
+`.github/workflows/ci.yml` corre **solo al tocar `main`**: en los pull requests *hacia* `main`
+(el PR de release) y en push a `main`. **No** corre en push a `dev`, así que la verificación antes
+de integrar a `dev` es local (`pnpm build`, `pnpm test`, `pnpm lint`). El job
 instala dependencias con caché de pnpm y ejecuta `turbo run lint test build --affected`
 (solo procesa los paquetes afectados). No requiere secrets.
 
