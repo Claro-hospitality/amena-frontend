@@ -1,15 +1,16 @@
 import {
+  useActionState,
   useEffect,
   useRef,
   useState,
   type ComponentProps,
   type ReactNode,
 } from "react"
-import { Eye, EyeOff, Lock } from "lucide-react"
+import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 
 import { cn } from "@amena/ui/lib/utils"
 import { Button } from "@amena/ui/components/ui/button"
-import { Field, FieldLabel } from "@amena/ui/components/ui/field"
+import { Field, FieldError, FieldLabel } from "@amena/ui/components/ui/field"
 import { Input } from "@amena/ui/components/ui/input"
 import { LogotipoAmena } from "@amena/ui/components/logotipo-amena"
 
@@ -94,6 +95,76 @@ export function EncabezadoAcceso({
       <h1 className="text-2xl font-semibold tracking-tight text-balance">{titulo}</h1>
       {subtitulo && <p className="mt-1.5 text-sm text-muted-foreground">{subtitulo}</p>}
     </div>
+  )
+}
+
+/**
+ * Autoservicio para cuando el enlace del correo venció o ya se usó: la persona pide otro sin
+ * tener que escribirle a un administrador. Presentacional — el envío entra por `onEnviar`.
+ *
+ * `onEnviar` devuelve el mensaje a mostrar. Es el MISMO exista o no la cuenta (así lo responde
+ * la edge function, a propósito), así que aquí no se distingue "enviado" de "no existe": se
+ * muestra el mensaje tal cual y se oculta el formulario para no invitar a reintentar en bucle.
+ */
+export function SolicitarEnlaceAcceso({
+  onEnviar,
+}: {
+  onEnviar: (email: string) => Promise<string>
+}) {
+  const [estado, accion, pendiente] = useActionState<
+    { mensaje?: string; error?: string },
+    FormData
+  >(async (_previo, datos) => {
+    const email = String(datos.get("email") ?? "").trim()
+    if (!email) return { error: "Escribe tu correo para enviarte el enlace." }
+    try {
+      return { mensaje: await onEnviar(email) }
+    } catch {
+      return {
+        error: "No pudimos enviar el enlace. Inténtalo de nuevo en un momento.",
+      }
+    }
+  }, {})
+
+  if (estado.mensaje) {
+    return (
+      <p
+        role="status"
+        className="rounded-lg bg-success/10 px-3 py-2 text-sm text-foreground"
+      >
+        {estado.mensaje}
+      </p>
+    )
+  }
+
+  return (
+    <form action={accion} className="flex flex-col gap-4">
+      <Field>
+        <FieldLabel htmlFor="email-enlace">Tu correo</FieldLabel>
+        <div className="relative">
+          <Mail
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <Input
+            id="email-enlace"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="tu@correo.com"
+            className="px-9"
+            aria-invalid={Boolean(estado.error)}
+          />
+        </div>
+        {estado.error && (
+          <FieldError role="alert">{estado.error}</FieldError>
+        )}
+      </Field>
+
+      <Button type="submit" size="lg" className="w-full" loading={pendiente}>
+        Enviarme un enlace nuevo
+      </Button>
+    </form>
   )
 }
 

@@ -63,6 +63,32 @@ export async function definirPasswordAcceso(nueva: string): Promise<void> {
   if (error) throw error
 }
 
+/** En qué app está pidiendo el acceso la persona. */
+export type PlataformaAcceso = 'backoffice' | 'portal'
+
+/**
+ * Pide para UNO MISMO un enlace de acceso nuevo, cuando el que llegó por correo venció o
+ * ya se usó (la pantalla `/definir-contrasena`). No requiere sesión: quien lo pide todavía
+ * no puede entrar.
+ *
+ * La edge function responde SIEMPRE lo mismo exista o no la cuenta — es deliberado, para que
+ * nadie pueda usarla para averiguar qué correos están dados de alta. Por eso aquí tampoco hay
+ * un "no encontramos esa cuenta": devolvemos el mensaje tal cual para mostrarlo.
+ */
+export async function solicitarAcceso(
+  email: string,
+  plataforma: PlataformaAcceso
+): Promise<string> {
+  const { data, error } = await supabase.functions.invoke('solicitar-acceso', {
+    body: { email, plataforma },
+  })
+  if (error) throw error
+  return (
+    (data as { mensaje?: string })?.mensaje ??
+    'Si esa cuenta existe, te enviamos un enlace nuevo. Revisa tu correo.'
+  )
+}
+
 /** Devuelve la sesión actual (o null si no hay). */
 export async function obtenerSesion(): Promise<Session | null> {
   const { data } = await supabase.auth.getSession()
