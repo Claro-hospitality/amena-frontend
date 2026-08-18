@@ -1,4 +1,5 @@
 import { supabase } from '@amena/supabase'
+import { invocarFuncion } from '@amena/supabase/funciones'
 import type { Database } from '@amena/supabase/types'
 
 export type RolBackoffice = Database['public']['Enums']['rol_backoffice']
@@ -45,24 +46,9 @@ export async function listarUsuarios(): Promise<UsuarioBackoffice[]> {
   return (data ?? []) as UsuarioBackoffice[]
 }
 
-/** Invoca una Edge Function y normaliza el error (extrae el {error} del body). */
-async function invocar<T>(fn: string, body: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke(fn, { body })
-  if (error) {
-    let mensaje = 'No se pudo completar la operación. Intenta de nuevo.'
-    const resp = (error as { context?: Response }).context
-    if (resp && typeof resp.json === 'function') {
-      try {
-        const b = await resp.json()
-        if (b?.error) mensaje = b.error
-      } catch {
-        /* sin cuerpo JSON */
-      }
-    }
-    throw new Error(mensaje)
-  }
-  return data as T
-}
+// La invocación de Edge Functions (incluido el manejo del 401 por sesión inválida) vive en
+// @amena/supabase/funciones — antes cada api.ts repetía su propio normalizador de errores.
+const invocar = invocarFuncion
 
 /** Crea el usuario interno y le envía la invitación por correo (no genera contraseña). */
 export function crearUsuario(datos: {

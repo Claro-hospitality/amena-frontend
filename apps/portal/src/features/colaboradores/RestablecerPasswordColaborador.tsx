@@ -11,6 +11,7 @@ import {
 } from '@amena/ui/components/ui/alert-dialog'
 import type { Colaborador } from './api'
 import { useResetearPasswordColaborador } from './queries'
+import { mensajeErrorCorreo } from '@amena/supabase/correo'
 
 /**
  * Restablece la contraseña de un colaborador: confirma la acción y le ENVÍA un correo con el
@@ -39,7 +40,8 @@ export function RestablecerPasswordColaborador({
             `Le enviamos a ${colaborador.nombre} un correo con el enlace para restablecer su contraseña.`
           )
         } else {
-          toast.error(r.correo_error ?? 'El colaborador se procesó, pero el correo no pudo salir.')
+          // El error crudo de Postmark (inglés, jerga de proveedor) no se muestra tal cual.
+          toast.error(mensajeErrorCorreo(r.correo_error, { nombre: colaborador.nombre }))
         }
       },
       onError: (e) =>

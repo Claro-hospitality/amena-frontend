@@ -1,4 +1,5 @@
 import { supabase } from '@amena/supabase'
+import { invocarFuncion } from '@amena/supabase/funciones'
 
 /**
  * Colaborador (comensal) aplanado para el listado global: la identidad (nombre,
@@ -212,22 +213,11 @@ export async function eliminarUsuarioPortal(usuarioId: number): Promise<void> {
  * (service role); el front solo invoca. Solo super_admin (lo valida la función).
  */
 export async function altaUsuarioPortal(datos: DatosAlta): Promise<CredencialesAlta> {
-  const { data, error } = await supabase.functions.invoke('alta-usuario-portal', { body: datos })
-  if (error) {
-    // FunctionsHttpError: el body {error} viene en error.context (el Response).
-    let mensaje = 'No se pudo dar de alta al usuario. Intenta de nuevo.'
-    const resp = (error as { context?: Response }).context
-    if (resp && typeof resp.json === 'function') {
-      try {
-        const body = await resp.json()
-        if (body?.error) mensaje = body.error
-      } catch {
-        /* sin cuerpo JSON: se conserva el mensaje genérico */
-      }
-    }
-    throw new Error(mensaje)
-  }
-  return data as CredencialesAlta
+  return invocarFuncion<CredencialesAlta>(
+    'alta-usuario-portal',
+    datos as unknown as Record<string, unknown>,
+    'No se pudo dar de alta al usuario. Intenta de nuevo.'
+  )
 }
 
 /** Resultado de enviar el correo de restablecimiento de acceso. */
@@ -243,21 +233,9 @@ export interface ResultadoAccesoPortal {
  * Solo super_admin (lo valida la función).
  */
 export async function restablecerAccesoPortal(email: string): Promise<ResultadoAccesoPortal> {
-  const { data, error } = await supabase.functions.invoke('restablecer-acceso', {
-    body: { email, plataforma: 'portal', motivo: 'restablecer' },
-  })
-  if (error) {
-    let mensaje = 'No se pudo enviar el correo de restablecimiento. Intenta de nuevo.'
-    const resp = (error as { context?: Response }).context
-    if (resp && typeof resp.json === 'function') {
-      try {
-        const body = await resp.json()
-        if (body?.error) mensaje = body.error
-      } catch {
-        /* sin cuerpo JSON: se conserva el mensaje genérico */
-      }
-    }
-    throw new Error(mensaje)
-  }
-  return data as ResultadoAccesoPortal
+  return invocarFuncion<ResultadoAccesoPortal>(
+    'restablecer-acceso',
+    { email, plataforma: 'portal', motivo: 'restablecer' },
+    'No se pudo enviar el correo de restablecimiento. Intenta de nuevo.'
+  )
 }

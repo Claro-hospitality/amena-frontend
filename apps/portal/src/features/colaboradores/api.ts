@@ -1,6 +1,7 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
 import { obtenerMiEmpresaId } from '../../lib/empresaActual'
+import { invocarFuncion } from '@amena/supabase/funciones'
 
 // Helper compartido (fuente única): también se re-exporta para el hook useMiEmpresaId y el alta.
 export { obtenerMiEmpresaId }
@@ -148,24 +149,11 @@ export async function listarColaboradores(): Promise<Colaborador[]> {
 export async function crearColaborador(
   datos: DatosColaborador & { empresa_id: number; rol: RolAlta }
 ): Promise<CredencialesAlta> {
-  const { data, error } = await supabase.functions.invoke('alta-usuario-portal', {
-    body: datos,
-  })
-  if (error) {
-    // FunctionsHttpError (p. ej. 403): el body {error} viene en error.context (el Response).
-    let mensaje = 'No se pudo dar de alta al colaborador. Intenta de nuevo.'
-    const resp = (error as { context?: Response }).context
-    if (resp && typeof resp.json === 'function') {
-      try {
-        const body = await resp.json()
-        if (body?.error) mensaje = body.error
-      } catch {
-        /* sin cuerpo JSON: se conserva el mensaje genérico */
-      }
-    }
-    throw new Error(mensaje)
-  }
-  return data as CredencialesAlta
+  return invocarFuncion<CredencialesAlta>(
+    'alta-usuario-portal',
+    datos as unknown as Record<string, unknown>,
+    'No se pudo dar de alta al colaborador. Intenta de nuevo.'
+  )
 }
 
 /** Actualiza nombre/email del colaborador (viven en usuarios_portal_empresarial). */
@@ -228,21 +216,9 @@ export interface ResultadoAccesoPortal {
  * solo pueda hacerlo sobre usuarios de SU empresa. `usuarioId` = colaborador.usuario_id.
  */
 export async function resetearPasswordColaborador(usuarioId: number): Promise<ResultadoAccesoPortal> {
-  const { data, error } = await supabase.functions.invoke('resetear-password-portal', {
-    body: { usuario_id: usuarioId },
-  })
-  if (error) {
-    let mensaje = 'No se pudo enviar el correo de restablecimiento. Intenta de nuevo.'
-    const resp = (error as { context?: Response }).context
-    if (resp && typeof resp.json === 'function') {
-      try {
-        const body = await resp.json()
-        if (body?.error) mensaje = body.error
-      } catch {
-        /* sin cuerpo JSON: se conserva el mensaje genérico */
-      }
-    }
-    throw new Error(mensaje)
-  }
-  return data as ResultadoAccesoPortal
+  return invocarFuncion<ResultadoAccesoPortal>(
+    'resetear-password-portal',
+    { usuario_id: usuarioId },
+    'No se pudo enviar el correo de restablecimiento. Intenta de nuevo.'
+  )
 }

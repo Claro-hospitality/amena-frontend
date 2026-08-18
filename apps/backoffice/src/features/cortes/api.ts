@@ -1,5 +1,6 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
+import { invocarFuncion } from '@amena/supabase/funciones'
 
 export type Corte = Database['public']['Tables']['cortes_semanales']['Row']
 export type EstadoFactura = Database['public']['Enums']['estado_factura']
@@ -74,9 +75,9 @@ export interface ResultadoCorte {
  * oculta a otros roles; el filtrado real de datos lo hace la función con service_role).
  */
 export async function ejecutarCorteManual(): Promise<ResultadoCorte> {
-  const { data, error } = await supabase.functions.invoke('corte-semanal', {
-    body: { force: true },
-  })
-  if (error) throw error
-  return data as ResultadoCorte
+  return invocarFuncion<ResultadoCorte>(
+    'corte-semanal',
+    { force: true },
+    'No se pudo ejecutar el corte. Intenta de nuevo.'
+  )
 }
