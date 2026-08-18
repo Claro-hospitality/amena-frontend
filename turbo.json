@@ -4,17 +4,17 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
-      "env": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN"]
+      "env": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN", "VITE_SITIO_PUBLICO_URL"]
     },
     "dev": {
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN"]
+      "passThroughEnv": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN", "VITE_SITIO_PUBLICO_URL"]
     },
     "dev:prod": {
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN"]
+      "passThroughEnv": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY", "VITE_SENTRY_DSN", "VITE_SITIO_PUBLICO_URL"]
     },
     "test": {
       "dependsOn": ["^build"]
