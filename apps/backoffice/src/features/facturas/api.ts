@@ -1,6 +1,7 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
 import { zipSync } from 'fflate'
+import { invocarFuncion } from '@amena/supabase/funciones'
 
 export type Factura = Database['public']['Tables']['facturas']['Row']
 export type EstadoFactura = Database['public']['Enums']['estado_factura']
@@ -38,23 +39,11 @@ export interface ResultadoFacturar {
  * error del SAT/Facturama (extrae el `{error}` del cuerpo) para mostrarlo tal cual al usuario.
  */
 export async function facturarCorte(corteId: number): Promise<ResultadoFacturar> {
-  const { data, error } = await supabase.functions.invoke('facturar-corte', {
-    body: { corte_id: corteId },
-  })
-  if (error) {
-    let mensaje = 'No se pudo facturar el corte. Intenta de nuevo.'
-    const resp = (error as { context?: Response }).context
-    if (resp && typeof resp.json === 'function') {
-      try {
-        const b = await resp.json()
-        if (b?.error) mensaje = b.error
-      } catch {
-        /* sin cuerpo JSON */
-      }
-    }
-    throw new Error(mensaje)
-  }
-  return data as ResultadoFacturar
+  return invocarFuncion<ResultadoFacturar>(
+    'facturar-corte',
+    { corte_id: corteId },
+    'No se pudo facturar el corte. Intenta de nuevo.'
+  )
 }
 
 /** URL firmada de corta duración para un objeto del bucket privado `facturas`. */

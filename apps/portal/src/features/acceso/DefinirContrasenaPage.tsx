@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
@@ -16,41 +16,31 @@ import {
   SolicitarEnlaceAcceso,
 } from '@amena/ui/components/marco-acceso'
 
-type Estado = 'verificando' | 'listo' | 'invalido'
+type Estado = 'listo' | 'invalido'
 
 const MIN_LONGITUD = 8
 
 /**
  * Página PÚBLICA (sin guard de sesión) para definir la contraseña desde el enlace del correo
- * de acceso del PORTAL. Verifica el token (recovery), limpia el query string del historial, y con
- * la sesión activa deja definir la contraseña. Mismo marco de diseño que el login.
+ * de acceso del PORTAL.
+ *
+ * El token se canjea al ENVIAR el formulario, no al abrir la página. Es deliberado: el token es
+ * de un solo uso, así que si se canjeara al montar, lo consumiría el primero que abra la URL —
+ * y en dominios corporativos suele ser el escáner de seguridad del correo, que visita los
+ * enlaces para analizarlos. La persona llegaba después y su enlace ya estaba quemado. Como
+ * efecto secundario, recargar esta página ya no rompe nada.
  */
 export function DefinirContrasenaPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  // Estado inicial derivado del query (sin setState síncrono en el efecto).
-  const [estado, setEstado] = useState<Estado>(() => {
-    const t = params.get('token_hash')
-    return t && params.get('type') === 'recovery' ? 'verificando' : 'invalido'
-  })
+  const tokenHash = params.get('token_hash')
+  // Sin token bien formado no hay nada que intentar; con token, mostramos el formulario
+  // directamente (todavía no sabemos si sirve — eso se descubre al guardar).
+  const [estado, setEstado] = useState<Estado>(
+    tokenHash && params.get('type') === 'recovery' ? 'listo' : 'invalido'
+  )
   const [error, setError] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
-  const yaVerifico = useRef(false)
-
-  useEffect(() => {
-    // Solo verificamos si el token venía bien formado; el token es de un solo uso
-    // (yaVerifico evita el doble montaje de StrictMode).
-    if (estado !== 'verificando' || yaVerifico.current) return
-    yaVerifico.current = true
-
-    verificarTokenAcceso(params.get('token_hash') as string)
-      .then(() => {
-        // El token no debe quedar en el historial del navegador.
-        window.history.replaceState(null, '', '/definir-contrasena')
-        setEstado('listo')
-      })
-      .catch(() => setEstado('invalido'))
-  }, [estado, params])
 
   const enviar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -68,6 +58,17 @@ export function DefinirContrasenaPage() {
     }
     setError(null)
     setGuardando(true)
+
+    try {
+      // Aquí se consume el token de un solo uso y se abre la sesión.
+      await verificarTokenAcceso(tokenHash as string)
+    } catch {
+      // Auth no distingue "venció" de "ya se usó" ni de "inválido": mismo error para los tres.
+      setGuardando(false)
+      setEstado('invalido')
+      return
+    }
+
     try {
       await definirPasswordAcceso(pass)
       // Programa el recorrido guiado para el primer acceso al portal.
@@ -82,10 +83,6 @@ export function DefinirContrasenaPage() {
 
   return (
     <MarcoAcceso>
-      {estado === 'verificando' && (
-        <EncabezadoAcceso titulo="Un momento…" subtitulo="Verificando tu enlace de acceso." />
-      )}
-
       {estado === 'invalido' && (
         <>
           <EncabezadoAcceso

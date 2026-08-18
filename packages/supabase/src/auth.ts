@@ -18,9 +18,16 @@ export async function iniciarSesion(email: string, password: string): Promise<Se
   return data.session
 }
 
-/** Cierra la sesión actual. Lanza el AuthError de Supabase si falla. */
+/**
+ * Cierra la sesión actual **solo en esta app**.
+ *
+ * `scope: 'local'` no es un detalle: el default de supabase-js es `'global'`, que revoca TODAS
+ * las sesiones del usuario en el servidor. Como backoffice y portal comparten el proyecto de
+ * Auth, cerrar sesión en uno dejaba al otro con una sesión zombie — la UI se veía logueada
+ * (el JWT en localStorage seguía vigente hasta una hora) pero cualquier acción fallaba.
+ */
 export async function cerrarSesion(): Promise<void> {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut({ scope: 'local' })
   if (error) throw error
 }
 
@@ -38,8 +45,17 @@ export async function cambiarPassword(nueva: string): Promise<void> {
 }
 
 /**
- * Verifica el token de un enlace de acceso (tipo `recovery`) y abre la sesión.
- * Es el paso 1 de /definir-contrasena. Lanza si el enlace venció o ya se usó.
+ * Verifica el token de un enlace de acceso (tipo `recovery`) y abre la sesión. **Consume el
+ * token**: es de un solo uso.
+ *
+ * Por eso NO se llama al abrir la pantalla, sino al guardar la contraseña. Si se consume al
+ * montar, el token lo quema el primero que abra la URL — y en dominios corporativos eso suele
+ * ser el escáner de seguridad del correo (Defender, Proofpoint), que "hace clic" en los enlaces
+ * para analizarlos. La persona llegaba después y su enlace ya no servía. Es la mitigación que
+ * recomienda Supabase: invalidar el token cuando el usuario envía el formulario, no al acceder.
+ *
+ * Nota: Auth devuelve el MISMO error (`otp_expired`) si el enlace venció, si ya se usó o si es
+ * inválido. No se pueden distinguir, así que el mensaje al usuario cubre los tres casos.
  */
 export async function verificarTokenAcceso(tokenHash: string): Promise<Session> {
   const { data, error } = await supabase.auth.verifyOtp({

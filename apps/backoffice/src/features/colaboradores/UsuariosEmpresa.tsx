@@ -37,6 +37,7 @@ import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { Switch } from '@amena/ui/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@amena/ui/components/ui/tooltip'
+import { mensajeErrorCorreo } from '@amena/supabase/correo'
 import type { Empresa } from '../empresas/api'
 import type { UsuarioEmpresa } from './api'
 import { ColaboradorFormDialog } from './ColaboradorFormDialog'
@@ -300,7 +301,8 @@ export function UsuariosEmpresa({
         if (r.correo_enviado) {
           toast.success(`Le enviamos a ${nombre} un correo con el enlace para restablecer su contraseña.`)
         } else {
-          toast.error(r.correo_error ?? 'El usuario se procesó, pero el correo no pudo salir.')
+          // El error crudo de Postmark (inglés, jerga de proveedor) no se muestra tal cual.
+          toast.error(mensajeErrorCorreo(r.correo_error, { nombre }))
         }
       },
       onError: (e) =>
