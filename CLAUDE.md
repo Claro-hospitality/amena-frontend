@@ -30,6 +30,19 @@ packages/
 > backoffice y portal, el acceso se decide con `usuarios_backoffice.rol = 'eventos'` (o
 > `super_admin`), vía `eventos.es_admin()`. Toda policy nueva de ese schema debe usar ese
 > helper, nunca `using (true)`.
+>
+> **El backend de estos módulos ya existe, en la rama `eventos` de `amena-backend`** (schema,
+> RLS, seed y las 3 edge functions: `reservar-pago`, `google-wallet-boleto`,
+> `facturar-consumo`). El sitio público es la rama `eventos` de `landing-amena`, apuntada al
+> mismo proyecto con `db.schema = 'eventos'`. **Para arrancar en local, la checklist y las
+> trampas están en el CLAUDE.md de `amena-backend` → "Eventos — puesta en marcha"**: secrets,
+> orden de pasos y la prueba de punta a punta (reservar en la landing → verla en
+> `/eventos/reservaciones` → abrir el pase → escanear en `/eventos/escanear`).
+>
+> Del lado del front no falta nada para conectar. Sí falta, y es aparte: el test de
+> `validarBoleto` (regla 4 — es el update condicionado que evita revalidar un boleto en la
+> puerta), y las pantallas de "Facturas emitidas" y "Códigos de consumo", que ya tienen tablas,
+> RPCs y datos de seed esperándolas.
 
 ## Reglas de oro
 
