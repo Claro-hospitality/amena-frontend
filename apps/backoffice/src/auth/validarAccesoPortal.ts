@@ -1,6 +1,9 @@
 import { supabase } from '@amena/supabase'
 
-export type RolBackoffice = 'super_admin' | 'mesero' | 'finanzas' | 'consulta' | 'capitan_meseros'
+import type { Database } from '@amena/supabase/types'
+
+/** Deriva del enum generado: agregar un rol en el backend lo trae solo. */
+export type RolBackoffice = Database['public']['Enums']['rol_backoffice']
 
 export interface ResultadoAcceso {
   concedido: boolean
@@ -37,7 +40,9 @@ export async function validarAccesoPortal(): Promise<ResultadoAcceso> {
   }
 }
 
-/** Ruta inicial (home) según el rol: el mesero solo escanea. */
+/** Ruta inicial (home) según el rol: el mesero solo escanea, eventos vive en su propio módulo. */
 export function rutaInicialPorRol(rol: RolBackoffice): string {
-  return rol === 'mesero' ? '/escaner' : '/inicio'
+  if (rol === 'mesero') return '/escaner'
+  if (rol === 'eventos') return '/eventos'
+  return '/inicio'
 }

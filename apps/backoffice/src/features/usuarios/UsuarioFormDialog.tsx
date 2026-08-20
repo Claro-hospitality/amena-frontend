@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@amena/ui/components/ui/select'
-import { ETIQUETA_ROL, type RolBackoffice } from './api'
+import { ETIQUETA_ROL, ROLES_ASIGNABLES, type RolBackoffice } from './api'
 import { useCrearUsuario } from './queries'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -90,11 +90,11 @@ export function UsuarioFormDialog({ onClose }: { onClose: () => void }) {
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="super_admin">{ETIQUETA_ROL.super_admin}</SelectItem>
-                      <SelectItem value="finanzas">{ETIQUETA_ROL.finanzas}</SelectItem>
-                      <SelectItem value="mesero">{ETIQUETA_ROL.mesero}</SelectItem>
-                      <SelectItem value="capitan_meseros">{ETIQUETA_ROL.capitan_meseros}</SelectItem>
-                      <SelectItem value="consulta">{ETIQUETA_ROL.consulta}</SelectItem>
+                      {ROLES_ASIGNABLES.map((r) => (
+                        <SelectItem key={r} value={r}>
+                          {ETIQUETA_ROL[r]}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   {errores.rol && <FieldError>{errores.rol}</FieldError>}

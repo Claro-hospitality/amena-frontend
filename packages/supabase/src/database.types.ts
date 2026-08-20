@@ -7,23 +7,297 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
+  eventos: {
     Tables: {
-      [_ in never]: never
+      codigos_consumo: {
+        Row: {
+          codigo: string
+          descripcion: string
+          fecha: string
+          folio_ticket: string
+          id: string
+          items: Json
+          iva: number
+          mesa: string | null
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          codigo: string
+          descripcion: string
+          fecha: string
+          folio_ticket: string
+          id?: string
+          items: Json
+          iva: number
+          mesa?: string | null
+          subtotal: number
+          total: number
+        }
+        Update: {
+          codigo?: string
+          descripcion?: string
+          fecha?: string
+          folio_ticket?: string
+          id?: string
+          items?: Json
+          iva?: number
+          mesa?: string | null
+          subtotal?: number
+          total?: number
+        }
+        Relationships: []
+      }
+      eventos: {
+        Row: {
+          categoria: string
+          created_at: string
+          cupo_disponible: number
+          cupo_total: number
+          descripcion_corta: string
+          descripcion_larga: string[] | null
+          estado: string
+          fecha: string
+          hora_fin: string | null
+          hora_inicio: string
+          id: string
+          imagen_url: string
+          incluye: string[] | null
+          lugar: string
+          precio: number
+          slug: string
+          titulo: string
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          cupo_disponible: number
+          cupo_total: number
+          descripcion_corta: string
+          descripcion_larga?: string[] | null
+          estado?: string
+          fecha: string
+          hora_fin?: string | null
+          hora_inicio: string
+          id?: string
+          imagen_url: string
+          incluye?: string[] | null
+          lugar?: string
+          precio: number
+          slug: string
+          titulo: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          cupo_disponible?: number
+          cupo_total?: number
+          descripcion_corta?: string
+          descripcion_larga?: string[] | null
+          estado?: string
+          fecha?: string
+          hora_fin?: string | null
+          hora_inicio?: string
+          id?: string
+          imagen_url?: string
+          incluye?: string[] | null
+          lugar?: string
+          precio?: number
+          slug?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
+      facturas: {
+        Row: {
+          codigo_consumo_id: string
+          correo: string
+          cp: string
+          facturama_id: string | null
+          fecha_timbrado: string
+          folio_fiscal: string
+          id: string
+          razon_social: string
+          regimen_fiscal: string
+          rfc: string
+          uso_cfdi: string
+        }
+        Insert: {
+          codigo_consumo_id: string
+          correo: string
+          cp: string
+          facturama_id?: string | null
+          fecha_timbrado?: string
+          folio_fiscal: string
+          id?: string
+          razon_social: string
+          regimen_fiscal: string
+          rfc: string
+          uso_cfdi: string
+        }
+        Update: {
+          codigo_consumo_id?: string
+          correo?: string
+          cp?: string
+          facturama_id?: string | null
+          fecha_timbrado?: string
+          folio_fiscal?: string
+          id?: string
+          razon_social?: string
+          regimen_fiscal?: string
+          rfc?: string
+          uso_cfdi?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facturas_codigo_consumo_id_fkey"
+            columns: ["codigo_consumo_id"]
+            isOneToOne: true
+            referencedRelation: "codigos_consumo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservaciones: {
+        Row: {
+          email: string
+          estado_boleto: string
+          estado_pago: string
+          evento_id: string
+          folio: string
+          id: string
+          metodo_pago: string | null
+          monto: number
+          nombre: string
+          personas: number
+          reservada_el: string
+          synergy_pay_id: string | null
+          telefono: string | null
+          validada_el: string | null
+        }
+        Insert: {
+          email: string
+          estado_boleto?: string
+          estado_pago?: string
+          evento_id: string
+          folio: string
+          id?: string
+          metodo_pago?: string | null
+          monto: number
+          nombre: string
+          personas: number
+          reservada_el?: string
+          synergy_pay_id?: string | null
+          telefono?: string | null
+          validada_el?: string | null
+        }
+        Update: {
+          email?: string
+          estado_boleto?: string
+          estado_pago?: string
+          evento_id?: string
+          folio?: string
+          id?: string
+          metodo_pago?: string | null
+          monto?: number
+          nombre?: string
+          personas?: number
+          reservada_el?: string
+          synergy_pay_id?: string | null
+          telefono?: string | null
+          validada_el?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservaciones_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
+      buscar_codigo_consumo: {
+        Args: { p_codigo: string }
+        Returns: {
+          codigo_consumo: Database["eventos"]["Tables"]["codigos_consumo"]["Row"]
+          factura_existente: Database["eventos"]["Tables"]["facturas"]["Row"]
+        }[]
       }
+      crear_reservacion: {
+        Args: {
+          p_email: string
+          p_evento_id: string
+          p_folio: string
+          p_metodo_pago: string
+          p_monto: number
+          p_nombre: string
+          p_personas: number
+          p_synergy_pay_id: string
+          p_telefono: string
+        }
+        Returns: {
+          email: string
+          estado_boleto: string
+          estado_pago: string
+          evento_id: string
+          folio: string
+          id: string
+          metodo_pago: string | null
+          monto: number
+          nombre: string
+          personas: number
+          reservada_el: string
+          synergy_pay_id: string | null
+          telefono: string | null
+          validada_el: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reservaciones"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      dashboard_stats: { Args: never; Returns: Json }
+      emitir_factura: {
+        Args: {
+          p_codigo: string
+          p_correo: string
+          p_cp: string
+          p_facturama_id: string
+          p_folio_fiscal: string
+          p_razon_social: string
+          p_regimen_fiscal: string
+          p_rfc: string
+          p_uso_cfdi: string
+        }
+        Returns: {
+          codigo_consumo_id: string
+          correo: string
+          cp: string
+          facturama_id: string | null
+          fecha_timbrado: string
+          folio_fiscal: string
+          id: string
+          razon_social: string
+          regimen_fiscal: string
+          rfc: string
+          uso_cfdi: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "facturas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      es_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
@@ -835,6 +1109,7 @@ export type Database = {
       }
       es_capitan_meseros: { Args: never; Returns: boolean }
       es_consulta: { Args: never; Returns: boolean }
+      es_eventos: { Args: never; Returns: boolean }
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }
@@ -993,6 +1268,7 @@ export type Database = {
         | "finanzas"
         | "consulta"
         | "capitan_meseros"
+        | "eventos"
       rol_portal: "admin" | "colaborador"
     }
     CompositeTypes: {
@@ -1119,7 +1395,7 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
+  eventos: {
     Enums: {},
   },
   public: {
@@ -1136,6 +1412,7 @@ export const Constants = {
         "finanzas",
         "consulta",
         "capitan_meseros",
+        "eventos",
       ],
       rol_portal: ["admin", "colaborador"],
     },

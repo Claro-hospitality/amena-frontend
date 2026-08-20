@@ -36,7 +36,16 @@ export const ETIQUETA_ROL: Record<RolBackoffice, string> = {
   mesero: 'Mesero',
   consulta: 'Consulta',
   capitan_meseros: 'Capitán de meseros',
+  eventos: 'Eventos',
 }
+
+/**
+ * Orden en que se ofrecen los roles al dar de alta o cambiar de rol. Se deriva de
+ * ETIQUETA_ROL — que a su vez es `Record<RolBackoffice, string>` — para que un rol nuevo
+ * aparezca solo en los selects. Antes la lista estaba escrita a mano en dos diálogos y se
+ * desincronizó al agregar `eventos`.
+ */
+export const ROLES_ASIGNABLES = Object.keys(ETIQUETA_ROL) as RolBackoffice[]
 
 /** Lista los usuarios internos con su email (RPC SECURITY DEFINER, solo super_admin). */
 export async function listarUsuarios(): Promise<UsuarioBackoffice[]> {

@@ -19,8 +19,11 @@ type EstadoAcceso = 'validando' | ResultadoAcceso
  *       - denegado → /sin-acceso
  *       - debe cambiar contraseña → pantalla de cambio obligatorio (sin navegar)
  *       - concedido → monta el shell y pasa el rol a las rutas hijas vía <Outlet>
+ *
+ * `conShell={false}` aplica la misma validación pero sin el chrome del backoffice, para las
+ * pantallas que necesitan el viewport completo (el escáner de boletos y su cámara).
  */
-export function RutaProtegida() {
+export function RutaProtegida({ conShell = true }: { conShell?: boolean } = {}) {
   const { session, cargando } = useAuth()
   // Guardamos el resultado junto al userId validado: si la sesión cambia (otro
   // usuario), el resultado deja de corresponder y volvemos a "validando".
@@ -61,6 +64,7 @@ export function RutaProtegida() {
   }
 
   const contexto: ContextoAcceso = { rol: acceso.rol }
+  if (!conShell) return <Outlet context={contexto} />
   return (
     <BackofficeShell rol={acceso.rol}>
       <Outlet context={contexto} />

@@ -14,6 +14,11 @@ export const RUTAS_BREADCRUMB: Record<string, string> = {
   '/wifi': 'WiFi',
   '/configuracion': 'Configuración',
   '/mi-perfil': 'Mi perfil',
+  // Eventos de amena.social (el escáner de boletos no lleva migas: va fuera del shell).
+  '/eventos': 'Eventos',
+  '/eventos/catalogo': 'Catálogo',
+  '/eventos/catalogo/nuevo': 'Nuevo evento',
+  '/eventos/reservaciones': 'Reservaciones',
   '/componentes': 'Componentes',
   '/branding': 'Branding',
 }

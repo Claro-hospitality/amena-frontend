@@ -12,19 +12,24 @@ El contexto de negocio vive en el repo `amena-backend/docs/` (resumen de platafo
 apps/
   backoffice/        # backoffice.amena.com — personal interno (super_admin, mesero, finanzas)
   portal/            # app.amena.com — admins de empresa y colaboradores
-  eventos/           # admin de amena.social — eventos, reservaciones y boletos QR (OTRO producto)
 packages/
   ui/                # componentes shadcn/ui con el branding de Amena (tokens en Tailwind)
   supabase/          # cliente de Supabase + tipos TypeScript generados del esquema
   utils/             # utilidades puras: fechas, semanas, formateo de moneda
 ```
 
-> **`apps/eventos` es un producto aparte.** Es el admin del sitio público `amena.social`
-> (eventos y venta de boletos), migrado del repo standalone `amena-admin`. Va contra **otro
-> proyecto de Supabase** (el de `amena-landing`), así que **no usa `@amena/supabase`,
-> `@amena/ui` ni `@amena/utils`**: tiene su cliente, sus tipos a mano y su propio `theme.css`.
-> `pnpm gen:types` no aplica a sus tablas. Esa duplicación es deliberada — las reglas 2, 3 y 5
-> de abajo se refieren a `backoffice` y `portal`. Detalles en `apps/eventos/README.md`.
+> **Los módulos de eventos son otro producto dentro del backoffice.** `features/eventos`,
+> `features/reservaciones` y `features/escaner-boletos` administran el sitio público
+> `amena.social` (eventos, reservaciones y boletos QR), no los planes de alimentación.
+> Sus tablas viven en el **schema `eventos`** de `amena-backend`, no en `public` — misma
+> instancia de Supabase, otro namespace, porque `public` ya tiene su propia `facturas`,
+> distinta. Se consultan con `supabase.schema('eventos')`; `pnpm gen:types` genera los dos
+> schemas.
+>
+> **Ser admin de eventos no es "estar autenticado".** Como `auth.users` se comparte con
+> backoffice y portal, el acceso se decide con `usuarios_backoffice.rol = 'eventos'` (o
+> `super_admin`), vía `eventos.es_admin()`. Toda policy nueva de ese schema debe usar ese
+> helper, nunca `using (true)`.
 
 ## Reglas de oro
 
@@ -105,4 +110,4 @@ git branch -d <modulo>                  # borrar rama al integrar
 - **`pnpm prod`** (mode `prod`, Vite `--mode prod`) → `.env.prod` (gitignored, local por app): front local contra el **Supabase Cloud de producción**. Puertos backoffice 5184 / portal 5183, así que puede correr **a la vez** que `pnpm dev` sin chocar. ⚠️ Escribe en la BD real de prod.
 - **Build/deploy** (mode `production`) → usa los secrets de GitHub (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SENTRY_DSN`) en el workflow, no un `.env` local. Nombre de mode distinto (`prod` ≠ `production`) para no interferir con el build.
 - Deploy: Firebase Hosting (proyecto `amena-20df0`), un site por app (backoffice / portal), al mergear `dev → main` (`.github/workflows/deploy.yml`).
-- **`apps/eventos` no se despliega todavía.** El site `amena-admin` ya lo ocupa `backoffice`; eventos necesita site propio (p. ej. `amena-eventos`) y su **propio** par de secrets de Supabase, porque `deploy.yml` construye todas las apps con un solo `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`. Hasta resolverlo, no está en `firebase.json` ni en `deploy.yml`. Dev local: puerto 5176 con `apps/eventos/.env.local`.
+- **Los módulos de eventos se despliegan con el backoffice**, en el mismo site de Firebase. Ya no necesitan site aparte: al vivir dentro de `apps/backoffice` comparten build y secrets. Lo que sí falta es subir el schema `eventos` al Supabase de producción (`supabase db push`) y agregar `eventos` a `api.schemas` del `config.toml` de prod — sin eso PostgREST no lo sirve y las pantallas devuelven 404.

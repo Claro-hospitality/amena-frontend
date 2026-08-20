@@ -19,6 +19,7 @@ const ETIQUETA_ROL: Record<RolBackoffice, string> = {
   mesero: 'Mesero',
   capitan_meseros: 'Capitán de meseros',
   consulta: 'Consulta',
+  eventos: 'Eventos',
 }
 
 function iniciales(texto: string): string {
