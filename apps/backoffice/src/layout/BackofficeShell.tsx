@@ -114,12 +114,15 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
       )
     })
 
-  /** Grupo colapsable con sub-items. Un item `proximamente` se pinta inerte, sin enlace. */
+  /**
+   * Grupo colapsable con sub-items, como una fila más del menú (no una sección aparte).
+   * Devuelve un item suelto a propósito: va dentro del mismo <SidebarMenu> que los items
+   * planos. Un item `proximamente` se pinta inerte, sin enlace.
+   */
   const renderGrupo = (grupo: GrupoNav) => {
     const IconoGrupo = grupo.icon
     return (
-      <SidebarMenu key={grupo.label}>
-        <Collapsible defaultOpen>
+        <Collapsible defaultOpen key={grupo.label}>
           <SidebarMenuItem>
             <CollapsibleTrigger
               render={
@@ -176,11 +179,15 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
             </CollapsibleContent>
           </SidebarMenuItem>
         </Collapsible>
-      </SidebarMenu>
     )
   }
 
   const grupos = gruposPorRol[rol] ?? []
+  const items = navPorRol[rol]
+  // Los grupos colapsables van justo debajo de Inicio. Si el rol no tiene Inicio (p. ej.
+  // `eventos`, cuyo menú es solo el grupo), quedan arriba de todo.
+  const iInicio = items.findIndex((i) => i.to === '/inicio')
+  const corte = iInicio >= 0 ? iInicio + 1 : 0
 
   return (
     <Sidebar collapsible="icon">
@@ -190,21 +197,22 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItems(navPorRol[rol])}</SidebarMenu>
+            {/* Los grupos colapsables van en la MISMA lista que los items planos: son una
+                fila más del menú, no una sección aparte. */}
+            <SidebarMenu>
+              {renderItems(items.slice(0, corte))}
+              {grupos.map(renderGrupo)}
+              {renderItems(items.slice(corte))}
+            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* Grupos colapsables del rol (hoy: Eventos, para super_admin y el rol eventos). */}
-        {grupos.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupContent>{grupos.map(renderGrupo)}</SidebarGroupContent>
-          </SidebarGroup>
-        )}
 
         {/* Solo en desarrollo (import.meta.env.DEV): submenú de herramientas internas. */}
         {import.meta.env.DEV && (
           <SidebarGroup>
-            <SidebarGroupContent>{renderGrupo(navDesarrollo)}</SidebarGroupContent>
+            <SidebarGroupContent>
+              <SidebarMenu>{renderGrupo(navDesarrollo)}</SidebarMenu>
+            </SidebarGroupContent>
           </SidebarGroup>
         )}
       </SidebarContent>
