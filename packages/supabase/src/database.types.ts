@@ -67,6 +67,7 @@ export type Database = {
           precio: number
           slug: string
           titulo: string
+          updated_at: string
         }
         Insert: {
           categoria: string
@@ -86,6 +87,7 @@ export type Database = {
           precio: number
           slug: string
           titulo: string
+          updated_at?: string
         }
         Update: {
           categoria?: string
@@ -105,6 +107,7 @@ export type Database = {
           precio?: number
           slug?: string
           titulo?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -173,6 +176,7 @@ export type Database = {
           reservada_el: string
           synergy_pay_id: string | null
           telefono: string | null
+          updated_at: string
           validada_el: string | null
         }
         Insert: {
@@ -189,6 +193,7 @@ export type Database = {
           reservada_el?: string
           synergy_pay_id?: string | null
           telefono?: string | null
+          updated_at?: string
           validada_el?: string | null
         }
         Update: {
@@ -205,6 +210,7 @@ export type Database = {
           reservada_el?: string
           synergy_pay_id?: string | null
           telefono?: string | null
+          updated_at?: string
           validada_el?: string | null
         }
         Relationships: [
@@ -255,6 +261,7 @@ export type Database = {
           reservada_el: string
           synergy_pay_id: string | null
           telefono: string | null
+          updated_at: string
           validada_el: string | null
         }
         SetofOptions: {
@@ -1109,7 +1116,6 @@ export type Database = {
       }
       es_capitan_meseros: { Args: never; Returns: boolean }
       es_consulta: { Args: never; Returns: boolean }
-      es_eventos: { Args: never; Returns: boolean }
       es_finanzas: { Args: never; Returns: boolean }
       es_mesero: { Args: never; Returns: boolean }
       es_super_admin: { Args: never; Returns: boolean }

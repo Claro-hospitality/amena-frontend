@@ -18,6 +18,7 @@ function reservacion(over: Partial<Reservacion> = {}): Reservacion {
     metodo_pago: null,
     reservada_el: '2026-08-02T18:42:00-06:00',
     validada_el: null,
+    updated_at: '2026-08-02T18:42:00-06:00',
     eventos: null,
     ...over,
   }

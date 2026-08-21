@@ -21,6 +21,7 @@ function evento(over: Partial<Evento> = {}): Evento {
     estado: 'Publicado',
     imagen_url: 'https://x/1.jpg',
     created_at: '2026-07-01T00:00:00Z',
+    updated_at: '2026-07-01T00:00:00Z',
     ...over,
   }
 }
