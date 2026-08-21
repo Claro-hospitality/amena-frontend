@@ -28,7 +28,14 @@ import {
   useSidebar,
 } from '@amena/ui/components/ui/sidebar'
 import type { RolBackoffice } from '../auth/validarAccesoPortal'
-import { navDesarrollo, navPorRol, type ItemNav } from './navBackoffice'
+import {
+  gruposPorRol,
+  navDesarrollo,
+  navPorRol,
+  type GrupoNav,
+  type ItemNav,
+} from './navBackoffice'
+import { rutaActiva } from './navActiva'
 import { UsuarioMenu } from './UsuarioMenu'
 
 /**
@@ -88,10 +95,16 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
     if (isMobile) setOpenMobile(false)
   }
 
-  const renderItems = (items: ItemNav[]) =>
-    items.map((item) => {
+  // El activo se resuelve contra la lista completa, no ítem por ítem: un padre como `/eventos`
+  // casa por prefijo con todas sus hijas, y así quedaban dos filas sombreadas a la vez.
+  const renderItems = (items: ItemNav[]) => {
+    const activa = rutaActiva(
+      pathname,
+      items.map((i) => i.to)
+    )
+    return items.map((item) => {
       const Icono = item.icon
-      const activo = pathname === item.to || pathname.startsWith(`${item.to}/`)
+      const activo = item.to === activa
       return (
         <SidebarMenuItem key={item.to}>
           <SidebarMenuButton
@@ -107,8 +120,86 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
         </SidebarMenuItem>
       )
     })
+  }
 
-  const IconoDesarrollo = navDesarrollo.icon
+  /**
+   * Grupo colapsable con sub-items, como una fila más del menú (no una sección aparte).
+   * Devuelve un item suelto a propósito: va dentro del mismo <SidebarMenu> que los items
+   * planos. Un item `proximamente` se pinta inerte, sin enlace.
+   */
+  const renderGrupo = (grupo: GrupoNav) => {
+    const IconoGrupo = grupo.icon
+    const activa = rutaActiva(
+      pathname,
+      grupo.items.map((i) => i.to)
+    )
+    return (
+        <Collapsible defaultOpen key={grupo.label}>
+          <SidebarMenuItem>
+            <CollapsibleTrigger
+              render={
+                <SidebarMenuButton tooltip={grupo.label} className="group/grupo">
+                  <IconoGrupo />
+                  <span>{grupo.label}</span>
+                  <ChevronRight className="ml-auto transition-transform group-aria-expanded/grupo:rotate-90" />
+                </SidebarMenuButton>
+              }
+            />
+            <CollapsibleContent>
+              <SidebarMenuSub>
+                {grupo.items.map((item) => {
+                  const Icono = item.icon
+                  const activo = item.to === activa
+                  return (
+                    <SidebarMenuSubItem key={item.to}>
+                      {item.proximamente ? (
+                        <SidebarMenuSubButton
+                          aria-disabled
+                          title="Próximamente"
+                          className="cursor-not-allowed opacity-50"
+                          render={
+                            <span>
+                              <Icono />
+                              <span>{item.label}</span>
+                            </span>
+                          }
+                        />
+                      ) : item.externo ? (
+                        <SidebarMenuSubButton
+                          render={
+                            <a href={item.to} target="_blank" rel="noreferrer">
+                              <Icono />
+                              <span>{item.label}</span>
+                            </a>
+                          }
+                        />
+                      ) : (
+                        <SidebarMenuSubButton
+                          isActive={activo}
+                          render={
+                            <Link to={item.to} onClick={cerrarDrawer}>
+                              <Icono />
+                              <span>{item.label}</span>
+                            </Link>
+                          }
+                        />
+                      )}
+                    </SidebarMenuSubItem>
+                  )
+                })}
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          </SidebarMenuItem>
+        </Collapsible>
+    )
+  }
+
+  const grupos = gruposPorRol[rol] ?? []
+  const items = navPorRol[rol]
+  // Los grupos colapsables van justo debajo de Inicio. Si el rol no tiene Inicio (p. ej.
+  // `eventos`, cuyo menú es solo el grupo), quedan arriba de todo.
+  const iInicio = items.findIndex((i) => i.to === '/inicio')
+  const corte = iInicio >= 0 ? iInicio + 1 : 0
 
   return (
     <Sidebar collapsible="icon">
@@ -118,7 +209,13 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItems(navPorRol[rol])}</SidebarMenu>
+            {/* Los grupos colapsables van en la MISMA lista que los items planos: son una
+                fila más del menú, no una sección aparte. */}
+            <SidebarMenu>
+              {renderItems(items.slice(0, corte))}
+              {grupos.map(renderGrupo)}
+              {renderItems(items.slice(corte))}
+            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -126,43 +223,7 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
         {import.meta.env.DEV && (
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarMenu>
-                <Collapsible defaultOpen>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger
-                      render={
-                        <SidebarMenuButton tooltip={navDesarrollo.label} className="group/desarrollo">
-                          <IconoDesarrollo />
-                          <span>{navDesarrollo.label}</span>
-                          <ChevronRight className="ml-auto transition-transform group-aria-expanded/desarrollo:rotate-90" />
-                        </SidebarMenuButton>
-                      }
-                    />
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {navDesarrollo.items.map((item) => {
-                          const Icono = item.icon
-                          const activo =
-                            pathname === item.to || pathname.startsWith(`${item.to}/`)
-                          return (
-                            <SidebarMenuSubItem key={item.to}>
-                              <SidebarMenuSubButton
-                                isActive={activo}
-                                render={
-                                  <Link to={item.to} onClick={cerrarDrawer}>
-                                    <Icono />
-                                    <span>{item.label}</span>
-                                  </Link>
-                                }
-                              />
-                            </SidebarMenuSubItem>
-                          )
-                        })}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              </SidebarMenu>
+              <SidebarMenu>{renderGrupo(navDesarrollo)}</SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         )}

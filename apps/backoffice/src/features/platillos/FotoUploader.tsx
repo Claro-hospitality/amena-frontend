@@ -1,8 +1,8 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { ImagePlus, X } from 'lucide-react'
+import { validarImagen } from '@amena/utils'
 import { AspectRatio } from '@amena/ui/components/ui/aspect-ratio'
 import { Button } from '@amena/ui/components/ui/button'
-import { validarImagen } from './foto'
 import { PlaceholderFoto } from './PlaceholderFoto'
 
 /**

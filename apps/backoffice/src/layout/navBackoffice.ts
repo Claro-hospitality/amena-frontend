@@ -3,11 +3,17 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
+  ExternalLink,
+  FileText,
+  Hash,
   Home,
+  LayoutDashboard,
   Palette,
+  QrCode,
   Receipt,
   ScanLine,
   Settings,
+  Ticket,
   Users,
   UtensilsCrossed,
   Wifi,
@@ -20,6 +26,13 @@ export interface ItemNav {
   to: string
   label: string
   icon: LucideIcon
+  /**
+   * Se pinta deshabilitado con "Próximamente" y no navega: la pantalla todavía no existe.
+   * `to` solo sirve de key en estos casos.
+   */
+  proximamente?: boolean
+  /** `to` es una URL absoluta: se abre en pestaña nueva con <a>, no con el router. */
+  externo?: boolean
 }
 
 /**
@@ -64,6 +77,9 @@ export const navPorRol: Record<RolBackoffice, ItemNav[]> = {
     { to: '/platillos', label: 'Platillos', icon: UtensilsCrossed },
     { to: '/menu', label: 'Menú', icon: CalendarDays },
   ],
+  // Eventos: otro producto (amena.social). Todo su menú vive en el grupo colapsable de abajo,
+  // así que no tiene items sueltos.
+  eventos: [],
 }
 
 /** Grupo de navegación colapsable (un item padre con sub-items). */
@@ -71,6 +87,34 @@ export interface GrupoNav {
   label: string
   icon: LucideIcon
   items: ItemNav[]
+}
+
+/** Sitio público que administran estos módulos. */
+const SITIO_PUBLICO_URL = import.meta.env.VITE_SITIO_PUBLICO_URL ?? 'https://amena.social'
+
+/**
+ * Eventos de amena.social: otro producto dentro del mismo backoffice (esquema `eventos` de la
+ * base, no `public`). Va en un grupo propio para no mezclar su menú con el de planes de
+ * alimentación — y porque "Facturas" y "Escáner" ya significan otra cosa en la raíz.
+ */
+export const grupoEventos: GrupoNav = {
+  label: 'Eventos',
+  icon: Ticket,
+  items: [
+    { to: '/eventos', label: 'Resumen', icon: LayoutDashboard },
+    { to: '/eventos/catalogo', label: 'Catálogo', icon: CalendarDays },
+    { to: '/eventos/reservaciones', label: 'Reservaciones', icon: Users },
+    { to: '/eventos/escanear', label: 'Escanear boleto', icon: QrCode },
+    { to: '/eventos/facturas', label: 'Facturas emitidas', icon: FileText, proximamente: true },
+    { to: '/eventos/codigos', label: 'Códigos de consumo', icon: Hash, proximamente: true },
+    { to: SITIO_PUBLICO_URL, label: 'Ver sitio', icon: ExternalLink, externo: true },
+  ],
+}
+
+/** Grupos colapsables por rol. Los roles ausentes no ven ninguno. */
+export const gruposPorRol: Partial<Record<RolBackoffice, GrupoNav[]>> = {
+  super_admin: [grupoEventos],
+  eventos: [grupoEventos],
 }
 
 /**

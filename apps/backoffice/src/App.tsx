@@ -66,6 +66,34 @@ const PresentacionPage = lazy(() =>
     default: m.PresentacionPage,
   }))
 )
+const EventosResumenPage = lazy(() =>
+  import('./features/eventos/EventosResumenPage').then((m) => ({
+    default: m.EventosResumenPage,
+  }))
+)
+const CatalogoEventosPage = lazy(() =>
+  import('./features/eventos/CatalogoEventosPage').then((m) => ({
+    default: m.CatalogoEventosPage,
+  }))
+)
+const EventoFormPage = lazy(() =>
+  import('./features/eventos/EventoFormPage').then((m) => ({ default: m.EventoFormPage }))
+)
+const ReservacionesPage = lazy(() =>
+  import('./features/reservaciones/ReservacionesPage').then((m) => ({
+    default: m.ReservacionesPage,
+  }))
+)
+const ReservacionDetallePage = lazy(() =>
+  import('./features/reservaciones/ReservacionDetallePage').then((m) => ({
+    default: m.ReservacionDetallePage,
+  }))
+)
+const EscanerBoletosPage = lazy(() =>
+  import('./features/escaner-boletos/EscanerBoletosPage').then((m) => ({
+    default: m.EscanerBoletosPage,
+  }))
+)
 
 function CargandoRuta() {
   return (
@@ -227,6 +255,69 @@ export default function App() {
           }
         />
 
+        {/* Eventos de amena.social: otro producto, otro schema de la base. El escáner de
+            boletos va aparte, fuera del shell (ver más abajo). */}
+        <Route
+          path="eventos"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <EventosResumenPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="eventos/catalogo"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <CatalogoEventosPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="eventos/catalogo/nuevo"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <EventoFormPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="eventos/catalogo/:slug/editar"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <EventoFormPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="eventos/reservaciones"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ReservacionesPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+        <Route
+          path="eventos/reservaciones/:folio"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <ReservacionDetallePage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
+
         {/* Sección de desarrollo: solo en dev (import.meta.env.DEV), nunca en prod. */}
         {import.meta.env.DEV && (
           <>
@@ -252,6 +343,21 @@ export default function App() {
             />
           </>
         )}
+      </Route>
+
+      {/* Misma validación de acceso, sin el shell: el escáner de boletos ocupa el viewport
+          completo y el color de fondo es la señal de validación para quien está en la puerta. */}
+      <Route element={<RutaProtegida conShell={false} />}>
+        <Route
+          path="eventos/escanear"
+          element={
+            <RutaErrorBoundary>
+              <Suspense fallback={<CargandoRuta />}>
+                <EscanerBoletosPage />
+              </Suspense>
+            </RutaErrorBoundary>
+          }
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

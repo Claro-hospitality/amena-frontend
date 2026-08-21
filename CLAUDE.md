@@ -18,6 +18,32 @@ packages/
   utils/             # utilidades puras: fechas, semanas, formateo de moneda
 ```
 
+> **Los módulos de eventos son otro producto dentro del backoffice.** `features/eventos`,
+> `features/reservaciones` y `features/escaner-boletos` administran el sitio público
+> `amena.social` (eventos, reservaciones y boletos QR), no los planes de alimentación.
+> Sus tablas viven en el **schema `eventos`** de `amena-backend`, no en `public` — misma
+> instancia de Supabase, otro namespace, porque `public` ya tiene su propia `facturas`,
+> distinta. Se consultan con `supabase.schema('eventos')`; `pnpm gen:types` genera los dos
+> schemas.
+>
+> **Ser admin de eventos no es "estar autenticado".** Como `auth.users` se comparte con
+> backoffice y portal, el acceso se decide con `usuarios_backoffice.rol = 'eventos'` (o
+> `super_admin`), vía `eventos.es_admin()`. Toda policy nueva de ese schema debe usar ese
+> helper, nunca `using (true)`.
+>
+> **El backend de estos módulos ya existe, en la rama `eventos` de `amena-backend`** (schema,
+> RLS, seed y las 3 edge functions: `reservar-pago`, `google-wallet-boleto`,
+> `facturar-consumo`). El sitio público es la rama `eventos` de `landing-amena`, apuntada al
+> mismo proyecto con `db.schema = 'eventos'`. **Para arrancar en local, la checklist y las
+> trampas están en el CLAUDE.md de `amena-backend` → "Eventos — puesta en marcha"**: secrets,
+> orden de pasos y la prueba de punta a punta (reservar en la landing → verla en
+> `/eventos/reservaciones` → abrir el pase → escanear en `/eventos/escanear`).
+>
+> Del lado del front no falta nada para conectar. Sí falta, y es aparte: el test de
+> `validarBoleto` (regla 4 — es el update condicionado que evita revalidar un boleto en la
+> puerta), y las pantallas de "Facturas emitidas" y "Códigos de consumo", que ya tienen tablas,
+> RPCs y datos de seed esperándolas.
+
 ## Reglas de oro
 
 1. **Terminología:** "**colaborador**" es un **rol** del portal; la persona que come es un "**comensal**" (entidad `comensales`, con su QR = `credenciales_qr.qr_token`). Nunca "empleado". Los ids de tablas propias son `int8` → `number` en TS (no `string`/uuid); `user_id` y `qr_token` siguen siendo uuid (`string`).
@@ -97,3 +123,4 @@ git branch -d <modulo>                  # borrar rama al integrar
 - **`pnpm prod`** (mode `prod`, Vite `--mode prod`) → `.env.prod` (gitignored, local por app): front local contra el **Supabase Cloud de producción**. Puertos backoffice 5184 / portal 5183, así que puede correr **a la vez** que `pnpm dev` sin chocar. ⚠️ Escribe en la BD real de prod.
 - **Build/deploy** (mode `production`) → usa los secrets de GitHub (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SENTRY_DSN`) en el workflow, no un `.env` local. Nombre de mode distinto (`prod` ≠ `production`) para no interferir con el build.
 - Deploy: Firebase Hosting (proyecto `amena-20df0`), un site por app (backoffice / portal), al mergear `dev → main` (`.github/workflows/deploy.yml`).
+- **Los módulos de eventos se despliegan con el backoffice**, en el mismo site de Firebase. Ya no necesitan site aparte: al vivir dentro de `apps/backoffice` comparten build y secrets. Lo que sí falta es subir el schema `eventos` al Supabase de producción (`supabase db push`) y agregar `eventos` a `api.schemas` del `config.toml` de prod — sin eso PostgREST no lo sirve y las pantallas devuelven 404.

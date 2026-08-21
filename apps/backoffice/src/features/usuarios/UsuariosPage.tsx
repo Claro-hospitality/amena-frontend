@@ -47,7 +47,12 @@ import {
 import { toast } from 'sonner'
 import { useAuth } from '../../auth/useAuth'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { ETIQUETA_ROL, type RolBackoffice, type UsuarioBackoffice } from './api'
+import {
+  ETIQUETA_ROL,
+  ROLES_ASIGNABLES,
+  type RolBackoffice,
+  type UsuarioBackoffice,
+} from './api'
 import { UsuarioFormDialog } from './UsuarioFormDialog'
 import {
   useCambiarRol,
@@ -300,11 +305,11 @@ function CambiarRolDialog({
               <SelectValue>{(v) => (v ? ETIQUETA_ROL[v as RolBackoffice] : '')}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="super_admin">{ETIQUETA_ROL.super_admin}</SelectItem>
-              <SelectItem value="finanzas">{ETIQUETA_ROL.finanzas}</SelectItem>
-              <SelectItem value="mesero">{ETIQUETA_ROL.mesero}</SelectItem>
-              <SelectItem value="capitan_meseros">{ETIQUETA_ROL.capitan_meseros}</SelectItem>
-              <SelectItem value="consulta">{ETIQUETA_ROL.consulta}</SelectItem>
+              {ROLES_ASIGNABLES.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {ETIQUETA_ROL[r]}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
