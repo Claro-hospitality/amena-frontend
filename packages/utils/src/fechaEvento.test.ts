@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   fechaBadge,
+  fechaCorta,
   fechaCortaConHora,
   fechaLarga,
   marcaDeTiempo,
@@ -14,6 +15,16 @@ describe('fechaBadge', () => {
 
   it('acepta la hora ya recortada a HH:mm', () => {
     expect(fechaBadge('2026-08-15', '19:00')).toBe('SÁB 15 AGO · 19:00')
+  })
+})
+
+describe('fechaCorta', () => {
+  it('capitaliza el día y quita el punto de la abreviatura del mes', () => {
+    expect(fechaCorta('2026-08-15')).toBe('Sáb 15 ago 2026')
+  })
+
+  it('no corre el día por zona horaria (parsea a medianoche local)', () => {
+    expect(fechaCorta('2026-01-01')).toBe('Jue 1 ene 2026')
   })
 })
 

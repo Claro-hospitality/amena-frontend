@@ -34,6 +34,12 @@ export function fechaLarga(fecha: string): string {
   return texto[0].toUpperCase() + texto.slice(1)
 }
 
+/** Fecha corta con año, sin hora, p. ej. "Sáb 15 ago 2026". */
+export function fechaCorta(fecha: string): string {
+  const etiqueta = format(deFechaISO(fecha), 'EEE d MMM yyyy', { locale: es }).replace(/\./g, '')
+  return etiqueta[0].toUpperCase() + etiqueta.slice(1)
+}
+
 /** Fecha corta con año y hora, p. ej. "Sáb 15 ago 2026 · 19:00 h". */
 export function fechaCortaConHora(fecha: string, horaInicio: string): string {
   const etiqueta = format(deFechaISO(fecha), 'EEE d MMM yyyy', { locale: es }).replace(/\./g, '')

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { Evento } from './api'
-import { condicionFiltroEvento, ocupados, puedeVerEventos } from './logica'
+import {
+  condicionFiltroEvento,
+  cupoAlto,
+  ocupados,
+  porcentajeOcupado,
+  puedeVerEventos,
+  UMBRAL_CUPO_ALTO,
+} from './logica'
 
 function evento(over: Partial<Evento> = {}): Evento {
   return {
@@ -47,6 +54,31 @@ describe('ocupados', () => {
 
   it('es cero cuando nadie reservó', () => {
     expect(ocupados(evento({ cupo_total: 20, cupo_disponible: 20 }))).toBe(0)
+  })
+})
+
+describe('porcentajeOcupado', () => {
+  it('redondea la proporción de lugares tomados', () => {
+    expect(porcentajeOcupado(evento({ cupo_total: 24, cupo_disponible: 12 }))).toBe(50)
+    expect(porcentajeOcupado(evento({ cupo_total: 24, cupo_disponible: 6 }))).toBe(75)
+    expect(porcentajeOcupado(evento({ cupo_total: 3, cupo_disponible: 2 }))).toBe(33)
+  })
+
+  it('un evento lleno da 100 y uno intacto da 0', () => {
+    expect(porcentajeOcupado(evento({ cupo_total: 20, cupo_disponible: 0 }))).toBe(100)
+    expect(porcentajeOcupado(evento({ cupo_total: 20, cupo_disponible: 20 }))).toBe(0)
+  })
+
+  it('cupo 0 no divide entre cero', () => {
+    expect(porcentajeOcupado(evento({ cupo_total: 0, cupo_disponible: 0 }))).toBe(0)
+  })
+})
+
+describe('cupoAlto', () => {
+  it('avisa justo en el umbral, no antes', () => {
+    expect(cupoAlto(evento({ cupo_total: 24, cupo_disponible: 6 }))).toBe(true)
+    expect(cupoAlto(evento({ cupo_total: 24, cupo_disponible: 8 }))).toBe(false)
+    expect(UMBRAL_CUPO_ALTO).toBe(75)
   })
 })
 

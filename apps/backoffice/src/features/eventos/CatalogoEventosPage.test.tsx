@@ -98,6 +98,40 @@ describe('CatalogoEventosPage', () => {
     expect(await screen.findByText('1 publicados · 1 borrador')).toBeInTheDocument()
   })
 
+  it('cada fila trae la miniatura, la barra de cupo y las reservas', async () => {
+    api.listarEventosPagina.mockResolvedValue({
+      filas: [evento({ cupo_total: 24, cupo_disponible: 6, imagen_url: 'https://x/cata.jpg' })],
+      total: 1,
+    })
+    renderizar('eventos')
+    await screen.findByRole('table')
+
+    expect(screen.getByRole('img', { name: 'Imagen de Cata de vinos mexicanos' })).toHaveAttribute(
+      'src',
+      'https://x/cata.jpg'
+    )
+    // 18 de 24 lugares tomados: la barra lo reporta para quien no la ve.
+    const barra = screen.getByRole('progressbar', { name: 'Cupo: 18 de 24 lugares' })
+    expect(barra).toHaveAttribute('aria-valuenow', '75')
+    expect(screen.getByText('18 / 24')).toBeInTheDocument()
+    // El Button del kit renderiza el enlace con role="button" (así lo hace en toda la app).
+    expect(screen.getByRole('button', { name: 'Editar Cata de vinos mexicanos' })).toHaveAttribute(
+      'href',
+      '/eventos/catalogo/cata-de-vinos/editar'
+    )
+  })
+
+  it('el estado se ve como badge, con el borrador en ámbar', async () => {
+    api.listarEventosPagina.mockResolvedValue({
+      filas: [evento({ estado: 'Borrador' })],
+      total: 1,
+    })
+    renderizar('eventos')
+    await screen.findByRole('table')
+
+    expect(screen.getByText('Borrador')).toHaveClass('bg-warning/15')
+  })
+
   it('super_admin también entra', async () => {
     api.listarEventosPagina.mockResolvedValue({ filas: [evento()], total: 1 })
     renderizar('super_admin')
