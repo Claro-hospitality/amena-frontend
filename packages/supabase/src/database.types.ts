@@ -228,6 +228,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      boleto_por_folio: {
+        Args: { p_email: string; p_folio: string }
+        Returns: {
+          evento: Database["eventos"]["Tables"]["eventos"]["Row"]
+          reservacion: Database["eventos"]["Tables"]["reservaciones"]["Row"]
+        }[]
+      }
       buscar_codigo_consumo: {
         Args: { p_codigo: string }
         Returns: {

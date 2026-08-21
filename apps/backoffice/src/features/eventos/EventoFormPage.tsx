@@ -1,6 +1,5 @@
 import { useActionState, useState } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { ImagePlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@amena/ui/components/ui/button'
 import {
@@ -15,21 +14,27 @@ import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { Switch } from '@amena/ui/components/ui/switch'
 import { Textarea } from '@amena/ui/components/ui/textarea'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
-import { CATEGORIAS, slugify, type DatosEvento } from './api'
+import {
+  borrarImagenEvento,
+  CATEGORIAS,
+  slugify,
+  subirImagenEvento,
+  type DatosEvento,
+} from './api'
+import { esImagenPropia, IMAGEN_POR_OMISION } from './imagenEvento'
+import { ImagenEventoUploader } from './ImagenEventoUploader'
 import { aParrafos, deParrafos, eventoSchema } from './eventoSchema'
 import { puedeVerEventos } from './logica'
 import { useEvento, useGuardarEvento } from './queries'
 import { useSetTituloDetalle } from '../../layout/tituloDetalle'
-
-/** Imagen por omisión mientras no exista carga real de archivos (ver "Imagen destacada"). */
-const IMAGEN_POR_OMISION =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixlib=rb-4.1.0&q=80&w=1080'
 
 const LUGAR_POR_OMISION = 'Amena · Mutuo Vive, Guadalajara'
 
 type Errores = Partial<Record<keyof typeof eventoSchema.shape, string[]>>
 interface EstadoForm {
   errors: Errores
+  /** Va aparte de `errors`: la imagen no es un campo de `eventoSchema` (es un File, no texto). */
+  errorImagen?: string | null
 }
 
 export function EventoFormPage() {
@@ -45,6 +50,16 @@ export function EventoFormPage() {
   const [publicarElegido, setPublicarElegido] = useState<boolean | null>(null)
   const publicar = publicarElegido ?? (evento ? evento.estado === 'Publicado' : true)
   const [listaEspera, setListaEspera] = useState(false)
+
+  // La imagen elegida vive en estado, no en el FormData (ver ImagenEventoUploader).
+  // `imagenQuitada` distingue "no tocó nada" de "la quitó": en el segundo caso vuelve la genérica.
+  const [imagenNueva, setImagenNueva] = useState<File | null>(null)
+  const [imagenQuitada, setImagenQuitada] = useState(false)
+
+  function onCambioImagen(file: File | null) {
+    setImagenNueva(file)
+    setImagenQuitada(file === null)
+  }
 
   useSetTituloDetalle(esEdicion ? (evento?.titulo ?? 'Editar evento') : 'Nuevo evento')
 
@@ -65,6 +80,36 @@ export function EventoFormPage() {
       if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Errores }
 
       const comoBorrador = fd.get('modo') === 'borrador'
+      const publicando = !comoBorrador && publicar
+
+      // --- Imagen destacada -------------------------------------------------------------
+      // Se resuelve antes de tocar la base: subir primero y descubrir después que el evento no
+      // se podía publicar dejaría un archivo huérfano en el bucket.
+      // El tipo y el tamaño ya los filtró el uploader; el límite duro está en el bucket.
+      const nueva = imagenNueva
+      const anterior = evento?.imagen_url ?? null
+
+      // Sin archivo nuevo se conserva la que ya tenía (o la genérica si la quitó / es alta).
+      let imagen_url = nueva
+        ? ''
+        : imagenQuitada
+          ? IMAGEN_POR_OMISION
+          : (anterior ?? IMAGEN_POR_OMISION)
+
+      // La imagen genérica no sale a amena.social: un borrador sí puede quedarse con ella
+      // (la columna es `not null`), pero publicar exige una propia.
+      if (publicando && !nueva && !esImagenPropia(imagen_url)) {
+        return { errors: {}, errorImagen: 'Sube una imagen para publicar el evento' }
+      }
+
+      if (nueva) {
+        try {
+          imagen_url = await subirImagenEvento(nueva)
+        } catch {
+          return { errors: {}, errorImagen: 'No se pudo subir la imagen. Intenta de nuevo.' }
+        }
+      }
+
       const v = parsed.data
       const datos: DatosEvento = {
         slug: evento?.slug ?? slugify(v.titulo),
@@ -81,16 +126,21 @@ export function EventoFormPage() {
         cupo_total: v.cupo_total,
         // En alta el cupo arranca completo; en edición se respeta lo ya reservado.
         cupo_disponible: evento ? evento.cupo_disponible : v.cupo_total,
-        estado: comoBorrador || !publicar ? 'Borrador' : 'Publicado',
-        imagen_url: evento?.imagen_url ?? IMAGEN_POR_OMISION,
+        estado: publicando ? 'Publicado' : 'Borrador',
+        imagen_url,
       }
 
       try {
         await guardar.mutateAsync({ datos, id: evento?.id })
+        // La imagen que quedó fuera ya no la referencia nadie. Best effort: si el borrado falla,
+        // el evento igual quedó guardado.
+        if (imagen_url !== anterior) void borrarImagenEvento(anterior)
         toast.success(esEdicion ? 'Evento actualizado' : 'Evento creado')
         navigate('/eventos/catalogo')
         return { errors: {} }
       } catch {
+        // Si el guardado falla después de subir, la imagen nueva queda huérfana: se limpia.
+        if (nueva) void borrarImagenEvento(imagen_url)
         toast.error('No se pudo guardar el evento. Intenta de nuevo.')
         return { errors: {} }
       }
@@ -255,21 +305,11 @@ export function EventoFormPage() {
       </section>
 
       <div className="flex flex-col gap-6">
-        {/* Sin carga de archivos todavía: el evento usa una imagen por omisión. */}
-        <section className="rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-semibold">Imagen destacada</h2>
-          <div
-            aria-disabled
-            title="Próximamente"
-            className="mt-3 flex cursor-not-allowed flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-muted p-6 text-center opacity-60"
-          >
-            <ImagePlus className="size-6 text-muted-foreground" />
-            <p className="text-sm font-medium">Subir imagen — próximamente</p>
-            <p className="text-xs text-muted-foreground">
-              JPG o PNG · máx. 5 MB · 1200×800 px recomendado
-            </p>
-          </div>
-        </section>
+        <ImagenEventoUploader
+          imagenActual={evento?.imagen_url ?? null}
+          error={estado.errorImagen}
+          onCambio={onCambioImagen}
+        />
 
         <section className="rounded-2xl border border-border bg-card p-6">
           <h2 className="font-semibold">Publicación</h2>

@@ -12,9 +12,9 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@amena/ui/components/ui/field'
 import { Input } from '@amena/ui/components/ui/input'
 import { Textarea } from '@amena/ui/components/ui/textarea'
+import { validarImagen } from '@amena/utils'
 import { subirFotoPlatillo, type Platillo } from './api'
 import { FotoUploader } from './FotoUploader'
-import { validarImagen } from './foto'
 import { platilloSchema } from './platilloSchema'
 import { useActualizarPlatillo, useCrearPlatillo } from './queries'
 

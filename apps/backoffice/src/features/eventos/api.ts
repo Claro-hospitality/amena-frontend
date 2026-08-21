@@ -1,5 +1,6 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
+import { BUCKET_IMAGENES, rutaDesdeUrlPublica } from './imagenEvento'
 
 /**
  * Los eventos de amena.social viven en el schema `eventos`, no en `public` (que es el negocio
@@ -72,6 +73,35 @@ export async function guardarEvento(datos: DatosEvento, id?: string): Promise<Ev
   const { data, error } = await query.select().single()
   if (error) throw error
   return data as Evento
+}
+
+/**
+ * Sube la imagen destacada al bucket público `eventos` y devuelve su URL pública, que es lo que
+ * se guarda en `imagen_url` y lo que pinta la landing.
+ *
+ * Storage NO se selecciona por schema: `supabase.storage` es su propia API. El `.schema('eventos')`
+ * de arriba es solo para PostgREST. Quien puede escribir aquí lo decide la policy del bucket
+ * (`eventos.es_admin()`), no esta función.
+ */
+export async function subirImagenEvento(file: File): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const ruta = `${crypto.randomUUID()}.${ext}`
+  const { error } = await supabase.storage
+    .from(BUCKET_IMAGENES)
+    .upload(ruta, file, { contentType: file.type })
+  if (error) throw error
+  return supabase.storage.from(BUCKET_IMAGENES).getPublicUrl(ruta).data.publicUrl
+}
+
+/**
+ * Borra una imagen del bucket al ser reemplazada. Best effort a propósito: si falla, el guardado
+ * del evento NO se cae — un archivo huérfano molesta menos que perder la edición. Las URLs que no
+ * son del bucket (las de los eventos que ya existían) se ignoran.
+ */
+export async function borrarImagenEvento(url: string | null | undefined): Promise<void> {
+  const ruta = rutaDesdeUrlPublica(url)
+  if (!ruta) return
+  await supabase.storage.from(BUCKET_IMAGENES).remove([ruta])
 }
 
 /** Marcas diacríticas que deja `normalize('NFD')` al separar los acentos de la letra base. */
