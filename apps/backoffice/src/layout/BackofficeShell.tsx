@@ -35,6 +35,7 @@ import {
   type GrupoNav,
   type ItemNav,
 } from './navBackoffice'
+import { rutaActiva } from './navActiva'
 import { UsuarioMenu } from './UsuarioMenu'
 
 /**
@@ -94,10 +95,16 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
     if (isMobile) setOpenMobile(false)
   }
 
-  const renderItems = (items: ItemNav[]) =>
-    items.map((item) => {
+  // El activo se resuelve contra la lista completa, no ítem por ítem: un padre como `/eventos`
+  // casa por prefijo con todas sus hijas, y así quedaban dos filas sombreadas a la vez.
+  const renderItems = (items: ItemNav[]) => {
+    const activa = rutaActiva(
+      pathname,
+      items.map((i) => i.to)
+    )
+    return items.map((item) => {
       const Icono = item.icon
-      const activo = pathname === item.to || pathname.startsWith(`${item.to}/`)
+      const activo = item.to === activa
       return (
         <SidebarMenuItem key={item.to}>
           <SidebarMenuButton
@@ -113,6 +120,7 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
         </SidebarMenuItem>
       )
     })
+  }
 
   /**
    * Grupo colapsable con sub-items, como una fila más del menú (no una sección aparte).
@@ -121,6 +129,10 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
    */
   const renderGrupo = (grupo: GrupoNav) => {
     const IconoGrupo = grupo.icon
+    const activa = rutaActiva(
+      pathname,
+      grupo.items.map((i) => i.to)
+    )
     return (
         <Collapsible defaultOpen key={grupo.label}>
           <SidebarMenuItem>
@@ -137,7 +149,7 @@ function NavegacionBackoffice({ rol }: { rol: RolBackoffice }) {
               <SidebarMenuSub>
                 {grupo.items.map((item) => {
                   const Icono = item.icon
-                  const activo = pathname === item.to || pathname.startsWith(`${item.to}/`)
+                  const activo = item.to === activa
                   return (
                     <SidebarMenuSubItem key={item.to}>
                       {item.proximamente ? (
