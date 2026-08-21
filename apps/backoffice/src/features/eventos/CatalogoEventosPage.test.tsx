@@ -9,11 +9,16 @@ import { CatalogoEventosPage } from './CatalogoEventosPage'
 
 const api = vi.hoisted(() => ({
   listarEventos: vi.fn(),
+  listarEventosPagina: vi.fn(),
+  contarEventosPorEstado: vi.fn(),
   obtenerEventoPorSlug: vi.fn(),
   guardarEvento: vi.fn(),
   obtenerResumen: vi.fn(),
+  subirImagenEvento: vi.fn(),
+  borrarImagenEvento: vi.fn(),
   slugify: (s: string) => s,
   CATEGORIAS: ['Cata', 'Taller', 'Cena'],
+  TAMANO_PAGINA: 10,
 }))
 vi.mock('./api', () => api)
 
@@ -41,6 +46,14 @@ function evento(over: Partial<Evento> = {}): Evento {
   }
 }
 
+/** Página con `n` eventos distintos, para poder pedir la siguiente. */
+function pagina(n: number, total: number) {
+  const filas = Array.from({ length: n }, (_, i) =>
+    evento({ id: `id-${i}`, slug: `evento-${i}`, titulo: `Evento ${i}` })
+  )
+  return { filas, total }
+}
+
 function renderizar(rol: RolBackoffice) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
@@ -56,64 +69,114 @@ function renderizar(rol: RolBackoffice) {
   )
 }
 
+/** Argumentos de la última consulta al servidor: [filtros, page, pageSize]. */
+function ultimaConsulta() {
+  const calls = api.listarEventosPagina.mock.calls
+  return calls[calls.length - 1]
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
+  api.contarEventosPorEstado.mockResolvedValue({ publicados: 1, borradores: 1 })
 })
 
 describe('CatalogoEventosPage', () => {
   it('muestra los eventos al rol de eventos', async () => {
-    api.listarEventos.mockResolvedValue([
-      evento(),
-      evento({ id: 'id-2', slug: 'cena', titulo: 'Cena maridaje', estado: 'Borrador' }),
-    ])
+    api.listarEventosPagina.mockResolvedValue({
+      filas: [
+        evento(),
+        evento({ id: 'id-2', slug: 'cena', titulo: 'Cena maridaje', estado: 'Borrador' }),
+      ],
+      total: 2,
+    })
     renderizar('eventos')
 
     const tabla = await screen.findByRole('table')
     expect(within(tabla).getByText('Cata de vinos mexicanos')).toBeInTheDocument()
     expect(within(tabla).getByText('Cena maridaje')).toBeInTheDocument()
-    expect(screen.getByText('1 publicados · 1 borrador')).toBeInTheDocument()
+    // Los conteos del encabezado vienen de la base, no de las filas de la página.
+    expect(await screen.findByText('1 publicados · 1 borrador')).toBeInTheDocument()
   })
 
   it('super_admin también entra', async () => {
-    api.listarEventos.mockResolvedValue([evento()])
+    api.listarEventosPagina.mockResolvedValue({ filas: [evento()], total: 1 })
     renderizar('super_admin')
     expect(await screen.findByRole('table')).toBeInTheDocument()
   })
 
   it('niega el acceso a un rol del negocio de comidas', () => {
-    api.listarEventos.mockResolvedValue([evento()])
+    api.listarEventosPagina.mockResolvedValue({ filas: [evento()], total: 1 })
     renderizar('finanzas')
     expect(screen.getByText('No tienes acceso a esta sección.')).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
-  it('el filtro "Borradores" deja fuera a los publicados', async () => {
-    api.listarEventos.mockResolvedValue([
-      evento(),
-      evento({ id: 'id-2', slug: 'cena', titulo: 'Cena maridaje', estado: 'Borrador' }),
-    ])
+  it('el filtro se resuelve en el servidor, no en el navegador', async () => {
+    api.listarEventosPagina.mockResolvedValue({ filas: [evento()], total: 1 })
     renderizar('eventos')
     await screen.findByRole('table')
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Borradores' }))
 
-    const tabla = screen.getByRole('table')
-    expect(within(tabla).queryByText('Cata de vinos mexicanos')).not.toBeInTheDocument()
-    expect(within(tabla).getByText('Cena maridaje')).toBeInTheDocument()
+    await waitFor(() => expect(ultimaConsulta()[0]).toEqual({ filtro: 'Borradores', busqueda: '' }))
+  })
+
+  it('"Página siguiente" pide la página 2', async () => {
+    api.listarEventosPagina.mockResolvedValue(pagina(10, 25))
+    renderizar('eventos')
+    await screen.findByRole('table')
+    expect(ultimaConsulta()[1]).toBe(0)
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Página siguiente' }))
+
+    await waitFor(() => expect(ultimaConsulta()[1]).toBe(1))
+  })
+
+  it('cambiar de filtro regresa a la primera página', async () => {
+    api.listarEventosPagina.mockResolvedValue(pagina(10, 25))
+    const u = userEvent.setup()
+    renderizar('eventos')
+    await screen.findByRole('table')
+
+    await u.click(screen.getByRole('button', { name: 'Página siguiente' }))
+    await waitFor(() => expect(ultimaConsulta()[1]).toBe(1))
+
+    // Sin el reset, la consulta seguiría pidiendo la página 2 de un resultado que quizá ya
+    // no tiene tantas filas, y la tabla saldría vacía.
+    await u.click(screen.getByRole('button', { name: 'Publicados' }))
+    await waitFor(() => {
+      const [filtros, page] = ultimaConsulta()
+      expect(filtros).toEqual({ filtro: 'Publicados', busqueda: '' })
+      expect(page).toBe(0)
+    })
   })
 
   it('muestra el estado vacío cuando no hay eventos', async () => {
-    api.listarEventos.mockResolvedValue([])
+    api.listarEventosPagina.mockResolvedValue({ filas: [], total: 0 })
     renderizar('eventos')
     expect(await screen.findByText('Aún no hay eventos')).toBeInTheDocument()
   })
 
+  it('con filtro activo y cero resultados se queda la tabla, no el estado vacío', async () => {
+    // El estado vacío del catálogo reemplaza la tabla entera (y con ella los chips), así que
+    // solo debe salir cuando de verdad no hay nada: sin filtro y sin búsqueda.
+    api.listarEventosPagina.mockResolvedValue({ filas: [evento()], total: 1 })
+    renderizar('eventos')
+    await screen.findByRole('table')
+
+    api.listarEventosPagina.mockResolvedValue({ filas: [], total: 0 })
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Borradores' }))
+
+    expect(await screen.findByText('Ningún evento coincide con el filtro.')).toBeInTheDocument()
+    expect(screen.queryByText('Aún no hay eventos')).not.toBeInTheDocument()
+  })
+
   it('muestra el error y permite reintentar', async () => {
-    api.listarEventos.mockRejectedValue(new Error('sin red'))
+    api.listarEventosPagina.mockRejectedValue(new Error('sin red'))
     renderizar('eventos')
 
     expect(await screen.findByText('No se pudieron cargar los eventos')).toBeInTheDocument()
-    api.listarEventos.mockResolvedValue([evento()])
+    api.listarEventosPagina.mockResolvedValue({ filas: [evento()], total: 1 })
     await userEvent.setup().click(screen.getByRole('button', { name: 'Reintentar' }))
     await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument())
   })

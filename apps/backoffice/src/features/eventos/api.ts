@@ -1,6 +1,8 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
+import { aISO, patronIlike } from '@amena/utils'
 import { BUCKET_IMAGENES, rutaDesdeUrlPublica } from './imagenEvento'
+import { condicionFiltroEvento, type FiltroEvento } from './logica'
 
 /**
  * Los eventos de amena.social viven en el schema `eventos`, no en `public` (que es el negocio
@@ -18,6 +20,9 @@ export type Categoria = 'Cata' | 'Taller' | 'Cena'
 export type EstadoEvento = 'Publicado' | 'Borrador'
 
 export const CATEGORIAS: Categoria[] = ['Cata', 'Taller', 'Cena']
+
+/** Filas por página; espeja el default del DataTable de @amena/ui. */
+export const TAMANO_PAGINA = 10
 
 export type Evento = Omit<EventoRow, 'categoria' | 'estado'> & {
   categoria: Categoria
@@ -50,6 +55,64 @@ export async function listarEventos(): Promise<Evento[]> {
     .order('fecha', { ascending: true })
   if (error) throw error
   return data as Evento[]
+}
+
+/** Filtros del catálogo, los mismos chips y buscador de la pantalla. */
+export interface FiltrosEventos {
+  filtro: FiltroEvento
+  busqueda: string
+}
+
+/** Una página del catálogo y el total que casa con el filtro (no el de la página). */
+export interface PaginaEventos {
+  filas: Evento[]
+  total: number
+}
+
+/**
+ * Página del catálogo. El filtro, la búsqueda y el orden se resuelven en la base: si se hicieran
+ * aquí, filtrarían solo las filas de la página visible.
+ */
+export async function listarEventosPagina(
+  { filtro, busqueda }: FiltrosEventos,
+  page = 0,
+  pageSize = TAMANO_PAGINA
+): Promise<PaginaEventos> {
+  let consulta = eventosDb().from('eventos').select('*', { count: 'exact' })
+
+  const condicion = condicionFiltroEvento(filtro, aISO(new Date()))
+  if (condicion?.operador === 'eq') consulta = consulta.eq(condicion.columna, condicion.valor)
+  if (condicion?.operador === 'lt') consulta = consulta.lt(condicion.columna, condicion.valor)
+
+  const termino = busqueda.trim()
+  if (termino) consulta = consulta.ilike('titulo', patronIlike(termino))
+
+  const desde = page * pageSize
+  const { data, error, count } = await consulta
+    .order('fecha', { ascending: true })
+    .range(desde, desde + pageSize - 1)
+  if (error) throw error
+  return { filas: (data ?? []) as Evento[], total: count ?? 0 }
+}
+
+/**
+ * Publicados y borradores para el encabezado. Van como conteos y no contando el arreglo de la
+ * página, que solo tiene las filas visibles.
+ */
+export async function contarEventosPorEstado(): Promise<{
+  publicados: number
+  borradores: number
+}> {
+  const contar = async (estado: EstadoEvento) => {
+    const { count, error } = await eventosDb()
+      .from('eventos')
+      .select('*', { count: 'exact', head: true })
+      .eq('estado', estado)
+    if (error) throw error
+    return count ?? 0
+  }
+  const [publicados, borradores] = await Promise.all([contar('Publicado'), contar('Borrador')])
+  return { publicados, borradores }
 }
 
 export async function obtenerEventoPorSlug(slug: string): Promise<Evento | null> {

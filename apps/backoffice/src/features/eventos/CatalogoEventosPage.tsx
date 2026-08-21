@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { CalendarDays, Plus, TriangleAlert } from 'lucide-react'
 import { Button } from '@amena/ui/components/ui/button'
@@ -15,29 +15,45 @@ import { SearchInput } from '@amena/ui/components/ui/search-input'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { cn } from '@amena/ui/lib/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
+import { TAMANO_PAGINA } from './api'
 import { crearColumnasEventos } from './columns'
-import { filtrarEventos, puedeVerEventos, type FiltroEvento, FILTROS_EVENTO } from './logica'
-import { useEventos } from './queries'
+import { puedeVerEventos, type FiltroEvento, FILTROS_EVENTO } from './logica'
+import { useConteoEventos, useEventosPagina } from './queries'
 
 export function CatalogoEventosPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
-  const { data, isLoading, isError, refetch } = useEventos()
   const [busqueda, setBusqueda] = useState('')
+  const [q, setQ] = useState('')
   const [filtro, setFiltro] = useState<FiltroEvento>('Todos')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(TAMANO_PAGINA)
 
-  const eventos = useMemo(() => data ?? [], [data])
-  const filtrados = useMemo(
-    () => filtrarEventos(eventos, filtro, busqueda),
-    [eventos, filtro, busqueda]
-  )
+  // Búsqueda contra la base: debounce para no consultar en cada tecla, y de regreso a la
+  // primera página cuando cambia el término (si no, se queda en una página que ya no existe).
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setQ(busqueda)
+      setPage(0)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [busqueda])
+
+  const filtros = useMemo(() => ({ filtro, busqueda: q }), [filtro, q])
+  const { data, isLoading, isError, refetch } = useEventosPagina(filtros, page, pageSize)
+  const conteo = useConteoEventos()
   const columnas = useMemo(() => crearColumnasEventos(), [])
 
   if (!puedeVerEventos(rol)) {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
-  const publicados = eventos.filter((e) => e.estado === 'Publicado').length
-  const borradores = eventos.length - publicados
+  const filas = data?.filas ?? []
+  const total = data?.total ?? 0
+  const publicados = conteo.data?.publicados ?? 0
+  const borradores = conteo.data?.borradores ?? 0
+  // El catálogo está vacío de verdad solo si no hay filtro ni búsqueda encima; con filtro activo
+  // se deja la tabla para poder corregir el término.
+  const sinNada = total === 0 && !q.trim() && filtro === 'Todos'
 
   return (
     <div className="flex flex-col gap-4">
@@ -55,13 +71,22 @@ export function CatalogoEventosPage() {
         <Skeleton className="h-96 w-full" />
       ) : isError ? (
         <EstadoError onReintentar={() => refetch()} />
-      ) : eventos.length === 0 ? (
+      ) : sinNada ? (
         <CatalogoVacio />
       ) : (
         <DataTable
           columns={columnas}
-          data={filtrados}
+          data={filas}
           emptyMessage="Ningún evento coincide con el filtro."
+          paginacionServidor={{
+            pageIndex: page,
+            pageSize,
+            total,
+            onChange: ({ pageIndex, pageSize: tamano }) => {
+              setPage(pageIndex)
+              setPageSize(tamano)
+            },
+          }}
           toolbar={
             <div className="flex flex-wrap items-center gap-3">
               <SearchInput
@@ -76,7 +101,10 @@ export function CatalogoEventosPage() {
                   <button
                     key={f}
                     type="button"
-                    onClick={() => setFiltro(f)}
+                    onClick={() => {
+                      setFiltro(f)
+                      setPage(0)
+                    }}
                     aria-pressed={filtro === f}
                     className={cn(
                       'rounded-full border px-3 py-1.5 text-sm font-medium',

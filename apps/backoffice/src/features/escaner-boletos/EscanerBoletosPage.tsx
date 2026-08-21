@@ -8,7 +8,7 @@ import { useEventos } from '../eventos/queries'
 import { puedeVerEventos } from '../eventos/logica'
 import type { Reservacion } from '../reservaciones/api'
 import { marcaDeTiempo } from '@amena/utils'
-import { useReservaciones, useValidarBoleto } from '../reservaciones/queries'
+import { useBoletosValidados, useValidarBoleto } from '../reservaciones/queries'
 
 type Resultado =
   | { tipo: 'valido'; reservacion: Reservacion }
@@ -23,7 +23,6 @@ type Resultado =
 export function EscanerBoletosPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
   const eventos = useEventos()
-  const reservaciones = useReservaciones()
   const validar = useValidarBoleto()
 
   const [resultado, setResultado] = useState<Resultado | null>(null)
@@ -38,13 +37,9 @@ export function EscanerBoletosPage() {
   const eventoSlug = eventoElegido ?? listaEventos[0]?.slug ?? ''
   const evento = listaEventos.find((e) => e.slug === eventoSlug)
 
-  const validados = useMemo(
-    () =>
-      (reservaciones.data ?? []).filter(
-        (r) => r.eventos?.slug === eventoSlug && r.estado_boleto === 'validado'
-      ).length,
-    [reservaciones.data, eventoSlug]
-  )
+  // Lo cuenta la base. Antes se filtraba en memoria el arreglo con TODAS las reservaciones, que
+  // ya no existe (y con más de 1000 filas nunca fue confiable).
+  const validados = useBoletosValidados(evento?.id).data ?? 0
 
   async function procesarFolio(folio: string) {
     const r = await validar.mutateAsync(folio)

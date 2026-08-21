@@ -1,5 +1,7 @@
 import { supabase } from '@amena/supabase'
 import type { Database } from '@amena/supabase/types'
+import { orIlike } from '@amena/utils'
+import { estadoDelFiltro, type FiltroReservacion } from './logica'
 
 /** Las reservaciones viven en el schema `eventos` (ver features/eventos/api.ts). */
 const eventosDb = () => supabase.schema('eventos')
@@ -28,13 +30,74 @@ export type Reservacion = Omit<ReservacionRow, 'estado_pago' | 'estado_boleto'> 
 
 const SELECT_CON_EVENTO = '*, eventos(slug, titulo, fecha, hora_inicio)'
 
-export async function listarReservaciones(): Promise<Reservacion[]> {
-  const { data, error } = await eventosDb()
+/** Filtros de la pantalla: el chip de estado de pago y el buscador. */
+export interface FiltrosReservaciones {
+  filtro: FiltroReservacion
+  busqueda: string
+}
+
+export interface PaginaReservaciones {
+  filas: Reservacion[]
+  /** Filas que casan con el filtro, no las de esta página. */
+  total: number
+}
+
+/** Filas por página; espeja el default del DataTable de @amena/ui. */
+export const TAMANO_PAGINA = 10
+
+/**
+ * Página del listado. Filtro, búsqueda y orden se resuelven en la base: filtrar aquí solo
+ * alcanzaría a las filas de la página visible, que es peor que no paginar.
+ *
+ * La búsqueda va por `or` de tres columnas con el término escapado (ver `orIlike`): el folio y
+ * los nombres traen comas y guiones que romperían la condición si viajaran en crudo.
+ */
+export async function listarReservacionesPagina(
+  { filtro, busqueda }: FiltrosReservaciones,
+  page = 0,
+  pageSize = TAMANO_PAGINA
+): Promise<PaginaReservaciones> {
+  let consulta = eventosDb()
     .from('reservaciones')
-    .select(SELECT_CON_EVENTO)
+    .select(SELECT_CON_EVENTO, { count: 'exact' })
+
+  const estado = estadoDelFiltro(filtro)
+  if (estado) consulta = consulta.eq('estado_pago', estado)
+
+  const termino = busqueda.trim()
+  if (termino) consulta = consulta.or(orIlike(['nombre', 'email', 'folio'], termino))
+
+  const desde = page * pageSize
+  const { data, error, count } = await consulta
     .order('reservada_el', { ascending: false })
+    .range(desde, desde + pageSize - 1)
   if (error) throw error
-  return data as unknown as Reservacion[]
+  return { filas: (data ?? []) as unknown as Reservacion[], total: count ?? 0 }
+}
+
+/** Reservaciones no canceladas, para el encabezado. */
+export async function contarReservacionesActivas(): Promise<number> {
+  const { count, error } = await eventosDb()
+    .from('reservaciones')
+    .select('*', { count: 'exact', head: true })
+    .neq('estado_pago', 'cancelada')
+  if (error) throw error
+  return count ?? 0
+}
+
+/**
+ * Boletos ya validados de un evento, para el contador del escáner. Antes se contaba filtrando
+ * en memoria el arreglo con TODAS las reservaciones; con el listado paginado ese arreglo ya no
+ * existe (y con más de 1000 filas nunca fue confiable).
+ */
+export async function contarBoletosValidados(eventoId: string): Promise<number> {
+  const { count, error } = await eventosDb()
+    .from('reservaciones')
+    .select('*', { count: 'exact', head: true })
+    .eq('evento_id', eventoId)
+    .eq('estado_boleto', 'validado')
+  if (error) throw error
+  return count ?? 0
 }
 
 /** `ilike` sin comodines = match exacto pero insensible a mayúsculas (el folio se teclea a mano). */

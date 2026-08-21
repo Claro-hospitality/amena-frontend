@@ -1,4 +1,3 @@
-import { deISO } from '@amena/utils'
 import type { RolBackoffice } from '../../auth/validarAccesoPortal'
 import type { Evento } from './api'
 
@@ -21,21 +20,25 @@ export function ocupados(evento: Evento): number {
 }
 
 /**
- * Filtra por estado/fecha y busca por título. `hoy` se inyecta para poder testear el corte de
- * "Pasados" sin depender del reloj.
+ * Condición que le toca a cada chip del catálogo cuando el filtrado se hace en la base.
+ *
+ * `hoyISO` se inyecta (en vez de leer el reloj aquí) para poder testear el corte de "Pasados",
+ * igual que hacía el filtrado en memoria que esto reemplaza.
  */
-export function filtrarEventos(
-  eventos: Evento[],
-  filtro: FiltroEvento,
-  busqueda: string,
-  hoy: Date = new Date()
-): Evento[] {
-  const q = busqueda.trim().toLowerCase()
-  return eventos.filter((e) => {
-    if (filtro === 'Publicados' && e.estado !== 'Publicado') return false
-    if (filtro === 'Borradores' && e.estado !== 'Borrador') return false
-    if (filtro === 'Pasados' && deISO(e.fecha) >= hoy) return false
-    if (q && !e.titulo.toLowerCase().includes(q)) return false
-    return true
-  })
+export type CondicionEvento =
+  | { columna: 'estado'; operador: 'eq'; valor: string }
+  | { columna: 'fecha'; operador: 'lt'; valor: string }
+  | null
+
+export function condicionFiltroEvento(filtro: FiltroEvento, hoyISO: string): CondicionEvento {
+  switch (filtro) {
+    case 'Publicados':
+      return { columna: 'estado', operador: 'eq', valor: 'Publicado' }
+    case 'Borradores':
+      return { columna: 'estado', operador: 'eq', valor: 'Borrador' }
+    case 'Pasados':
+      return { columna: 'fecha', operador: 'lt', valor: hoyISO }
+    case 'Todos':
+      return null
+  }
 }

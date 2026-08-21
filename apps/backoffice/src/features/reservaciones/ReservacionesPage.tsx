@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { Download, Ticket, TriangleAlert } from 'lucide-react'
 import { fechaCortaConHora, formatearMoneda, marcaDeTiempo } from '@amena/utils'
@@ -16,23 +16,33 @@ import { Skeleton } from '@amena/ui/components/ui/skeleton'
 import { cn } from '@amena/ui/lib/utils'
 import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { puedeVerEventos } from '../eventos/logica'
-import type { Reservacion } from './api'
+import { TAMANO_PAGINA, type Reservacion } from './api'
 import { crearColumnasReservaciones } from './columns'
-import { filtrarReservaciones, iniciales, type FiltroReservacion, FILTROS_RESERVACION } from './logica'
-import { useReservaciones } from './queries'
+import { iniciales, type FiltroReservacion, FILTROS_RESERVACION } from './logica'
+import { useReservacionesActivas, useReservacionesPagina } from './queries'
 
 export function ReservacionesPage() {
   const { rol } = useOutletContext<ContextoAcceso>()
-  const { data, isLoading, isError, refetch } = useReservaciones()
   const [busqueda, setBusqueda] = useState('')
+  const [q, setQ] = useState('')
   const [filtro, setFiltro] = useState<FiltroReservacion>('Todas')
   const [folioSel, setFolioSel] = useState<string | null>(null)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(TAMANO_PAGINA)
 
-  const reservaciones = useMemo(() => data ?? [], [data])
-  const filtradas = useMemo(
-    () => filtrarReservaciones(reservaciones, filtro, busqueda),
-    [reservaciones, filtro, busqueda]
-  )
+  // Búsqueda contra la base: debounce para no consultar en cada tecla, y de regreso a la primera
+  // página cuando cambia el término (si no, se queda en una página que ya no existe).
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setQ(busqueda)
+      setPage(0)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [busqueda])
+
+  const filtros = useMemo(() => ({ filtro, busqueda: q }), [filtro, q])
+  const { data, isLoading, isError, refetch } = useReservacionesPagina(filtros, page, pageSize)
+  const activas = useReservacionesActivas()
   const columnas = useMemo(
     () => crearColumnasReservaciones({ onSeleccionar: (r) => setFolioSel(r.folio) }),
     []
@@ -42,17 +52,18 @@ export function ReservacionesPage() {
     return <p className="text-muted-foreground">No tienes acceso a esta sección.</p>
   }
 
-  const activas = reservaciones.filter((r) => r.estado_pago !== 'cancelada').length
-  const cobrado = reservaciones
-    .filter((r) => r.estado_pago === 'pagada')
-    .reduce((suma, r) => suma + r.monto, 0)
-  const seleccion = reservaciones.find((r) => r.folio === folioSel) ?? filtradas[0] ?? null
+  const filas = data?.filas ?? []
+  const total = data?.total ?? 0
+  const sinNada = total === 0 && !q.trim() && filtro === 'Todas'
+  // El panel lateral se surte de la página visible: la seleccionada por el usuario si está en
+  // ella, y si no la primera fila.
+  const seleccion = filas.find((r) => r.folio === folioSel) ?? filas[0] ?? null
 
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          {activas} activas · {formatearMoneda(cobrado)} cobrados
+          {activas.data ?? 0} activa{activas.data === 1 ? '' : 's'}
         </p>
         {/* Sin exportación todavía. */}
         <Button variant="outline" disabled title="Próximamente">
@@ -65,15 +76,24 @@ export function ReservacionesPage() {
         <Skeleton className="h-96 w-full" />
       ) : isError ? (
         <EstadoError onReintentar={() => refetch()} />
-      ) : reservaciones.length === 0 ? (
+      ) : sinNada ? (
         <ReservacionesVacio />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <DataTable
             columns={columnas}
-            data={filtradas}
+            data={filas}
             emptyMessage="Ninguna reservación coincide con el filtro."
             rowClassName={(r) => (r.folio === seleccion?.folio ? 'bg-secondary/40' : undefined)}
+            paginacionServidor={{
+              pageIndex: page,
+              pageSize,
+              total,
+              onChange: ({ pageIndex, pageSize: tamano }) => {
+                setPage(pageIndex)
+                setPageSize(tamano)
+              },
+            }}
             toolbar={
               <div className="flex flex-wrap items-center gap-3">
                 <SearchInput
@@ -88,7 +108,10 @@ export function ReservacionesPage() {
                     <button
                       key={f}
                       type="button"
-                      onClick={() => setFiltro(f)}
+                      onClick={() => {
+                        setFiltro(f)
+                        setPage(0)
+                      }}
                       aria-pressed={filtro === f}
                       className={cn(
                         'rounded-full border px-3 py-1.5 text-sm font-medium',

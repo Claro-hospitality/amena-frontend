@@ -34,8 +34,8 @@ import {
 /** Re-export para que las apps definan columnas sin depender directo de react-table. */
 export type { ColumnDef } from "@tanstack/react-table"
 
-/** Opciones de tamaño de página del estándar Amena: 20 por defecto, 50 y 100 como máximo. */
-const OPCIONES_TAMANO_PAGINA = [20, 50, 100] as const
+/** Opciones de tamaño de página del estándar Amena: 10 por defecto, 25 y 50 como máximo. */
+const OPCIONES_TAMANO_PAGINA = [10, 25, 50] as const
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -52,8 +52,22 @@ interface DataTableProps<TData, TValue> {
    * debe darle altura (flex-1 / min-h-0). Por defecto activo.
    */
   fillHeight?: boolean
-  /** Filas por página iniciales. Por defecto 20. */
+  /** Filas por página iniciales. Por defecto 10. */
   pageSizeInicial?: number
+  /**
+   * Paginación contra el servidor: la tabla recibe SOLO las filas de la página y el total real
+   * de la consulta. Sin esta prop la tabla pagina en el navegador con las filas que se le pasen.
+   *
+   * Ojo: si se pagina en el servidor, el filtrado y el orden también tienen que estar allá. Si
+   * no, se filtraría únicamente la página visible, que es peor que no paginar.
+   */
+  paginacionServidor?: {
+    pageIndex: number
+    pageSize: number
+    /** Filas que casan con la consulta, no las de esta página. */
+    total: number
+    onChange: (siguiente: { pageIndex: number; pageSize: number }) => void
+  }
   className?: string
 }
 
@@ -65,7 +79,7 @@ interface DataTableProps<TData, TValue> {
  * - Encabezado con superficie propia (`bg-muted`) y pegajoso al hacer scroll.
  * - Toolbar (buscador/filtros) DENTRO del mismo card, sin línea divisora encima.
  * - Desktop: ocupa el alto restante de la pantalla; el cuerpo hace scroll interno.
- * - Paginación con 20 filas por página (opciones 50 y 100).
+ * - Paginación con 10 filas por página (opciones 25 y 50).
  */
 export function DataTable<TData, TValue>({
   columns,
@@ -75,27 +89,43 @@ export function DataTable<TData, TValue>({
   emptyMessage,
   fillHeight = true,
   pageSizeInicial = OPCIONES_TAMANO_PAGINA[0],
+  paginacionServidor,
   className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [pagination, setPagination] = React.useState<PaginationState>({
+  const [paginacionLocal, setPaginacionLocal] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: pageSizeInicial,
   })
+
+  const enServidor = paginacionServidor !== undefined
+  const pagination: PaginationState = enServidor
+    ? { pageIndex: paginacionServidor.pageIndex, pageSize: paginacionServidor.pageSize }
+    : paginacionLocal
 
   const table = useReactTable({
     data,
     columns,
     state: { sorting, pagination },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      const siguiente = typeof updater === "function" ? updater(pagination) : updater
+      if (paginacionServidor) paginacionServidor.onChange(siguiente)
+      else setPaginacionLocal(siguiente)
+    },
+    // Con `manualPagination` react-table no rebana las filas (ya vienen rebanadas) y `rowCount`
+    // es lo que le permite saber si hay página siguiente.
+    manualPagination: enServidor,
+    rowCount: enServidor ? paginacionServidor.total : undefined,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
 
   const filas = table.getRowModel().rows
-  const totalFilas = table.getFilteredRowModel().rows.length
+  const totalFilas = enServidor
+    ? paginacionServidor.total
+    : table.getFilteredRowModel().rows.length
   const { pageIndex, pageSize } = table.getState().pagination
   const desde = totalFilas === 0 ? 0 : pageIndex * pageSize + 1
   const hasta = Math.min(desde + filas.length - 1, totalFilas)
