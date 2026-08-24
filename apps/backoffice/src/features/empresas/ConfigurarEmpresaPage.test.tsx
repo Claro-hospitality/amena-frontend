@@ -18,7 +18,14 @@ vi.mock('./queries', () => {
   }
   return {
     useEmpresas: () => ({ data: [empresa], isLoading: false, isError: false, refetch: vi.fn() }),
-    useActualizarEmpresa: () => ({ mutate: vi.fn(), isPending: false }),
+    useActualizarEmpresa: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+    useDatosFiscalesEmpresa: () => ({
+      data: null,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    }),
+    useGuardarDatosFiscales: () => ({ mutateAsync: vi.fn(), isPending: false }),
   }
 })
 
@@ -41,10 +48,13 @@ function renderizar(rol: RolBackoffice) {
 }
 
 describe('ConfigurarEmpresaPage', () => {
-  it('super_admin: ve la política y las acciones Editar/Desactivar', async () => {
+  it('super_admin: edita datos en la página (sin botón Editar) y ve Desactivar', async () => {
     renderizar('super_admin')
     expect(await screen.findByRole('heading', { name: 'Constructora Norte' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Editar' })).toBeInTheDocument()
+    // Ya no hay diálogo de edición: los datos se editan directo en la página.
+    expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Datos comerciales' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Datos fiscales' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Desactivar' })).toBeInTheDocument()
     // La política de consumo es editable (switch de modo libre visible).
     expect(screen.getByRole('switch', { name: /modo libre/i })).toBeInTheDocument()

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, Pencil, Power, PowerOff, TriangleAlert } from 'lucide-react'
+import { ArrowLeft, Building2, Power, PowerOff, TriangleAlert } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
+import { Card, CardContent } from '@amena/ui/components/ui/card'
 import {
   Empty,
   EmptyContent,
@@ -17,11 +18,10 @@ import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useSetMigasDetalle } from '../../layout/tituloDetalle'
 import type { Empresa } from './api'
 import { ConfirmarEstadoDialog } from './ConfirmarEstadoDialog'
-import { EmpresaFormDialog } from './EmpresaFormDialog'
+import { DatosComercialesSection } from './DatosComercialesSection'
+import { DatosFiscalesForm } from './DatosFiscalesForm'
 import { PoliticaConsumoSection } from './PoliticaConsumoSection'
 import { useEmpresas } from './queries'
-
-type Dialogo = { tipo: 'form' } | { tipo: 'estado' } | null
 
 const nombreEmpresa = (e: Empresa) => e.nombre_comercial ?? 'Empresa'
 
@@ -38,7 +38,7 @@ export function ConfigurarEmpresaPage() {
   const { data: empresas, isLoading, isError, refetch } = useEmpresas()
   const empresa = empresas?.find((e) => e.id === id)
 
-  const [dialogo, setDialogo] = useState<Dialogo>(null)
+  const [confirmandoEstado, setConfirmandoEstado] = useState(false)
 
   // Breadcrumb: Empresas › [Empresa] › Configurar.
   useSetMigasDetalle(
@@ -86,14 +86,10 @@ export function ConfigurarEmpresaPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => setDialogo({ tipo: 'form' })}>
-              <Pencil className="size-4" />
-              Editar
-            </Button>
             <Button
               variant={empresa.activo ? 'destructive' : 'default'}
               size="sm"
-              onClick={() => setDialogo({ tipo: 'estado' })}
+              onClick={() => setConfirmandoEstado(true)}
             >
               {empresa.activo ? <PowerOff className="size-4" /> : <Power className="size-4" />}
               {empresa.activo ? 'Desactivar' : 'Reactivar'}
@@ -101,14 +97,20 @@ export function ConfigurarEmpresaPage() {
           </div>
         </header>
 
+        <DatosComercialesSection empresa={empresa} />
+
+        <Card className="shadow-none">
+          <CardContent className="flex flex-col gap-5 p-5">
+            <h2 className="text-sm font-semibold tracking-tight">Datos fiscales</h2>
+            <DatosFiscalesForm empresaId={empresa.id} />
+          </CardContent>
+        </Card>
+
         <PoliticaConsumoSection empresa={empresa} puedeGestionar />
       </div>
 
-      {dialogo?.tipo === 'form' && (
-        <EmpresaFormDialog empresa={empresa} onClose={() => setDialogo(null)} />
-      )}
-      {dialogo?.tipo === 'estado' && (
-        <ConfirmarEstadoDialog empresa={empresa} onClose={() => setDialogo(null)} />
+      {confirmandoEstado && (
+        <ConfirmarEstadoDialog empresa={empresa} onClose={() => setConfirmandoEstado(false)} />
       )}
     </TooltipProvider>
   )
