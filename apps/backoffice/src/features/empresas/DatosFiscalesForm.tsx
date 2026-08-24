@@ -10,9 +10,22 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@amena/ui/components/ui/empty'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@amena/ui/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@amena/ui/components/ui/field'
 import { Input } from '@amena/ui/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@amena/ui/components/ui/select'
 import { Skeleton } from '@amena/ui/components/ui/skeleton'
+import {
+  etiquetaRegimenFiscal,
+  etiquetaUsoCfdi,
+  REGIMENES_FISCALES,
+  USOS_CFDI,
+} from '@amena/utils'
 import type { DatosFiscales } from './api'
 import { datosFiscalesSchema } from './empresaSchema'
 import { useDatosFiscalesEmpresa, useGuardarDatosFiscales } from './queries'
@@ -119,8 +132,8 @@ function FiscalFields({
 
   return (
     <form action={accion}>
-      <FieldGroup>
-        <Field>
+      <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+        <Field className="sm:col-span-2">
           <FieldLabel htmlFor="razon_social">Razón social</FieldLabel>
           <Input
             id="razon_social"
@@ -159,35 +172,63 @@ function FiscalFields({
           )}
         </Field>
 
-        {/* TODO: catálogos SAT como Select cuando llegue el módulo de facturación. */}
         <Field>
           <FieldLabel htmlFor="regimen_fiscal">Régimen fiscal</FieldLabel>
-          <Input
-            id="regimen_fiscal"
-            name="regimen_fiscal"
-            defaultValue={fiscal?.regimen_fiscal ?? ''}
-            aria-invalid={Boolean(estado.errors.regimen_fiscal)}
-            placeholder="601"
-          />
+          <Select name="regimen_fiscal" defaultValue={fiscal?.regimen_fiscal ?? null}>
+            <SelectTrigger
+              id="regimen_fiscal"
+              className="w-full"
+              aria-invalid={Boolean(estado.errors.regimen_fiscal)}
+            >
+              <SelectValue>
+                {(valor) =>
+                  valor ? etiquetaRegimenFiscal(valor as string) : 'Selecciona un régimen fiscal'
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent
+              alignItemWithTrigger={false}
+              className="max-h-72 [&_[data-slot=select-item]>div]:whitespace-normal"
+            >
+              {REGIMENES_FISCALES.map((r) => (
+                <SelectItem key={r.codigo} value={r.codigo}>
+                  {r.codigo} — {r.descripcion}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {estado.errors.regimen_fiscal && (
             <FieldError>{estado.errors.regimen_fiscal[0]}</FieldError>
           )}
         </Field>
 
-        {/* TODO: catálogos SAT como Select cuando llegue el módulo de facturación. */}
         <Field>
           <FieldLabel htmlFor="uso_cfdi">Uso de CFDI</FieldLabel>
-          <Input
-            id="uso_cfdi"
-            name="uso_cfdi"
-            defaultValue={fiscal?.uso_cfdi ?? 'G03'}
-            aria-invalid={Boolean(estado.errors.uso_cfdi)}
-            placeholder="G03"
-          />
+          <Select name="uso_cfdi" defaultValue={fiscal?.uso_cfdi ?? 'G03'}>
+            <SelectTrigger
+              id="uso_cfdi"
+              className="w-full"
+              aria-invalid={Boolean(estado.errors.uso_cfdi)}
+            >
+              <SelectValue>
+                {(valor) => (valor ? etiquetaUsoCfdi(valor as string) : 'Selecciona un uso de CFDI')}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent
+              alignItemWithTrigger={false}
+              className="max-h-72 [&_[data-slot=select-item]>div]:whitespace-normal"
+            >
+              {USOS_CFDI.map((u) => (
+                <SelectItem key={u.codigo} value={u.codigo}>
+                  {u.codigo} — {u.descripcion}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {estado.errors.uso_cfdi && <FieldError>{estado.errors.uso_cfdi[0]}</FieldError>}
         </Field>
 
-        <Field>
+        <Field className="sm:col-span-2">
           <FieldLabel htmlFor="email_facturacion">Correo de facturación</FieldLabel>
           <Input
             id="email_facturacion"
@@ -202,7 +243,7 @@ function FiscalFields({
             <FieldError>{estado.errors.email_facturacion[0]}</FieldError>
           )}
         </Field>
-      </FieldGroup>
+      </div>
 
       <div className="mt-6 flex justify-end">
         <Button type="submit" loading={pending}>
