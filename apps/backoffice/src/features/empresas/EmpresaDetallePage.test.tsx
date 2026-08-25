@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -10,6 +11,7 @@ const empresasApi = vi.hoisted(() => ({
   cambiarEstadoEmpresa: vi.fn(),
   obtenerDatosFiscales: vi.fn(),
   listarDatosFiscales: vi.fn(),
+  guardarDatosFiscales: vi.fn(),
 }))
 vi.mock('./api', async (importActual) => {
   const actual = await importActual<typeof import('./api')>()
@@ -44,6 +46,20 @@ const empresaFake = {
   modo_consumo: 'reserva' as const,
   dias_permitidos: [] as number[],
   limite_diario: null,
+}
+
+const fiscalFake = {
+  id: 1,
+  empresa_id: 1,
+  razon_social: 'Constructora Norte SA de CV',
+  rfc: 'CNO120101ABC',
+  codigo_postal_fiscal: '06600',
+  regimen_fiscal: '601',
+  uso_cfdi: 'G03',
+  email_facturacion: 'facturacion@norte.com',
+  activo: true,
+  created_at: '',
+  updated_at: '',
 }
 
 const resumenFake = {
@@ -115,6 +131,26 @@ describe('EmpresaDetallePage', () => {
     await screen.findByRole('heading', { name: 'Constructora Norte' })
     expect(screen.queryByRole('button', { name: 'Configurar empresa' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Nuevo usuario' })).not.toBeInTheDocument()
+  })
+
+  it('finanzas puede editar los datos de facturación', async () => {
+    empresasApi.obtenerDatosFiscales.mockResolvedValue(fiscalFake)
+    const user = userEvent.setup()
+    renderizar('finanzas')
+
+    const editar = await screen.findByRole('button', { name: 'Editar' })
+    await user.click(editar)
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /editar datos de facturación/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/razón social/i)).toHaveValue('Constructora Norte SA de CV')
+  })
+
+  it('consulta no puede editar los datos de facturación', async () => {
+    empresasApi.obtenerDatosFiscales.mockResolvedValue(fiscalFake)
+    renderizar('consulta')
+    await screen.findByRole('heading', { name: 'Constructora Norte' })
+    expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
   })
 
   it('empresa inexistente muestra "no encontrada"', async () => {
