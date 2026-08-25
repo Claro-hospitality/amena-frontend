@@ -7,7 +7,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@amena/ui/components/ui/dialog";
-import { deISO, formatearMoneda, rangoSemanaLegible } from "@amena/utils";
+import {
+  deISO,
+  desglosarMontoConIva,
+  formatearMoneda,
+  IVA_RATE,
+  rangoSemanaLegible,
+} from "@amena/utils";
 import { SeccionFacturaCorte } from "../facturas/SeccionFacturaCorte";
 import type { CorteConEmpresa } from "./api";
 import { useDetalleCorte } from "./queries";
@@ -74,6 +80,9 @@ export function CorteDetalleDialog({
   const libres = desglose?.libres ?? Math.max(corte.consumidas - corte.reservadas, 0);
   const invitados = desglose?.invitados ?? 0;
   const reservadosSinConsumir = Math.max(corte.reservadas - reservadosConsumidos, 0);
+
+  // El monto_total del corte ya incluye IVA; se desglosa hacia dentro para cuadrar con la factura.
+  const montos = desglosarMontoConIva(corte.monto_total);
 
   return (
     <Dialog
@@ -154,13 +163,23 @@ export function CorteDetalleDialog({
           </div>
         </section>
 
-        {/* Montos */}
+        {/* Precio unitario (aparte del desglose de montos) */}
+        <div className="flex items-center justify-between px-3 text-sm">
+          <span className="text-muted-foreground">Precio unitario</span>
+          <span className="font-mono tabular-nums">{formatearMoneda(corte.precio_unitario)}</span>
+        </div>
+
+        {/* Desglose de montos: subtotal, IVA y total (el monto_total ya incluye IVA). */}
         <dl className="flex flex-col rounded-lg border border-border p-3 text-sm">
           <div className="flex items-center justify-between py-1">
-            <dt className="text-muted-foreground">Precio unitario</dt>
-            <dd className="font-mono tabular-nums">{formatearMoneda(corte.precio_unitario)}</dd>
+            <dt className="text-muted-foreground">Subtotal</dt>
+            <dd className="font-mono tabular-nums">{formatearMoneda(montos.subtotal)}</dd>
           </div>
           <div className="flex items-center justify-between py-1">
+            <dt className="text-muted-foreground">IVA ({Math.round(IVA_RATE * 100)}%)</dt>
+            <dd className="font-mono tabular-nums">{formatearMoneda(montos.iva)}</dd>
+          </div>
+          <div className="mt-1 flex items-center justify-between border-t border-border pt-2 pb-1">
             <dt className="font-semibold">Monto total</dt>
             <dd className="font-mono font-semibold tabular-nums text-primary">
               {formatearMoneda(corte.monto_total)}
