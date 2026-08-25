@@ -172,7 +172,7 @@ En **Settings → Secrets and variables → Actions** del repositorio:
 
 | Secret                     | Para qué sirve                                                        |
 |----------------------------|----------------------------------------------------------------------|
-| `FIREBASE_SERVICE_ACCOUNT` | JSON de una service account **dedicada** con rol mínimo. Créala en Google Cloud Console → IAM y administración → Cuentas de servicio → *Crear cuenta de servicio* (proyecto `amena-20df0`), otórgale el rol **Firebase Hosting Admin** (`roles/firebasehosting.admin`) y genera una llave **JSON** (Claves → Agregar clave → Crear clave nueva → JSON). Pega el JSON completo. **No** uses la llave del Admin SDK por defecto de Firebase Console (acceso demasiado amplio). |
+| `FIREBASE_SERVICE_ACCOUNT_AMENA` | JSON de una service account **dedicada** con rol mínimo. Créala en Google Cloud Console → IAM y administración → Cuentas de servicio → *Crear cuenta de servicio* (proyecto `amena-20df0`), otórgale el rol **Firebase Hosting Admin** (`roles/firebasehosting.admin`) y genera una llave **JSON** (Claves → Agregar clave → Crear clave nueva → JSON). Pega el JSON completo. **No** uses la llave del Admin SDK por defecto de Firebase Console (acceso demasiado amplio). |
 | `VITE_SUPABASE_URL`        | URL del Supabase de producción (proyecto "Amena" en Supabase Cloud). |
 | `VITE_SUPABASE_ANON_KEY`   | Llave publishable (`sb_publishable_...`) de producción.              |
 | `VITE_SENTRY_DSN`          | DSN de Sentry para producción (deja el secret sin crear si aún no usas Sentry en prod; el build funciona igual y Sentry queda deshabilitado). |
@@ -202,7 +202,7 @@ npx firebase-tools deploy --only hosting
 ### Troubleshooting — permisos de la service account
 
 **Síntoma:** `deploy.yml` falla en el paso de deploy con un error de permisos /
-autenticación de Firebase Hosting, aun con `FIREBASE_SERVICE_ACCOUNT` configurado.
+autenticación de Firebase Hosting, aun con `FIREBASE_SERVICE_ACCOUNT_AMENA` configurado.
 
 **Causa (vista en el primer deploy):** en el IAM del proyecto `amena-20df0` había un
 **binding de rol apuntando a una identidad eliminada** — aparece como
@@ -214,7 +214,7 @@ identidad muerta y no a la service account viva que usa el workflow.
 1. Google Cloud Console → **IAM y administración → IAM** del proyecto `amena-20df0`.
 2. Busca bindings con el prefijo **`deleted:`** (uid huérfano) y **elimínalos**.
 3. Otorga **Firebase Hosting Admin** (`roles/firebasehosting.admin`) a la service
-   account **viva** (la del JSON en `FIREBASE_SERVICE_ACCOUNT`).
+   account **viva** (la del JSON en `FIREBASE_SERVICE_ACCOUNT_AMENA`).
 4. Re-ejecuta el job fallido: **Actions → run fallido → Re-run jobs**.
 
 Puede recurrir si se elimina y recrea una service account: los bindings antiguos que

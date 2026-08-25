@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { datosFiscalesSchema, nombreComercialSchema } from './fiscal'
+import { datosFiscalesSchema, desglosarMontoConIva, nombreComercialSchema } from './fiscal'
 
 const fiscalBase = {
   razon_social: 'Empresa Ejemplo S.A. de C.V.',
@@ -46,5 +46,21 @@ describe('nombreComercialSchema', () => {
   it('recorta espacios y convierte vacío en null', () => {
     expect(nombreComercialSchema.parse({ nombre_comercial: '  ' }).nombre_comercial).toBeNull()
     expect(nombreComercialSchema.parse({ nombre_comercial: '  Acme  ' }).nombre_comercial).toBe('Acme')
+  })
+})
+
+describe('desglosarMontoConIva', () => {
+  it('desglosa hacia dentro un monto con IVA (espeja el backend de facturación)', () => {
+    // 6 × 168 = 1008 → subtotal 868.97 + iva 139.03 = 1008.00
+    expect(desglosarMontoConIva(1008)).toEqual({ subtotal: 868.97, iva: 139.03, total: 1008 })
+    // 3 × 95 = 285 → subtotal 245.69 + iva 39.31
+    expect(desglosarMontoConIva(285)).toEqual({ subtotal: 245.69, iva: 39.31, total: 285 })
+  })
+
+  it('subtotal + iva siempre reconstruye el total al centavo', () => {
+    for (const total of [504, 1170, 2184, 2535, 999.99]) {
+      const { subtotal, iva } = desglosarMontoConIva(total)
+      expect(subtotal + iva).toBeCloseTo(total, 2)
+    }
   })
 })

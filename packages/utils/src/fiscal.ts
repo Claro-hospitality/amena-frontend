@@ -5,6 +5,33 @@ import { z } from 'zod'
 // RFC mexicano: 3 letras (moral) o 4 (física) + 6 dígitos de fecha + 3 de homoclave (12 o 13).
 export const RFC_MX = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/
 
+/** Tasa de IVA trasladado (16%). Espeja IVA_RATE del backend (facturar-corte). */
+export const IVA_RATE = 0.16
+
+function redondear2(n: number): number {
+  return Math.round((n + Number.EPSILON) * 100) / 100
+}
+
+/** Subtotal (base gravable), IVA trasladado y total con IVA de un monto. */
+export interface DesgloseMontos {
+  subtotal: number
+  iva: number
+  total: number
+}
+
+/**
+ * Desglosa un monto que YA incluye IVA (el `monto_total` congelado del corte) hacia dentro:
+ * `subtotal = total / (1 + IVA_RATE)`, `iva = total − subtotal` (así `subtotal + iva === total`
+ * al centavo). Espeja `calcularMontos` del backend (Edge Function `facturar-corte`) para que el
+ * desglose de la UI cuadre exactamente con la factura emitida.
+ */
+export function desglosarMontoConIva(totalConIva: number): DesgloseMontos {
+  const total = redondear2(totalConIva)
+  const subtotal = redondear2(total / (1 + IVA_RATE))
+  const iva = redondear2(total - subtotal)
+  return { subtotal, iva, total }
+}
+
 /**
  * Datos fiscales de una empresa (tabla `datos_fiscales`, 1:1). Requeridos para facturar.
  * `razon_social` y `email_facturacion` obligatorios; `rfc` formato mexicano (12 moral /

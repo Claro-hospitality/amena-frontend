@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { Building2, FileText, Settings, TriangleAlert } from 'lucide-react'
+import { Building2, FileText, Pencil, Settings, TriangleAlert } from 'lucide-react'
 import { Badge } from '@amena/ui/components/ui/badge'
 import { Button } from '@amena/ui/components/ui/button'
 import { Card, CardContent } from '@amena/ui/components/ui/card'
@@ -21,6 +21,7 @@ import type { ContextoAcceso } from '../../auth/validarAccesoPortal'
 import { useSetTituloDetalle } from '../../layout/tituloDetalle'
 import { UsuariosEmpresa } from '../colaboradores/UsuariosEmpresa'
 import { ConsumosEmpresa } from './ConsumosEmpresa'
+import { DatosFiscalesDialog } from './DatosFiscalesDialog'
 import type { CorteConEmpresa } from '../cortes/api'
 import { CorteDetalleDialog } from '../cortes/CorteDetalleDialog'
 import { crearColumnasCortes } from '../cortes/columns'
@@ -58,6 +59,8 @@ export function EmpresaDetallePage() {
   }
 
   const puedeGestionar = rol === 'super_admin'
+  // Los datos de facturación los gestiona Amena: super_admin y finanzas (RLS lo respalda).
+  const puedeEditarFacturacion = rol === 'super_admin' || rol === 'finanzas'
 
   return (
     <TooltipProvider>
@@ -102,7 +105,7 @@ export function EmpresaDetallePage() {
         <ResumenSeccion empresaId={id} />
 
         {/* Información de facturación (datos fiscales) */}
-        <FacturacionSeccion empresaId={id} puedeGestionar={puedeGestionar} />
+        <FacturacionSeccion empresaId={id} puedeEditar={puedeEditarFacturacion} />
 
         {/* Tabs: cada tabla ocupa el alto restante de la pantalla en desktop */}
         <Tabs defaultValue="usuarios" className="flex min-h-0 flex-1 flex-col gap-4">
@@ -234,13 +237,14 @@ function MetricaDinero({ etiqueta, valor }: { etiqueta: string; valor: number })
 
 function FacturacionSeccion({
   empresaId,
-  puedeGestionar,
+  puedeEditar,
 }: {
   empresaId: number
-  puedeGestionar: boolean
+  /** super_admin y finanzas pueden editar los datos de facturación (RLS lo respalda). */
+  puedeEditar: boolean
 }) {
-  const navigate = useNavigate()
   const { data: fiscal, isLoading, isError, refetch } = useDatosFiscalesEmpresa(empresaId)
+  const [editando, setEditando] = useState(false)
 
   return (
     <section className="flex flex-col gap-3">
@@ -248,11 +252,19 @@ function FacturacionSeccion({
         <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
           Información de facturación
         </h2>
-        {datosFiscalesCompletos(fiscal) ? (
-          <Badge className="bg-success text-success-foreground">Facturable</Badge>
-        ) : (
-          <Badge variant="secondary">Sin datos fiscales</Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {datosFiscalesCompletos(fiscal) ? (
+            <Badge className="bg-success text-success-foreground">Facturable</Badge>
+          ) : (
+            <Badge variant="secondary">Sin datos fiscales</Badge>
+          )}
+          {puedeEditar && fiscal && (
+            <Button variant="outline" size="sm" onClick={() => setEditando(true)}>
+              <Pencil className="size-4" />
+              Editar
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card className="shadow-none">
@@ -293,17 +305,19 @@ function FacturacionSeccion({
                   Configura los datos fiscales para poder facturar a esta empresa.
                 </EmptyDescription>
               </EmptyHeader>
-              {puedeGestionar && (
+              {puedeEditar && (
                 <EmptyContent>
-                  <Button onClick={() => navigate(`/empresas/${empresaId}/configurar`)}>
-                    Configurar datos fiscales
-                  </Button>
+                  <Button onClick={() => setEditando(true)}>Configurar datos fiscales</Button>
                 </EmptyContent>
               )}
             </Empty>
           )}
         </CardContent>
       </Card>
+
+      {editando && (
+        <DatosFiscalesDialog empresaId={empresaId} onClose={() => setEditando(false)} />
+      )}
     </section>
   )
 }

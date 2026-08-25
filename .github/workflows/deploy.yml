@@ -39,7 +39,7 @@ jobs:
       - name: Deploy backoffice (site amena-admin)
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AMENA }}
           projectId: amena-20df0
           target: backoffice
           channelId: live
@@ -47,7 +47,7 @@ jobs:
       - name: Deploy portal (site amena-portal)
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_AMENA }}
           projectId: amena-20df0
           target: portal
           channelId: live
